@@ -156,17 +156,36 @@ public sealed class SchedulerPowerAndClockTests : IDisposable
     }
 
     [Fact]
-    public void Resume_MissedOneTimeSkipItem_IsDropped()
+    public void Resume_MissedOneTimeSkipItem_RunsOnceInTheResumeRefresh()
     {
-        // A reminder for a time that passed during sleep must not show up late.
-        var ran = false;
-        _scheduler.At(Start.AddMinutes(1), () => ran = true);
+        // A profile switch, a save or the end of a live state that fell during sleep must still happen.
+        var runs = new List<DateTimeOffset>();
+        _scheduler.At(Start.AddMinutes(1), () => runs.Add(_time.GetUtcNow()));
 
         Sleep(TimeSpan.FromHours(1));
+        var resumed = _time.GetUtcNow();
+        Assert.Empty(runs);
+
         _time.Advance(TimeSpan.FromMinutes(5));
 
-        Assert.False(ran);
+        var ranAt = Assert.Single(runs);
+        Assert.InRange(ranAt - resumed, Scheduler.ResumeRefreshDelay, Scheduler.ResumeRefreshDelay + Scheduler.ResumeJitter);
         Assert.Equal(0, _scheduler.Stats.ArmedItems);
+    }
+
+    [Fact]
+    public void Resume_MissedOneTimeSkipItem_SharesTheRefreshWakeWithRepeatingItems()
+    {
+        var runs = 0;
+        _scheduler.At(Start.AddMinutes(1), () => runs++);
+        _scheduler.Every(TimeSpan.FromMinutes(5), () => runs++);
+
+        Sleep(TimeSpan.FromHours(1));
+        var fired = _time.Fired;
+        _time.Advance(TimeSpan.FromSeconds(20));
+
+        Assert.Equal(2, runs);
+        Assert.Equal(1, _time.Fired - fired);
     }
 
     [Fact]

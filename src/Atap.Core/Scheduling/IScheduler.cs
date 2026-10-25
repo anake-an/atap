@@ -27,12 +27,12 @@ public readonly record struct ScheduleOptions(TimeSpan Slack = default, bool Def
 public enum MissedRun
 {
     /// <summary>
-    /// Wait for the next slot. A missed one-time item is dropped, and a missed repeating item runs once in the
-    /// shared refresh shortly after resume. The right choice for anything the user sees at a set time.
+    /// Run once in the shared refresh shortly after resume, then wait for the next slot. Missed slots are not made
+    /// up. A one-time item still runs, so a caller that shows the user a set time checks whether it passed during sleep.
     /// </summary>
     Skip,
 
-    /// <summary>Run once on resume, then carry on.</summary>
+    /// <summary>Run once on the next turn after resume, then carry on.</summary>
     RunOnce,
 }
 

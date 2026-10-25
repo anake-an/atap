@@ -41,6 +41,19 @@ public sealed class ProfileSwitchDebouncerTests : IDisposable
     }
 
     [Fact]
+    public void SwitchWaitingWhenThePcSlept_StillHappensAfterResume()
+    {
+        _debouncer.Propose("gaming");
+        _time.WallShift += TimeSpan.FromHours(1);
+        _scheduler.NotifyResumed();
+
+        _time.Advance(Scheduler.ResumeRefreshDelay + Scheduler.ResumeJitter);
+
+        Assert.Equal(["gaming"], _applied);
+        Assert.Null(_debouncer.Pending);
+    }
+
+    [Fact]
     public void GoingBackBeforeTheDelay_CancelsTheSwitch()
     {
         _debouncer.Propose("gaming");

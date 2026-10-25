@@ -236,7 +236,7 @@ The schema version is 3. Version 3 adds `profiles` and gives the panel pages:
 
 The `systemClock` feature calls `NotifyClockChanged` when the clock or time zone changes and `NotifyResumed` when the PC wakes. Aligned ticks then move to the next boundary. A repeating item never waits more than one period from now, so a clock set back an hour does not hold a 5 minute item for 65 minutes. `At` items keep their wall-clock time.
 
-After sleep, missed items follow their `MissedRun` policy. With `Skip`, a missed one-shot is dropped and a missed repeating item runs once, in a shared refresh 10 seconds after resume plus up to 5 seconds of jitter. With `RunOnce`, the item runs on the next turn.
+After sleep, missed items follow their `MissedRun` policy. With `Skip`, a missed item runs once, in a shared refresh 10 seconds after resume plus up to 5 seconds of jitter. With `RunOnce`, the item runs on the next turn. A missed one-shot is never dropped, so the work it waits for still happens. Code that shows the user a set time, such as an alarm, checks for itself whether that time passed during sleep.
 
 ## HTTP
 
