@@ -1,18 +1,25 @@
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Atap.Composition;
+using Atap.Core;
 using Atap.Core.Commands;
 using Atap.Core.Layout;
 using Atap.Core.Localization;
+using Atap.Core.Widgets;
 using Atap.Features.LayoutEditor;
 using Atap.Notch;
 using Atap.Settings.Cards.Layout;
+using Atap.Ui.Preview;
 
 [assembly: AtapSettingsCard(typeof(LayoutCard))]
 
 namespace Atap.Settings.Cards.Layout;
 
-/// <summary>Edit layout, and a way back to the layout from before the last time the editor saved.</summary>
+/// <summary>
+/// A picture of each notch state as it is set up now, Edit layout, and a way back to the layout from before the
+/// last time the editor saved.
+/// </summary>
 internal sealed class LayoutCard : ISettingsCard
 {
     public string Id => "layout";
@@ -26,20 +33,28 @@ internal sealed class LayoutCard : ISettingsCard
     public Uri ViewsSource { get; } = new("/Atap;component/Settings/Cards/Layout/LayoutViews.xaml", UriKind.Relative);
 
     public object CreateViewModel(SettingsCardContext context) =>
-        new LayoutCardViewModel(context.Services.Layout, context.Services.Commands, context.Services.Text, new LayoutBackup(context.Services.Paths.LayoutFile));
+        new LayoutCardViewModel(
+            context.Services.Layout,
+            context.Services.Catalog,
+            context.Services.Commands,
+            context.Services.Text,
+            new LayoutBackup(context.Services.Paths.LayoutFile));
 }
 
 internal sealed class LayoutCardViewModel : ObservableObject, IDisposable
 {
     private readonly ILayoutService _layout;
+    private readonly WidgetCatalog _catalog;
     private readonly ICommandRegistry _commands;
     private readonly ILocalizer _text;
     private readonly LayoutBackup _backup;
     private string? _messageKey;
+    private IReadOnlyList<NotchPicture>? _pictures;
 
-    public LayoutCardViewModel(ILayoutService layout, ICommandRegistry commands, ILocalizer text, LayoutBackup backup)
+    public LayoutCardViewModel(ILayoutService layout, WidgetCatalog catalog, ICommandRegistry commands, ILocalizer text, LayoutBackup backup)
     {
         _layout = layout;
+        _catalog = catalog;
         _commands = commands;
         _text = text;
         _backup = backup;
@@ -47,6 +62,7 @@ internal sealed class LayoutCardViewModel : ObservableObject, IDisposable
         RestoreCommand = new RelayCommand(Restore);
         _commands.Changed += OnCommandsChanged;
         _text.LanguageChanged += OnLanguageChanged;
+        _layout.Changed += OnLayoutChanged;
     }
 
     public IAsyncRelayCommand EditCommand { get; }
@@ -61,10 +77,32 @@ internal sealed class LayoutCardViewModel : ObservableObject, IDisposable
 
     public bool HasMessage => _messageKey is not null;
 
+    /// <summary>
+    /// The small notch, the notch when you point at it, and the first panel page, with sample content. Built when
+    /// first shown and again after the layout changes.
+    /// </summary>
+    public IReadOnlyList<NotchPicture> Pictures => _pictures ??= BuildPictures();
+
     public void Dispose()
     {
         _commands.Changed -= OnCommandsChanged;
         _text.LanguageChanged -= OnLanguageChanged;
+        _layout.Changed -= OnLayoutChanged;
+    }
+
+    private IReadOnlyList<NotchPicture> BuildPictures()
+    {
+        var active = _layout.Active;
+        var pages = active.PanelPages;
+        var panel = NotchPreviews.Picture(_catalog, NotchState.Panel, pages.Count > 0 ? pages[0].Placements : [], _text);
+        if (pages.Count > 1)
+            panel = panel with { Note = _text.Format("preview.pageOf", ("count", pages.Count.ToString(CultureInfo.CurrentCulture))) };
+        return
+        [
+            NotchPreviews.Picture(_catalog, NotchState.Idle, active.Idle, _text),
+            NotchPreviews.Picture(_catalog, NotchState.Expanded, active.Expanded, _text),
+            panel,
+        ];
     }
 
     /// <summary>
@@ -97,7 +135,23 @@ internal sealed class LayoutCardViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(CanRestore));
     }
 
+    private void RefreshPictures()
+    {
+        _pictures = null;
+        OnPropertyChanged(nameof(Pictures));
+    }
+
     private void OnCommandsChanged(object? sender, EventArgs e) => OnPropertyChanged(nameof(CanEdit));
 
-    private void OnLanguageChanged(object? sender, EventArgs e) => OnPropertyChanged(nameof(Message));
+    private void OnLayoutChanged(object? sender, EventArgs e)
+    {
+        RefreshPictures();
+        OnPropertyChanged(nameof(CanRestore));
+    }
+
+    private void OnLanguageChanged(object? sender, EventArgs e)
+    {
+        OnPropertyChanged(nameof(Message));
+        RefreshPictures();
+    }
 }

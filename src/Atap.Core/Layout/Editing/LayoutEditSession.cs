@@ -97,8 +97,11 @@ public sealed class LayoutEditSession
         && ListAt(spot) is { } list
         && (descriptor.AllowsMultipleInstances || !list.Any(p => p.WidgetId == typeId));
 
-    /// <summary>Adds a tile at the end, at <paramref name="size"/> or the widget's smallest size.</summary>
-    public EditResult Add(string typeId, EditSpot spot, WidgetSize? size = null)
+    /// <summary>
+    /// Adds a tile at <paramref name="size"/> or the widget's smallest size. It goes at the end, or before the tile
+    /// at <paramref name="at"/> when that is given.
+    /// </summary>
+    public EditResult Add(string typeId, EditSpot spot, WidgetSize? size = null, int? at = null)
     {
         if (!CanAdd(typeId, spot) || !_catalog.TryGet(typeId, out var descriptor))
             return EditResult.Rejected;
@@ -112,6 +115,15 @@ public sealed class LayoutEditSession
             var list = ListAt(draft, spot)!;
             list.Add(new WidgetPlacement { WidgetId = instanceId, Size = chosen, Order = list.Count, Slot = PlacementSlot.Center });
             Renumber(list);
+            if (at is { } index)
+            {
+                var ordered = list.OrderBy(p => p.Order).ToList();
+                var added = ordered[^1];
+                ordered.RemoveAt(ordered.Count - 1);
+                ordered.Insert(Math.Clamp(index, 0, ordered.Count), added);
+                list.Clear();
+                list.AddRange(ordered.Select((p, i) => p with { Order = i }));
+            }
             if (!draft.EnabledWidgets.Contains(instanceId))
                 draft.EnabledWidgets.Add(instanceId);
             if (descriptor.SupportedStates.Contains(NotchState.Compact))
@@ -161,6 +173,33 @@ public sealed class LayoutEditSession
             var moving = ordered[index];
             ordered.RemoveAt(index);
             ordered.Insert(target, moving);
+            list.Clear();
+            list.AddRange(ordered.Select((p, i) => p with { Order = i }));
+        });
+    }
+
+    /// <summary>
+    /// Moves a tile to the place <paramref name="target"/> in <paramref name="to"/>: elsewhere in the same place, or
+    /// onto another panel page. A tile keeps its state, and a page never gets the same widget twice.
+    /// </summary>
+    public EditResult MoveTo(EditSpot from, int index, EditSpot to, int target)
+    {
+        if (PlacementAt(from, index) is not { } placement || ListAt(to) is not { } destination || from.State != to.State)
+            return EditResult.Rejected;
+        if (from == to)
+            return Move(from, index, Math.Clamp(target, 0, destination.Count - 1) - index);
+        if (destination.Any(p => p.WidgetId == placement.WidgetId))
+            return EditResult.Rejected;
+
+        return Change(draft =>
+        {
+            var source = ListAt(draft, from)!;
+            var moving = source.OrderBy(p => p.Order).ElementAt(index);
+            source.Remove(moving);
+            Renumber(source);
+            var list = ListAt(draft, to)!;
+            var ordered = list.OrderBy(p => p.Order).ToList();
+            ordered.Insert(Math.Clamp(target, 0, ordered.Count), moving);
             list.Clear();
             list.AddRange(ordered.Select((p, i) => p with { Order = i }));
         });
