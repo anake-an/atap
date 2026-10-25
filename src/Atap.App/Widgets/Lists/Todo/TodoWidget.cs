@@ -54,7 +54,8 @@ public sealed class TodoWidget : WidgetBase
 {
     public const string DataFile = "todo.json";
 
-    private static readonly ScheduleOptions Exact = new(TimeSpan.Zero, false, MissedRun.RunOnce);
+    // Due times come from local times, so a time zone change works them out again.
+    private static readonly ScheduleOptions Exact = new(TimeSpan.Zero, false, MissedRun.RunOnce, WallClock: true);
 
     private readonly TodoViewModel _viewModel;
     private TodoDocument _document = new();

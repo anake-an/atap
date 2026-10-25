@@ -129,6 +129,32 @@ public sealed class SchedulerPowerAndClockTests : IDisposable
     }
 
     [Fact]
+    public void ClockChange_WallClockItem_RunsAtOnce_SoItsOwnerPlansAgain()
+    {
+        var runs = new List<DateTimeOffset>();
+        _scheduler.At(Start.AddHours(2), () => runs.Add(_time.GetUtcNow()), new ScheduleOptions(WallClock: true));
+        _scheduler.At(Start.AddHours(2), () => runs.Add(DateTimeOffset.MaxValue));
+
+        _scheduler.NotifyClockChanged();
+        _time.Advance(TimeSpan.FromSeconds(1));
+
+        Assert.Equal([Start], runs);
+        Assert.Equal(1, _scheduler.Stats.ArmedItems);
+    }
+
+    [Fact]
+    public void Resume_WallClockItemNotYetDue_RunsAtOnce()
+    {
+        var runs = 0;
+        _scheduler.At(Start.AddHours(2), () => runs++, new ScheduleOptions(WallClock: true));
+
+        Sleep(TimeSpan.FromHours(1));
+        _time.Advance(TimeSpan.FromSeconds(1));
+
+        Assert.Equal(1, runs);
+    }
+
+    [Fact]
     public void Resume_MissedRunOnceItem_RunsAtOnce()
     {
         var runs = 0;

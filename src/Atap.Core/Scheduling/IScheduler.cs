@@ -22,7 +22,12 @@ public interface IScheduler
 /// <param name="Slack">How late the item may run so it can share a wake with others. Zero for times the user expects.</param>
 /// <param name="Deferrable">Periods are stretched four times while battery saver is on. Never for alarms or prayer reminders.</param>
 /// <param name="Missed">What happens to a due time missed while the PC slept.</param>
-public readonly record struct ScheduleOptions(TimeSpan Slack = default, bool Deferrable = false, MissedRun Missed = MissedRun.Skip);
+/// <param name="WallClock">
+/// For a one-time item worked out from a local time, such as an alarm at 07:00. When the clock or time zone changes,
+/// or the PC wakes, it runs at once, so its owner can work the time out again. The callback checks for itself
+/// whether its time has come.
+/// </param>
+public readonly record struct ScheduleOptions(TimeSpan Slack = default, bool Deferrable = false, MissedRun Missed = MissedRun.Skip, bool WallClock = false);
 
 public enum MissedRun
 {
@@ -39,7 +44,10 @@ public enum MissedRun
 /// <summary>Control and statistics for the app, not for widgets.</summary>
 public interface ISchedulerControl
 {
-    /// <summary>The wall clock or time zone changed. Aligned ticks are recomputed, and repeating items wait at most one period from now.</summary>
+    /// <summary>
+    /// The wall clock or time zone changed. Aligned ticks are recomputed, repeating items wait at most one period from
+    /// now, and <see cref="ScheduleOptions.WallClock"/> items run at once.
+    /// </summary>
     void NotifyClockChanged();
 
     /// <summary>The PC resumed from sleep. Missed items follow their <see cref="MissedRun"/> policy.</summary>

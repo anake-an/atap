@@ -58,7 +58,8 @@ public sealed class AlarmWidget : WidgetBase
 
     public static readonly TimeSpan SnoozeLength = TimeSpan.FromMinutes(5);
 
-    private static readonly ScheduleOptions Exact = new(TimeSpan.Zero, false, MissedRun.RunOnce);
+    // Due times come from local times, so a time zone change works them out again.
+    private static readonly ScheduleOptions Exact = new(TimeSpan.Zero, false, MissedRun.RunOnce, WallClock: true);
 
     private readonly AlarmsViewModel _viewModel;
     private AlarmDocument _document = new();

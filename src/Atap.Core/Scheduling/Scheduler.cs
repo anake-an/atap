@@ -164,7 +164,8 @@ public sealed class Scheduler : IScheduler, ISchedulerControl, IDisposable
     /// <summary>
     /// Aligned ticks run at once, so wall-clock text catches up, and then return to their boundaries. A
     /// repeating item never waits longer than one period from now, so a clock set back does not hold it up.
-    /// <see cref="At"/> items keep their wall-clock time, and the timer is armed again for it.
+    /// <see cref="At"/> items keep their time, and the timer is armed again for it. <see cref="ScheduleOptions.WallClock"/>
+    /// items run at once instead, so their owners work out a local time such as 07:00 again in the new time zone.
     /// </summary>
     public void NotifyClockChanged()
     {
@@ -178,7 +179,7 @@ public sealed class Scheduler : IScheduler, ISchedulerControl, IDisposable
                 var item = _heap[i];
                 if (item.Kind == ItemKind.Repeat)
                     PullBack(item, now);
-                else if (item.IsAligned)
+                else if (item.IsAligned || item.IsWallClock)
                     item.Due = now;
             }
             _heap.Rebuild();
@@ -193,7 +194,7 @@ public sealed class Scheduler : IScheduler, ISchedulerControl, IDisposable
     /// resume, all in one wake, and repeating ones carry on one period after that. A one-time item is never
     /// dropped, because the work it waits for (a profile switch, a save, the end of a live state) still has to
     /// happen. Callers that show a set time, such as alarms, check for themselves whether it passed during sleep.
-    /// Aligned ticks run at once.
+    /// Aligned ticks and <see cref="ScheduleOptions.WallClock"/> items run at once.
     /// The clock may have changed during sleep too, so repeating items are pulled back as in
     /// <see cref="NotifyClockChanged"/>.
     /// </summary>
@@ -209,7 +210,7 @@ public sealed class Scheduler : IScheduler, ISchedulerControl, IDisposable
             {
                 var item = _heap[i];
                 var missed = item.Due <= now;
-                if (item.IsAligned)
+                if (item.IsAligned || item.IsWallClock)
                 {
                     item.Due = now;
                 }
@@ -576,6 +577,9 @@ public sealed class Scheduler : IScheduler, ISchedulerControl, IDisposable
         public TimeSpan Slack { get; } = options.Slack > TimeSpan.Zero ? options.Slack : TimeSpan.Zero;
 
         public bool IsAligned => Kind is ItemKind.Minute or ItemKind.Second;
+
+        /// <summary>A one-time item worked out from a local time. It runs at once after a clock change or resume.</summary>
+        public bool IsWallClock => Kind == ItemKind.Once && Options.WallClock;
 
         /// <summary>The boundary an aligned tick follows.</summary>
         public TimeSpan Unit => Kind == ItemKind.Minute ? Minute : Second;

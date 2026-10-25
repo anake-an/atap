@@ -49,7 +49,8 @@ public sealed class AssignmentsDescriptor : IWidgetDescriptor
 /// <summary>One wake at the next change: a deadline passing, or midnight when every day count drops by one.</summary>
 public sealed class AssignmentsWidget : WidgetBase
 {
-    private static readonly ScheduleOptions AtChange = new(TimeSpan.FromMinutes(1), false, MissedRun.RunOnce);
+    // Deadlines and midnight are local, so a time zone change works them out again.
+    private static readonly ScheduleOptions AtChange = new(TimeSpan.FromMinutes(1), false, MissedRun.RunOnce, WallClock: true);
 
     private readonly AssignmentsViewModel _viewModel;
     private AssignmentDocument _document = new();
