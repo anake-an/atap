@@ -42,6 +42,9 @@ public sealed class LayoutEditSession
 
     private readonly WidgetCatalog _catalog;
     private readonly string _original;
+    /// <summary>How many steps Undo keeps. Older steps are dropped, so a long editing session stays small.</summary>
+    public const int MaxUndo = 100;
+
     private readonly Stack<string> _undo = new();
     private readonly Stack<string> _redo = new();
     private LayoutDraft _draft;
@@ -328,6 +331,13 @@ public sealed class LayoutEditSession
         if (Serialize(draft) == before)
             return EditResult.Unchanged;
         _undo.Push(before);
+        if (_undo.Count > MaxUndo)
+        {
+            var keep = _undo.Take(MaxUndo).Reverse().ToArray();
+            _undo.Clear();
+            foreach (var step in keep)
+                _undo.Push(step);
+        }
         _redo.Clear();
         _draft = draft;
         return EditResult.Applied;

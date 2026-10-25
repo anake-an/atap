@@ -37,7 +37,7 @@ public sealed class SettingsMemoryTests(ITestOutputHelper output) : IDisposable
             Directory.Delete(_folder, recursive: true);
     }
 
-    [Fact]
+    [ByHandFact]
     public async Task AClosedSettingsWindow_LetsGoOfItsPages()
     {
         var paths = new AtapPaths(Path.Combine(_folder, "roaming"), Path.Combine(_folder, "local"));
@@ -63,7 +63,7 @@ public sealed class SettingsMemoryTests(ITestOutputHelper output) : IDisposable
             }
 
             // Every page but the last one shown, and everything of the windows before.
-            MemoryProbe.AssertCollected(last.Released.Concat(earlier));
+            await MemoryProbe.AssertCollectedAsync(last.Released.Concat(earlier));
         }
         finally
         {

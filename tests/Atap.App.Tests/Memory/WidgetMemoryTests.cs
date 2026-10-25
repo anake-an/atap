@@ -24,7 +24,7 @@ public sealed class WidgetMemoryTests(ITestOutputHelper output) : IDisposable
 
     public void Dispose() => _services.Dispose();
 
-    [Fact]
+    [ByHandFact]
     public async Task RemovedWidgets_AndTheirViews_AreCollected()
     {
         var target = Sta.Run(() => new ResourceDictionary());
@@ -37,7 +37,7 @@ public sealed class WidgetMemoryTests(ITestOutputHelper output) : IDisposable
         }
 
         Assert.Equal(0, Sta.Run(() => target.MergedDictionaries.Count));
-        MemoryProbe.AssertCollected(watched);
+        await MemoryProbe.AssertCollectedAsync(watched);
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]

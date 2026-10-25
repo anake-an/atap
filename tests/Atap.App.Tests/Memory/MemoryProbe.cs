@@ -54,10 +54,20 @@ internal static class MemoryProbe
             + $"handles {process.HandleCount}, user objects {GetGuiResources(process.Handle, 1)}";
     }
 
-    /// <summary>Fails with the type names of everything still alive.</summary>
-    public static void AssertCollected(IEnumerable<WeakReference> watched)
+    /// <summary>
+    /// Fails with the type names of everything still alive. Other tests on the shared UI thread can hold WPF caches
+    /// a little longer, so it keeps settling for up to 3 seconds before it calls something a leak.
+    /// </summary>
+    public static async Task AssertCollectedAsync(IEnumerable<WeakReference> watched)
     {
-        var alive = watched.Where(w => w.IsAlive).Select(w => w.Target?.GetType().Name).Distinct().ToList();
+        var list = watched.ToList();
+        var until = DateTime.UtcNow + TimeSpan.FromSeconds(3);
+        while (list.Any(w => w.IsAlive) && DateTime.UtcNow < until)
+        {
+            await SettleAsync();
+            await Task.Delay(50);
+        }
+        var alive = list.Where(w => w.IsAlive).Select(w => w.Target?.GetType().Name).Distinct().ToList();
         Assert.True(alive.Count == 0, "Still in memory after closing: " + string.Join(", ", alive));
     }
 
