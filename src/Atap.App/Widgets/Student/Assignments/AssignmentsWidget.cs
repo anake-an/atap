@@ -49,11 +49,13 @@ public sealed class AssignmentsDescriptor : IWidgetDescriptor
 /// <summary>One wake at the next change: a deadline passing, or midnight when every day count drops by one.</summary>
 public sealed class AssignmentsWidget : WidgetBase
 {
-    private static readonly ScheduleOptions AtChange = new(TimeSpan.FromMinutes(1), false, MissedRun.RunOnce);
+    // Deadlines and midnight are local, so a time zone change works them out again.
+    private static readonly ScheduleOptions AtChange = new(TimeSpan.FromMinutes(1), false, MissedRun.RunOnce, WallClock: true);
 
     private readonly AssignmentsViewModel _viewModel;
     private AssignmentDocument _document = new();
     private IDisposable? _wake;
+    private IDisposable? _tick;
 
     public AssignmentsWidget(WidgetContext context)
         : base(context)
@@ -66,14 +68,18 @@ public sealed class AssignmentsWidget : WidgetBase
     public override Task StartAsync(SettingValues settings, CancellationToken cancellationToken = default)
     {
         _document = Context.Storage.Load(AssignmentsDescriptor.DataFile, StudentJsonContext.Default.AssignmentDocument, new AssignmentDocument()).Normalize();
+        Context.Visibility.Changed += OnVisibilityChanged;
         Refresh();
         return Task.CompletedTask;
     }
 
     public override Task StopAsync()
     {
+        Context.Visibility.Changed -= OnVisibilityChanged;
         _wake?.Dispose();
         _wake = null;
+        _tick?.Dispose();
+        _tick = null;
         return Task.CompletedTask;
     }
 
@@ -100,7 +106,19 @@ public sealed class AssignmentsWidget : WidgetBase
         _viewModel.Show(_document.Upcoming(now, zone));
         _wake?.Dispose();
         _wake = Context.Scheduler.At(_document.NextChange(now, zone), Refresh, AtChange);
+
+        // "Due today, 3 h 20 min" counts down each minute while the card is on screen.
+        var shown = Context.Visibility.Value is WidgetVisibility.Compact or WidgetVisibility.Expanded or WidgetVisibility.Panel;
+        if (shown && _tick is null)
+            _tick = Context.Scheduler.EveryMinute(Refresh);
+        else if (!shown && _tick is not null)
+        {
+            _tick.Dispose();
+            _tick = null;
+        }
     }
+
+    private void OnVisibilityChanged(object? sender, EventArgs e) => Refresh();
 }
 
 /// <summary>"Laporan FYP Bab 3", "BIT2033", "3 days left", and its tick.</summary>

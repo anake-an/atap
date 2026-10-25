@@ -58,6 +58,13 @@ public partial class CommandBarWindow : Window
         }
     }
 
+    protected override void OnDpiChanged(DpiScale oldDpi, DpiScale newDpi)
+    {
+        base.OnDpiChanged(oldDpi, newDpi);
+        // Moving to a screen with another scale resizes the window. Place it again once that is done.
+        Dispatcher.InvokeAsync(Place);
+    }
+
     protected override void OnDeactivated(EventArgs e)
     {
         base.OnDeactivated(e);
@@ -93,7 +100,10 @@ public partial class CommandBarWindow : Window
         var info = new NativeMethods.MONITORINFOEX { cbSize = System.Runtime.InteropServices.Marshal.SizeOf<NativeMethods.MONITORINFOEX>() };
         if (monitor == IntPtr.Zero || !NativeMethods.GetMonitorInfo(monitor, ref info))
             return;
-        var scale = System.Windows.Media.VisualTreeHelper.GetDpi(this).DpiScaleX;
+        // The scale of the screen it goes to, not the one it opened on, so it is centred there too.
+        var scale = NativeMethods.GetDpiForMonitor(monitor, NativeMethods.MDT_EFFECTIVE_DPI, out var dpi, out _) == 0 && dpi > 0
+            ? dpi / 96.0
+            : System.Windows.Media.VisualTreeHelper.GetDpi(this).DpiScaleX;
         var work = info.rcWork;
         var width = (int)Math.Ceiling(ActualWidth * scale);
         var x = work.Left + (work.Right - work.Left - width) / 2;

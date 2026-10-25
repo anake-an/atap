@@ -80,6 +80,14 @@ public sealed class IndicatorTests : IDisposable
         Assert.False(tracker.Changed(2, 0x409));
     }
 
+    [Theory]
+    [InlineData((short)0x0000, true)]
+    [InlineData((short)0x0001, false)]
+    [InlineData(unchecked((short)0x8000), true)]
+    [InlineData(unchecked((short)0x8001), false)]
+    public void CapsLock_AfterAPress_IsTheOppositeOfWhatWindowsHeldBefore(short keyState, bool on) =>
+        Assert.Equal(on, HookKeyboardWatcher.CapsLockAfterPress(keyState));
+
     private sealed class FakeSensors : ISensorWatcher
     {
         public IReadOnlyList<SensorUse> Current { get; private set; } = [];

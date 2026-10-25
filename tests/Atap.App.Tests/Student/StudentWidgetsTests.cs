@@ -87,6 +87,26 @@ public sealed class StudentWidgetsTests : IDisposable
     }
 
     [Fact]
+    public async Task Assignments_DueToday_CountsDownEachMinute_WhileShown()
+    {
+        var now = _services.Time.GetUtcNow();
+        new WidgetStorage(AssignmentsDescriptor.TypeIdValue, _services.Paths).Save(AssignmentsDescriptor.DataFile, new AssignmentDocument
+        {
+            Assignments = [Assignment.Create("1", "Quiz 2", "", new DateOnly(2026, 10, 25), new TimeOnly(12, 0), now)],
+        }, StudentJsonContext.Default.AssignmentDocument);
+        var (widget, view) = await StartAsync<AssignmentsViewModel>(new AssignmentsDescriptor());
+        Assert.Equal("Due today, 3 h left", view.First?.Countdown);
+
+        _visibility.Value = WidgetVisibility.Panel;
+        Advance(TimeSpan.FromMinutes(10));
+        _services.Time.Advance(TimeSpan.FromSeconds(1)); // Past the 09:10 tick.
+
+        Assert.Equal("Due today, 2 h 50 min left", view.First?.Countdown);
+        await widget.StopAsync();
+        Assert.Equal(0, _services.Scheduler.Stats.ArmedItems);
+    }
+
+    [Fact]
     public async Task Assignments_TickingDone_RemovesItFromTheList()
     {
         var now = _services.Time.GetUtcNow();
@@ -122,6 +142,30 @@ public sealed class StudentWidgetsTests : IDisposable
         var stored = new WidgetStorage(NextClassDescriptor.TypeIdValue, _services.Paths)
             .Load(NextClassDescriptor.DataFile, StudentJsonContext.Default.TimetableDocument, new TimetableDocument());
         Assert.Equal("BIT2033", Assert.Single(stored.Classes).Code);
+    }
+
+    [Fact]
+    public void Card_KeepsAnAssignmentTheWidgetTickedDone_WhenItAddsAnother()
+    {
+        var now = _services.Time.GetUtcNow();
+        var storage = new WidgetStorage(AssignmentsDescriptor.TypeIdValue, _services.Paths);
+        var quiz = Assignment.Create("1", "Quiz 2", "", new DateOnly(2026, 10, 26), null, now);
+        storage.Save(AssignmentsDescriptor.DataFile, new AssignmentDocument { Assignments = [quiz] }, StudentJsonContext.Default.AssignmentDocument);
+        using var card = new StudentCardViewModel(
+            new WidgetStorage(NextClassDescriptor.TypeIdValue, _services.Paths),
+            storage,
+            _services.Layout,
+            _services.Text,
+            _services.Time);
+
+        // The widget ticks it done while the card is open.
+        storage.Save(AssignmentsDescriptor.DataFile, new AssignmentDocument { Assignments = [quiz.Complete(now)] }, StudentJsonContext.Default.AssignmentDocument);
+        card.Title = "Lab 3";
+        card.AddAssignmentCommand.Execute(null);
+
+        var stored = storage.Load(AssignmentsDescriptor.DataFile, StudentJsonContext.Default.AssignmentDocument, new AssignmentDocument());
+        Assert.True(stored.Find("1")?.Done);
+        Assert.Equal("Lab 3", Assert.Single(card.Assignments).Title);
     }
 
     [Fact]

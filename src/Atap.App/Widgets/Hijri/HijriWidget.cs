@@ -134,11 +134,15 @@ public sealed class HijriWidget(WidgetContext context) : WidgetBase(context)
         try
         {
             var schedule = await _loader.LoadAsync(zone, Context.Time.GetUtcNow(), cancellationToken);
-            if (cancellationToken.IsCancellationRequested || zone != _zone)
+            if (cancellationToken.IsCancellationRequested)
                 return;
-            _schedule = schedule ?? _schedule;
-            // Tried once today. A failure shows the calculated date until tomorrow's load.
-            _loadedFor = today;
+            // Dates for an area changed meanwhile are dropped. The Update below then loads the new area.
+            if (zone == _zone)
+            {
+                _schedule = schedule ?? _schedule;
+                // Tried once today. A failure shows the calculated date until tomorrow's load.
+                _loadedFor = today;
+            }
         }
         catch (OperationCanceledException)
         {

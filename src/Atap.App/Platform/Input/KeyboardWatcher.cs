@@ -34,7 +34,7 @@ internal sealed class LanguageSwitchTracker
 
 /// <summary>
 /// A low-level keyboard hook on the UI thread. It only looks at which key went down or up and never reads what is
-/// typed. Caps Lock flips on each press. A language check runs shortly after the switch keys (Win+Space,
+/// typed. Caps Lock is read from Windows on each press. A language check runs shortly after the switch keys (Win+Space,
 /// Alt+Shift, Ctrl+Shift) are let go. The hook lives only while this object does.
 /// </summary>
 internal sealed class HookKeyboardWatcher : IKeyboardWatcher
@@ -56,7 +56,6 @@ internal sealed class HookKeyboardWatcher : IKeyboardWatcher
     private readonly LanguageSwitchTracker _tracker = new();
     private nint _hook;
     private bool _capsDown;
-    private bool _capsOn;
     private int _checkVersion;
     private bool _disposed;
 
@@ -64,7 +63,6 @@ internal sealed class HookKeyboardWatcher : IKeyboardWatcher
     {
         _ui = ui;
         _proc = OnHook;
-        _capsOn = (GetKeyState(VkCapital) & 1) != 0;
         CheckLanguage();
         _hook = SetWindowsHookEx(WhKeyboardLl, _proc, GetModuleHandle(null), 0);
     }
@@ -100,8 +98,9 @@ internal sealed class HookKeyboardWatcher : IKeyboardWatcher
                 if (down && !_capsDown)
                 {
                     _capsDown = true;
-                    _capsOn = !_capsOn;
-                    var on = _capsOn;
+                    // Read from Windows on each press, so a change Atap did not see (on the sign-in screen, for one)
+                    // never leaves the indicator showing the opposite.
+                    var on = CapsLockAfterPress(GetKeyState(VkCapital));
                     _ui.Post(_ => Raise(CapsLockChanged, on), null);
                 }
                 else if (up)
@@ -117,6 +116,12 @@ internal sealed class HookKeyboardWatcher : IKeyboardWatcher
         }
         return CallNextHookEx(_hook, code, message, data);
     }
+
+    /// <summary>
+    /// Caps Lock once this press is done. The hook sees the press before Windows flips the light, so
+    /// <paramref name="keyState"/> (from GetKeyState) still holds the state before it, in its low bit.
+    /// </summary>
+    internal static bool CapsLockAfterPress(short keyState) => (keyState & 1) == 0;
 
     private static bool IsSwitchKey(int key) =>
         key is VkShift or VkControl or VkMenu or VkSpace or 0xA0 or 0xA1 or 0xA2 or 0xA3 or 0xA4 or 0xA5 or 0x5B or 0x5C;

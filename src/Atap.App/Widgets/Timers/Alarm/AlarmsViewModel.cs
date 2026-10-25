@@ -148,6 +148,14 @@ public sealed partial class AlarmsViewModel : ObservableObject, IAccessibleSumma
         AddCommand.NotifyCanExecuteChanged();
     }
 
+    /// <summary>Moves "in 9 h 12 min" on to <paramref name="now"/>. The rows stay as they are.</summary>
+    public void Tick(DateTimeOffset now)
+    {
+        _now = now;
+        OnPropertyChanged(nameof(NextText));
+        OnPropertyChanged(nameof(AccessibleSummary));
+    }
+
     public Alert RingAlert(AlarmItem alarm, DateTimeOffset occurrence) =>
         new(AlarmWidget.AlertKey, AlertPriority.Critical, alarm.Label.Length > 0 ? alarm.Label : _text["alarm.ringing"])
         {

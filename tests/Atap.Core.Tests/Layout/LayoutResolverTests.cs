@@ -48,6 +48,23 @@ public sealed class LayoutResolverTests
     }
 
     [Fact]
+    public void ProfileWithItsOwnList_StillRunsTheDefaultsWidgetsThatWorkWithoutPlacement()
+    {
+        var document = Document();
+        document.EnabledWidgets.AddRange(["alarm", "todo"]);
+        static bool WorksWithoutPlacement(string id) => id is "alarm" or "media";
+
+        var gaming = LayoutResolver.Resolve(document, "gaming", WorksWithoutPlacement);
+        var work = LayoutResolver.Resolve(document, "work", WorksWithoutPlacement);
+
+        // Its own list first, then the Default's alarm. Media is already there, and todo needs a placement.
+        Assert.Equal(["media", "alarm"], gaming.EnabledWidgets);
+        // A profile that inherits the list gets the Default's as it is.
+        Assert.Equal(["clock", "media", "alarm", "todo"], work.EnabledWidgets);
+        Assert.Equal(["media"], document.Profiles[0].EnabledWidgets);
+    }
+
+    [Fact]
     public void InheritedField_FollowsLaterChangesToTheDefault()
     {
         var document = Document();

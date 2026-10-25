@@ -57,6 +57,38 @@ public sealed class AlarmWaterTests : IDisposable
     }
 
     [Fact]
+    public async Task Alarm_TimeLeft_CountsDownEachMinute_OnlyWhileShown()
+    {
+        var (widget, alarms) = await StartAlarmAsync();
+        AddAlarm(alarms, hourSteps: 2, minuteSteps: 2);
+        Assert.Equal("in 10 min", alarms.NextText);
+
+        _visibility.Value = WidgetVisibility.Expanded;
+        Advance(TimeSpan.FromMinutes(3));
+        Assert.Equal("in 7 min", alarms.NextText);
+
+        _visibility.Value = WidgetVisibility.Hidden;
+        Assert.Equal(1, _services.Scheduler.Stats.ArmedItems);
+        await widget.StopAsync();
+    }
+
+    [Fact]
+    public async Task Alarm_AfterATimeZoneChange_RingsAtTheSameLocalTime()
+    {
+        var (_, alarms) = await StartAlarmAsync();
+        AddAlarm(alarms, hourSteps: 2, minuteSteps: 2);
+
+        // One hour west: it is 08:00 there now, so 09:10 is 70 minutes away.
+        _services.Time.SetLocalTimeZone(TimeZoneInfo.CreateCustomTimeZone("West", TimeSpan.FromHours(-1), "West", "West"));
+        _services.Scheduler.NotifyClockChanged();
+        Advance(TimeSpan.FromMinutes(10));
+        Assert.Null(_services.Alerts.Current);
+
+        Advance(TimeSpan.FromMinutes(60));
+        Assert.Equal("Alarm", Assert.IsType<ShownAlert>(_services.Alerts.Current).Alert.Title);
+    }
+
+    [Fact]
     public async Task Alarm_Snooze_RingsAgainFiveMinutesLater()
     {
         var (_, alarms) = await StartAlarmAsync();

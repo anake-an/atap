@@ -5,7 +5,8 @@ namespace Atap.Platform.Foreground;
 /// <summary>
 /// Reports when a full-screen app (game, video, presentation) is in front, and the front app's exe name while
 /// someone holds <see cref="WantProcessNames"/>.
-/// Event-driven: re-checks only when the foreground window changes.
+/// Event-driven: re-checks when the foreground window changes, and when that window moves or resizes, so a
+/// window that goes full screen by itself (F11, a video's full screen button) is noticed too.
 /// </summary>
 /// <remarks>
 /// Must be created on a thread with a message loop (the UI thread); events are raised there.
@@ -13,14 +14,18 @@ namespace Atap.Platform.Foreground;
 /// </remarks>
 internal sealed class ForegroundState : IForegroundState, IDisposable
 {
-    // Held in a field so the GC does not collect the delegate while Windows still calls it.
+    // Held in fields so the GC does not collect the delegates while Windows still calls them.
     private readonly ForegroundNative.WinEventProc _callback;
+    private readonly ForegroundNative.WinEventProc _moveCallback;
     private IntPtr _hook;
+    private IntPtr _moveHook;
+    private IntPtr _front;
     private int _nameLeases;
 
     public ForegroundState()
     {
         _callback = OnForegroundChanged;
+        _moveCallback = OnLocationChanged;
         _hook = ForegroundNative.SetWinEventHook(
             ForegroundNative.EVENT_SYSTEM_FOREGROUND,
             ForegroundNative.EVENT_SYSTEM_FOREGROUND,
@@ -29,6 +34,7 @@ internal sealed class ForegroundState : IForegroundState, IDisposable
             0,
             0,
             ForegroundNative.WINEVENT_OUTOFCONTEXT | ForegroundNative.WINEVENT_SKIPOWNPROCESS);
+        WatchMoves(ForegroundNative.GetForegroundWindow());
         FullScreen = QueryFullScreen();
     }
 
@@ -48,6 +54,7 @@ internal sealed class ForegroundState : IForegroundState, IDisposable
 
     public void Dispose()
     {
+        StopWatchingMoves();
         if (_hook == IntPtr.Zero)
             return;
         ForegroundNative.UnhookWinEvent(_hook);
@@ -57,6 +64,9 @@ internal sealed class ForegroundState : IForegroundState, IDisposable
     private void OnForegroundChanged(
         IntPtr hook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint eventThread, uint eventTime)
     {
+        if (_hook == IntPtr.Zero)
+            return;
+        WatchMoves(hwnd);
         var fullScreen = QueryFullScreen();
         var changed = fullScreen != FullScreen;
         FullScreen = fullScreen;
@@ -64,6 +74,51 @@ internal sealed class ForegroundState : IForegroundState, IDisposable
             changed |= UpdateName(hwnd, raise: false);
         if (changed)
             Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>The front window moved or resized, such as going full screen with F11. Other objects and windows are ignored.</summary>
+    private void OnLocationChanged(
+        IntPtr hook, uint eventType, IntPtr hwnd, int idObject, int idChild, uint eventThread, uint eventTime)
+    {
+        if (hwnd != _front || idObject != ForegroundNative.OBJID_WINDOW || idChild != ForegroundNative.CHILDID_SELF || _hook == IntPtr.Zero)
+            return;
+        var fullScreen = QueryFullScreen();
+        if (fullScreen == FullScreen)
+            return;
+        FullScreen = fullScreen;
+        Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Listens for moves in the front window's process only, so the many location events of other apps (and of
+    /// the mouse pointer) never reach Atap. Atap's own windows are not watched.
+    /// </summary>
+    private void WatchMoves(IntPtr window)
+    {
+        if (window == _front && _moveHook != IntPtr.Zero)
+            return;
+        StopWatchingMoves();
+        _front = window;
+        if (window == IntPtr.Zero || ForegroundNative.GetWindowThreadProcessId(window, out var processId) == 0
+            || processId == 0 || processId == (uint)Environment.ProcessId)
+            return;
+        _moveHook = ForegroundNative.SetWinEventHook(
+            ForegroundNative.EVENT_OBJECT_LOCATIONCHANGE,
+            ForegroundNative.EVENT_OBJECT_LOCATIONCHANGE,
+            IntPtr.Zero,
+            _moveCallback,
+            processId,
+            0,
+            ForegroundNative.WINEVENT_OUTOFCONTEXT);
+    }
+
+    private void StopWatchingMoves()
+    {
+        _front = IntPtr.Zero;
+        if (_moveHook == IntPtr.Zero)
+            return;
+        ForegroundNative.UnhookWinEvent(_moveHook);
+        _moveHook = IntPtr.Zero;
     }
 
     private void Release()

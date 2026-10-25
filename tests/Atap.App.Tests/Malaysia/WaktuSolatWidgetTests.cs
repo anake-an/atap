@@ -154,6 +154,45 @@ public sealed class WaktuSolatWidgetTests : IDisposable
         Assert.Equal(0, _esolat.Requests);
     }
 
+    [Fact]
+    public async Task AreaChangedWhileLoading_LoadsTheNewArea()
+    {
+        var answer = new TaskCompletionSource();
+        _esolat.Gate = answer.Task;
+        var (_, viewModel) = await StartAsync("WLY01");
+
+        _services.Settings.Set(MalaysiaKeys.Zone, "SGR01");
+        answer.SetResult();
+
+        await WaitUntil(() => viewModel.HasTimes);
+        Assert.Equal("SGR01", _esolat.Zones[^1]);
+    }
+
+    [Fact]
+    public async Task Hijri_AreaChangedWhileLoading_LoadsTheNewArea()
+    {
+        var answer = new TaskCompletionSource();
+        _esolat.Gate = answer.Task;
+        _services.Settings.Set(MalaysiaKeys.Zone, "WLY01");
+        var descriptor = new HijriDescriptor();
+        var widget = descriptor.Create(_services.CreateContext(descriptor.TypeId, descriptor, _lifetime, _visibility, _esolat));
+        await widget.StartAsync(SettingValues.Empty);
+        var viewModel = Assert.IsType<HijriViewModel>(widget.ViewModel);
+
+        _services.Settings.Set(MalaysiaKeys.Zone, "SGR01");
+        answer.SetResult();
+
+        await WaitUntil(() => !viewModel.IsEstimate);
+        Assert.Equal("SGR01", _esolat.Zones[^1]);
+    }
+
+    private static async Task WaitUntil(Func<bool> condition)
+    {
+        for (var i = 0; i < 200 && !condition(); i++)
+            await Task.Delay(10);
+        Assert.True(condition());
+    }
+
     private async Task<(WaktuSolatWidget Widget, WaktuSolatViewModel ViewModel)> StartAsync(string? zone = "SGR01")
     {
         if (zone is not null)
@@ -183,13 +222,23 @@ public sealed class WaktuSolatWidgetTests : IDisposable
 
         public int Requests { get; private set; }
 
-        public Task<FetchResult> GetAsync(FetchRequest request, CancellationToken cancellationToken = default)
+        /// <summary>The zones asked for, in order.</summary>
+        public List<string> Zones { get; } = [];
+
+        /// <summary>Answers wait for this, so a test can change things while a load is out.</summary>
+        public Task Gate { get; set; } = Task.CompletedTask;
+
+        public async Task<FetchResult> GetAsync(FetchRequest request, CancellationToken cancellationToken = default)
         {
             Requests++;
-            var month = request.Url.Query.Split('&').Select(p => p.Split('=')).FirstOrDefault(p => p[0] == "month")?[1];
+            var query = request.Url.Query.TrimStart('?').Split('&').Select(p => p.Split('=')).ToList();
+            if (query.FirstOrDefault(p => p[0] == "zone")?[1] is { } zone)
+                Zones.Add(zone);
+            await Gate;
+            var month = query.FirstOrDefault(p => p[0] == "month")?[1];
             if (request.Url.Host != MalaysiaKeys.EsolatHost || month is null || !Months.TryGetValue(int.Parse(month, System.Globalization.CultureInfo.InvariantCulture), out var body))
-                return Task.FromResult(FetchResult.Fail(FetchStatus.Failed, FetchError.Network));
-            return Task.FromResult(new FetchResult(FetchStatus.Fresh, Encoding.UTF8.GetBytes(body), DateTimeOffset.UtcNow, FetchError.None));
+                return FetchResult.Fail(FetchStatus.Failed, FetchError.Network);
+            return new FetchResult(FetchStatus.Fresh, Encoding.UTF8.GetBytes(body), DateTimeOffset.UtcNow, FetchError.None);
         }
     }
 }

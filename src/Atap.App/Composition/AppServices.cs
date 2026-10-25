@@ -152,6 +152,9 @@ internal sealed class AppServices : IDisposable
             Updates = updates,
         };
 
+        // Alarms and other widgets that need no placement keep running in a profile with its own widget list.
+        layout.WorksWithoutPlacement = id => services.Catalog.TryResolve(id, out var descriptor) && descriptor.WorksWithoutPlacement;
+
         // Instances are created by ApplyAsync, and the windows only by NotchHost.Start.
         services.Widgets = new WidgetHost(
             services.Catalog,

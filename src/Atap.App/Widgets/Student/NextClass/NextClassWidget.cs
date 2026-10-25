@@ -52,7 +52,8 @@ public sealed class NextClassDescriptor : IWidgetDescriptor
 /// </summary>
 public sealed class NextClassWidget(WidgetContext context) : WidgetBase(context)
 {
-    private static readonly ScheduleOptions Exact = new(TimeSpan.Zero, false, MissedRun.RunOnce);
+    // Due times come from local times, so a time zone change works them out again.
+    private static readonly ScheduleOptions Exact = new(TimeSpan.Zero, false, MissedRun.RunOnce, WallClock: true);
 
     private readonly NextClassViewModel _viewModel = new(context.Text);
     private TimetableDocument _timetable = new();

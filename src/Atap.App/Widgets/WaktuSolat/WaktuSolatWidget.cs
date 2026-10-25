@@ -195,14 +195,18 @@ public sealed class WaktuSolatWidget(WidgetContext context) : WidgetBase(context
         try
         {
             var schedule = await _loader.LoadAsync(zone, Context.Time.GetUtcNow(), cancellationToken);
-            if (cancellationToken.IsCancellationRequested || zone != _zone)
+            if (cancellationToken.IsCancellationRequested)
                 return;
-            if (schedule is not null)
-                _schedule = _schedule is { } old && old.Zone == schedule.Zone ? old.Merge(schedule).DropBefore(today.AddDays(-1)) : schedule;
-            if (schedule?.DayOf(today) is not null)
-                _loadedFor = today;
-            else
-                _retry = Context.Scheduler.At(Context.Time.GetUtcNow() + RetryAfter, Retry, Exact);
+            // Times for an area changed meanwhile are dropped. The Update below then loads the new area.
+            if (zone == _zone)
+            {
+                if (schedule is not null)
+                    _schedule = _schedule is { } old && old.Zone == schedule.Zone ? old.Merge(schedule).DropBefore(today.AddDays(-1)) : schedule;
+                if (schedule?.DayOf(today) is not null)
+                    _loadedFor = today;
+                else
+                    _retry = Context.Scheduler.At(Context.Time.GetUtcNow() + RetryAfter, Retry, Exact);
+            }
         }
         catch (OperationCanceledException)
         {

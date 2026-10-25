@@ -18,7 +18,7 @@ public partial class App : Application
     private SecondInstance? _secondInstance;
     private IUpdateService? _updates;
     private Ui.Theme.HighContrastTheme? _highContrast;
-    private Dictionary<string, string> _widgetSettings = new(StringComparer.Ordinal);
+    private readonly WidgetSettingsWatch _widgetSettings = new();
     private bool _quitting;
 
     protected override async void OnStartup(StartupEventArgs e)
@@ -52,7 +52,7 @@ public partial class App : Application
             // Enabled instances are created now, so the windows show them; they start after the windows are up.
             widgets = services.Widgets;
             await widgets.ApplyAsync(EnabledWidgets());
-            _widgetSettings = SnapshotWidgetSettings();
+            _widgetSettings.Remember(widgets.InstanceIds, WidgetSettingsOf);
             services.Layout.Changed += OnLayoutChanged;
 
             AppCommands.Register(services.Commands, () => _ = Dispatcher.InvokeAsync(QuitAsync), _updates);
@@ -136,14 +136,11 @@ public partial class App : Application
         var widgets = _services.Widgets;
         try
         {
-            var settings = SnapshotWidgetSettings();
-            foreach (var (id, json) in settings)
-            {
-                if (_widgetSettings.TryGetValue(id, out var before) && before != json)
-                    widgets.RestartSoon(id);
-            }
-            _widgetSettings = settings;
+            foreach (var id in _widgetSettings.Changed(widgets.InstanceIds, WidgetSettingsOf))
+                widgets.RestartSoon(id);
             await widgets.ApplyAsync(EnabledWidgets());
+            // Instances this apply created exist only now, so their first settings change restarts them too.
+            _widgetSettings.Remember(widgets.InstanceIds, WidgetSettingsOf);
             // After the apply, so a removed script instance has stopped before its approval goes.
             ForgetRemovedScripts(_services);
         }
@@ -175,15 +172,8 @@ public partial class App : Application
         }
     }
 
-    private Dictionary<string, string> SnapshotWidgetSettings()
-    {
-        var snapshot = new Dictionary<string, string>(StringComparer.Ordinal);
-        if (_services is null)
-            return snapshot;
-        foreach (var id in _services.Widgets.InstanceIds)
-            snapshot[id] = JsonSerializer.Serialize(_services.Layout.Document.GetWidgetSettings(id));
-        return snapshot;
-    }
+    private string WidgetSettingsOf(string instanceId) =>
+        _services is null ? string.Empty : JsonSerializer.Serialize(_services.Layout.Document.GetWidgetSettings(instanceId));
 
     /// <summary>
     /// An existing layout.json with no settings.json is an install from before settings existed, so the

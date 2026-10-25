@@ -23,6 +23,7 @@ public sealed class LayoutStore : ILayoutService, IDisposable
     private readonly JsonFileStore<LayoutDocument> _file;
     private EffectiveLayout _active;
     private string _activeProfileId = EffectiveLayout.DefaultProfileId;
+    private Func<string, bool>? _worksWithoutPlacement;
 
     /// <param name="filePath">Layout file path; defaults to <see cref="DefaultFilePath"/>.</param>
     /// <param name="createDefaults">Factory for the default layout; defaults to <see cref="DefaultLayout.Create"/>.</param>
@@ -51,7 +52,7 @@ public sealed class LayoutStore : ILayoutService, IDisposable
         };
         _file = new JsonFileStore<LayoutDocument>(filePath ?? DefaultFilePath, format, timeProvider, ui, watch ?? FolderWatch.Shared);
         _file.Reloaded += OnReloaded;
-        _active = LayoutResolver.Resolve(_file.Document, _activeProfileId);
+        _active = LayoutResolver.Resolve(_file.Document, _activeProfileId, _worksWithoutPlacement);
     }
 
     /// <summary>%APPDATA%\Atap\layout.json</summary>
@@ -68,6 +69,20 @@ public sealed class LayoutStore : ILayoutService, IDisposable
     public string ActiveProfileId => _activeProfileId;
 
     public bool IsReadOnly => _file.IsReadOnly;
+
+    /// <summary>
+    /// True for instances that keep running without a placement, such as alarms. The app sets it once from the widget
+    /// catalog, before anything reads <see cref="Active"/>, so a profile with its own widget list still runs them.
+    /// </summary>
+    public Func<string, bool>? WorksWithoutPlacement
+    {
+        get => _worksWithoutPlacement;
+        set
+        {
+            _worksWithoutPlacement = value;
+            _active = LayoutResolver.Resolve(_file.Document, _activeProfileId, value);
+        }
+    }
 
     /// <summary>Why changes are not reaching the file right now, for a banner.</summary>
     public StoreProblem Problem => _file.Problem;
@@ -99,7 +114,7 @@ public sealed class LayoutStore : ILayoutService, IDisposable
     public LayoutDocument Load()
     {
         _file.Load();
-        _active = LayoutResolver.Resolve(_file.Document, _activeProfileId);
+        _active = LayoutResolver.Resolve(_file.Document, _activeProfileId, _worksWithoutPlacement);
         return _file.Document;
     }
 
@@ -119,7 +134,7 @@ public sealed class LayoutStore : ILayoutService, IDisposable
         if (id == _activeProfileId)
             return;
         _activeProfileId = id;
-        _active = LayoutResolver.Resolve(_file.Document, id);
+        _active = LayoutResolver.Resolve(_file.Document, id, _worksWithoutPlacement);
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
@@ -135,7 +150,7 @@ public sealed class LayoutStore : ILayoutService, IDisposable
         // The change may have deleted the active profile.
         if (_file.Document.FindProfile(_activeProfileId) is null)
             _activeProfileId = EffectiveLayout.DefaultProfileId;
-        _active = LayoutResolver.Resolve(_file.Document, _activeProfileId);
+        _active = LayoutResolver.Resolve(_file.Document, _activeProfileId, _worksWithoutPlacement);
         Changed?.Invoke(this, EventArgs.Empty);
         return Map(result);
     }
@@ -171,7 +186,7 @@ public sealed class LayoutStore : ILayoutService, IDisposable
     {
         if (_file.Document.FindProfile(_activeProfileId) is null)
             _activeProfileId = EffectiveLayout.DefaultProfileId;
-        _active = LayoutResolver.Resolve(_file.Document, _activeProfileId);
+        _active = LayoutResolver.Resolve(_file.Document, _activeProfileId, _worksWithoutPlacement);
         Changed?.Invoke(this, EventArgs.Empty);
     }
 }

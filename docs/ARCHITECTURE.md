@@ -234,9 +234,9 @@ The schema version is 3. Version 3 adds `profiles` and gives the panel pages:
 - `EverySecond` is only for a countdown on screen. `TimerTicks` uses it while the timer shows in Expanded or Panel, every minute otherwise, and nothing while the notch is hidden or idle.
 - Widgets and features get a scoped scheduler. Their items end with their lifetime.
 
-The `systemClock` feature calls `NotifyClockChanged` when the clock or time zone changes and `NotifyResumed` when the PC wakes. Aligned ticks then move to the next boundary. A repeating item never waits more than one period from now, so a clock set back an hour does not hold a 5 minute item for 65 minutes. `At` items keep their wall-clock time.
+The `systemClock` feature calls `NotifyClockChanged` when the clock or time zone changes and `NotifyResumed` when the PC wakes. Aligned ticks then move to the next boundary. A repeating item never waits more than one period from now, so a clock set back an hour does not hold a 5 minute item for 65 minutes. `At` items keep their time, except those with `WallClock` set. Those come from a local time, such as an alarm at 07:00, so they run at once after a clock change or resume, and their owner works the time out again in the new time zone.
 
-After sleep, missed items follow their `MissedRun` policy. With `Skip`, a missed one-shot is dropped and a missed repeating item runs once, in a shared refresh 10 seconds after resume plus up to 5 seconds of jitter. With `RunOnce`, the item runs on the next turn.
+After sleep, missed items follow their `MissedRun` policy. With `Skip`, a missed item runs once, in a shared refresh 10 seconds after resume plus up to 5 seconds of jitter. With `RunOnce`, the item runs on the next turn. A missed one-shot is never dropped, so the work it waits for still happens. Code that shows the user a set time, such as an alarm, checks for itself whether that time passed during sleep.
 
 ## HTTP
 

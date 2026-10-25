@@ -72,7 +72,7 @@ internal sealed partial class StudentCardViewModel : ObservableObject, IDisposab
         _text = text;
         _time = time;
         _timetable = timetable.Load(NextClassDescriptor.DataFile, StudentJsonContext.Default.TimetableDocument, new TimetableDocument()).Normalize();
-        _assignments = assignments.Load(AssignmentsDescriptor.DataFile, StudentJsonContext.Default.AssignmentDocument, new AssignmentDocument()).Normalize();
+        _assignments = LoadAssignments();
         Build();
         _text.LanguageChanged += OnLanguageChanged;
     }
@@ -162,7 +162,7 @@ internal sealed partial class StudentCardViewModel : ObservableObject, IDisposab
             Message = _text["studentcard.assignmentInvalid"];
             return;
         }
-        _assignments = _assignments.Upsert(Assignment.Create(ItemIds.New(), Title, Course, Due.Value, null, _time.GetUtcNow())).Normalize();
+        _assignments = LoadAssignments().Upsert(Assignment.Create(ItemIds.New(), Title, Course, Due.Value, null, _time.GetUtcNow())).Normalize();
         SaveAssignments();
         Title = Course = string.Empty;
         Message = null;
@@ -172,7 +172,7 @@ internal sealed partial class StudentCardViewModel : ObservableObject, IDisposab
     [RelayCommand]
     private void RemoveAssignment(string id)
     {
-        _assignments = _assignments.Remove(id);
+        _assignments = LoadAssignments().Remove(id);
         SaveAssignments();
         Build();
     }
@@ -182,6 +182,13 @@ internal sealed partial class StudentCardViewModel : ObservableObject, IDisposab
         _timetableStorage.Save(NextClassDescriptor.DataFile, _timetable, StudentJsonContext.Default.TimetableDocument);
         Bump(NextClassDescriptor.TypeIdValue);
     }
+
+    /// <summary>
+    /// Read again before each change, because the widget saves the file too when an assignment is ticked done. A copy
+    /// kept from when the card opened would undo that tick.
+    /// </summary>
+    private AssignmentDocument LoadAssignments() =>
+        _assignmentStorage.Load(AssignmentsDescriptor.DataFile, StudentJsonContext.Default.AssignmentDocument, new AssignmentDocument()).Normalize();
 
     private void SaveAssignments()
     {
