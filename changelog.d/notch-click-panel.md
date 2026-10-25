@@ -7,3 +7,5 @@
 - The music bars beside the album art move while a song plays, and the open notch shows how far through the song you are.
 - The small focus timer has a button to stop and start over.
 - On a side edge, the small notch shows the focus time when paused and no longer leaves a gap.
+- The volume mixer shows plain app names, calls Windows' own sounds "System sounds" and shows each app once, with its helpers.
+- Long sound output names show in full when you point at them.

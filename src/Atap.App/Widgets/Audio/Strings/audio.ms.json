@@ -12,5 +12,7 @@
   "audio.mixer.mute": "Senyapkan {app}",
   "audio.mixer.unmute": "Nyahsenyap {app}",
   "audio.mixer.muted": "Disenyapkan",
-  "audio.mixer.accessible": "Pengadun kelantangan. {count} aplikasi"
+  "audio.mixer.accessible": "Pengadun kelantangan. {count} aplikasi",
+  "audio.mixer.systemSounds": "Bunyi sistem",
+  "audio.mixer.otherApp": "Aplikasi lain"
 }
