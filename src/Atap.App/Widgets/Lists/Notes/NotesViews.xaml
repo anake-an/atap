@@ -74,7 +74,7 @@
           <TextBox Style="{StaticResource notes.editor}" Text="{Binding EditText, UpdateSourceTrigger=PropertyChanged}" MinHeight="120" MaxHeight="240"
                    AutomationProperties.Name="{loc:T notes.editor}"
                    Visibility="{Binding HasNote, Converter={StaticResource notes.visible}}" />
-          <TextBlock Text="{loc:T notes.empty}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+          <TextBlock Text="{loc:T notes.empty}" Style="{DynamicResource card.Empty}"
                      Visibility="{Binding HasNone, Converter={StaticResource notes.visible}}" />
         </Grid>
       </DockPanel>

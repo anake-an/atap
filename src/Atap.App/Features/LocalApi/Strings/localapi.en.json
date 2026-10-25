@@ -8,7 +8,7 @@
   "localapi.card.running": "On. Programs on this PC can show progress on the notch.",
   "localapi.card.couldNotStart": "Could not start: another program uses its name. Restart Atap to try again.",
   "localapi.card.example": "Try it in a terminal:",
-  "localapi.card.pushWidget": "Pushes show only while the Push widget is on.",
+  "localapi.card.pushWidget": "Progress shows only while the Progress from programs widget is on.",
   "localapi.card.copy": "Copy example",
   "localapi.card.copied": "Copied"
 }

@@ -33,7 +33,7 @@
   "home-assistant.needsSetup": "Tambah alamat broker dan topik dalam tetapan widget ini.",
   "home-assistant.badField": "Bahagian mesej untuk ditunjukkan tidak ditulis dengan betul. Semak dalam tetapan widget ini.",
   "home-assistant.connecting": "Menyambung ke Home Assistant.",
-  "home-assistant.waiting": "Sudah bersambung. Menunggu bacaan pertama.",
+  "home-assistant.waiting": "Sudah bersambung. Menunggu bacaan pertama…",
   "home-assistant.retrying": "Broker tidak dapat dihubungi. Akan cuba lagi sebentar nanti.",
   "home-assistant.signInRefused": "Broker tidak menerima nama pengguna atau kata laluan.",
   "home-assistant.needsTls": "Broker ini berada di internet. Hidupkan sambungan selamat di bawah Lagi pilihan.",

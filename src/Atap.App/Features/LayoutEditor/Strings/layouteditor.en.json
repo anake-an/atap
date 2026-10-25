@@ -10,7 +10,7 @@
   "layouteditor.pageName": "Page {number}",
   "layouteditor.addPage": "Add page",
   "layouteditor.removePage": "Remove page",
-  "layouteditor.empty": "Drag a widget here",
+  "layouteditor.empty": "Drag a widget here.",
   "layouteditor.copy": "Copy {number}",
   "layouteditor.size": "Size",
   "layouteditor.size.small": "S",

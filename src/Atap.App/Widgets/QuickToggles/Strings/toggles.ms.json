@@ -1,10 +1,10 @@
 {
-  "toggles.name": "Togol pantas",
-  "toggles.description": "Mod gelap, Bluetooth, senyap mikrofon dan notch nipis, satu klik setiap satu. Togol yang tiada pada PC anda disembunyikan.",
+  "toggles.name": "Suis pantas",
+  "toggles.description": "Mod gelap, Bluetooth, bisu mikrofon dan notch nipis, satu klik setiap satu. Suis yang tiada pada PC anda disembunyikan.",
   "toggles.darkMode": "Mod gelap",
   "toggles.bluetooth": "Bluetooth",
-  "toggles.micMute": "Senyap mikrofon",
+  "toggles.micMute": "Bisukan mikrofon",
   "toggles.slim": "Notch nipis",
   "toggles.failed": "Windows tidak menerima perubahan itu. Cuba dalam Tetapan Windows.",
-  "toggles.accessible": "Togol pantas. Hidup: {on}"
+  "toggles.accessible": "Suis pantas. Hidup: {on}"
 }

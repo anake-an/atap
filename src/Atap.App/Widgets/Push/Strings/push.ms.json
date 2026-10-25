@@ -1,7 +1,7 @@
 {
-  "push.name": "Push",
+  "push.name": "Kemajuan daripada program",
   "push.description": "Menunjukkan kemajuan yang dihantar oleh program dan skrip pada PC ini dengan atap push, seperti binaan atau sandaran.",
-  "push.empty": "Tiada apa-apa dihantar",
+  "push.empty": "Belum ada apa-apa dihantar.",
   "push.from": "daripada {source}",
   "push.state.running": "Sedang berjalan",
   "push.state.done": "Selesai",

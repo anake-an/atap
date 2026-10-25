@@ -15,7 +15,7 @@
         <ItemsControl ItemsSource="{Binding Rows}" Focusable="False" Visibility="{Binding HasRows, Converter={StaticResource Card.BoolToVisibility}}">
           <ItemsControl.ItemTemplate>
             <DataTemplate>
-              <Border Padding="0,8" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,0,0,1" AutomationProperties.Name="{Binding Apps}">
+              <Border Padding="0,8" BorderBrush="{DynamicResource SettingsCardBorderBrush}" BorderThickness="0,0,0,1" AutomationProperties.Name="{Binding Apps}">
                 <StackPanel>
                   <DockPanel>
                     <Button DockPanel.Dock="Right" Style="{DynamicResource Settings.Button}" Content="{loc:T apprulescard.remove}"

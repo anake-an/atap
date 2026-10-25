@@ -11,7 +11,7 @@
   <!-- An output: click to make it the default. The current one is marked. -->
   <Style x:Key="audio-output.row" TargetType="Button">
     <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.card}" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     <Setter Property="Template">
       <Setter.Value>

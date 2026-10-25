@@ -59,25 +59,17 @@
     </Setter>
   </Style>
 
-  <!-- A small text button for due dates and Clear done. -->
-  <Style x:Key="todo.chip" TargetType="Button">
-    <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
+  <!-- A small text button for due dates and Clear done: the notch's shared button, smaller and quieter. -->
+  <Style x:Key="todo.chip" TargetType="Button" BasedOn="{StaticResource Notch.Button}">
     <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
-    <Setter Property="Template">
-      <Setter.Value>
-        <ControlTemplate TargetType="Button">
-          <Border x:Name="Chrome" CornerRadius="6" Padding="10,3" Background="{DynamicResource RaisedBrush}">
-            <ContentPresenter TextElement.FontSize="11" RecognizesAccessKey="False" />
-          </Border>
-          <ControlTemplate.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-              <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-            </Trigger>
-          </ControlTemplate.Triggers>
-        </ControlTemplate>
-      </Setter.Value>
-    </Setter>
+    <Setter Property="Padding" Value="10,3" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="Normal" />
+    <Style.Triggers>
+      <Trigger Property="IsMouseOver" Value="True">
+        <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+      </Trigger>
+    </Style.Triggers>
   </Style>
 
   <!-- One task in the open notch: tick and title. -->
@@ -166,7 +158,7 @@
           <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="260" Focusable="False">
             <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource todo.editItem}" Focusable="False" />
           </ScrollViewer>
-          <TextBlock Text="{loc:T todo.empty}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"
+          <TextBlock Text="{loc:T todo.empty}" Style="{DynamicResource card.Empty}"
                      Visibility="{Binding HasNone, Converter={StaticResource todo.visible}}" />
         </Grid>
       </DockPanel>

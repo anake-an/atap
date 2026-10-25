@@ -27,7 +27,7 @@
             </DataTemplate>
           </ItemsControl.ItemTemplate>
         </ItemsControl>
-        <TextBlock Text="{loc:T bluetooth.none}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+        <TextBlock Text="{loc:T bluetooth.none}" Style="{DynamicResource card.Empty}"
                    Visibility="{Binding HasNone, Converter={StaticResource bluetooth.visible}}" />
       </StackPanel>
     </controls:WidgetCard>

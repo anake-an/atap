@@ -9,9 +9,9 @@
   "audio.mixer.none": "Tiada aplikasi yang sedang berbunyi.",
   "audio.mixer.quieter": "Perlahankan",
   "audio.mixer.louder": "Kuatkan",
-  "audio.mixer.mute": "Senyapkan {app}",
-  "audio.mixer.unmute": "Nyahsenyap {app}",
-  "audio.mixer.muted": "Disenyapkan",
+  "audio.mixer.mute": "Bisukan {app}",
+  "audio.mixer.unmute": "Nyahbisu {app}",
+  "audio.mixer.muted": "Dibisukan",
   "audio.mixer.accessible": "Pengadun kelantangan. {count} aplikasi",
   "audio.mixer.systemSounds": "Bunyi sistem",
   "audio.mixer.otherApp": "Aplikasi lain"

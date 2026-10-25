@@ -8,29 +8,7 @@
 
   <BooleanToVisibilityConverter x:Key="next-meeting.visible" />
 
-  <Style x:Key="next-meeting.join" TargetType="Button">
-    <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
-    <Setter Property="Foreground" Value="{DynamicResource NotchSurfaceBrush}" />
-    <Setter Property="Background" Value="{DynamicResource ProductivityAccentBrush}" />
-    <Setter Property="Padding" Value="12,5" />
-    <Setter Property="Template">
-      <Setter.Value>
-        <ControlTemplate TargetType="Button">
-          <Border x:Name="Chrome" CornerRadius="6" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"
-                  SnapsToDevicePixels="True">
-            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.FontSize="12"
-                              TextElement.FontWeight="SemiBold" RecognizesAccessKey="False" />
-          </Border>
-          <ControlTemplate.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Chrome" Property="Opacity" Value="0.85" />
-            </Trigger>
-          </ControlTemplate.Triggers>
-        </ControlTemplate>
-      </Setter.Value>
-    </Setter>
-  </Style>
+  <Style x:Key="next-meeting.join" TargetType="Button" BasedOn="{StaticResource Notch.AccentButton}" />
 
   <!-- Compact, left of the camera: a calendar icon and the title, from 5 minutes before. -->
   <DataTemplate x:Key="next-meeting.Compact.Left">
@@ -46,7 +24,7 @@
                            VerticalAlignment="Center"
                            Margin="0,0,6,0" />
       <TextBlock Text="{Binding Title}"
-                 Foreground="{DynamicResource PrimaryTextBrush}"
+                 Foreground="{DynamicResource TextBrush}"
                  FontSize="13"
                  FontWeight="SemiBold"
                  MaxWidth="140"
@@ -60,7 +38,7 @@
     <TextBlock DataContext="{Binding ViewModel}"
                AutomationProperties.Name="{Binding AccessibleSummary}"
                Text="{Binding When}"
-               Foreground="{DynamicResource PrimaryTextBrush}"
+               Foreground="{DynamicResource TextBrush}"
                FontSize="13"
                FontWeight="SemiBold"
                VerticalAlignment="Center"

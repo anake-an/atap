@@ -8,7 +8,7 @@
   "localapi.card.running": "Dihidupkan. Program pada PC ini boleh menunjukkan kemajuan pada notch.",
   "localapi.card.couldNotStart": "Tidak dapat dimulakan kerana program lain sedang menggunakan namanya. Mulakan semula Atap untuk mencuba lagi.",
   "localapi.card.example": "Cuba dalam terminal:",
-  "localapi.card.pushWidget": "Hantaran hanya ditunjukkan semasa widget Push dihidupkan.",
+  "localapi.card.pushWidget": "Kemajuan hanya ditunjukkan semasa widget Kemajuan daripada program dihidupkan.",
   "localapi.card.copy": "Salin contoh",
   "localapi.card.copied": "Disalin"
 }

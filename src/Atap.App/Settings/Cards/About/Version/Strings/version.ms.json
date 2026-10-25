@@ -3,11 +3,11 @@
   "version.name": "Atap {version}",
   "version.check": "Semak kemas kini",
   "version.status.idle": "Atap menyemak kemas kini dengan sendirinya sekali sehari.",
-  "version.status.checking": "Menyemak kemas kini...",
-  "version.status.downloading": "Memuat turun kemas kini...",
+  "version.status.checking": "Menyemak kemas kini…",
+  "version.status.downloading": "Memuat turun kemas kini…",
   "version.status.ready": "Kemas kini sudah sedia. Ia akan dipasang apabila Atap ditutup.",
   "version.status.upToDate": "Anda sudah menggunakan versi terkini.",
   "version.status.unsupported": "Kemas kini hanya berfungsi dalam aplikasi yang dipasang.",
-  "version.status.scoop": "Scoop memastikan Atap sentiasa terkini. Jalankan scoop update atap.",
+  "version.status.scoop": "Scoop memastikan Atap sentiasa terkini. Kemas kini Atap melalui Scoop.",
   "version.status.store": "Microsoft Store memastikan Atap sentiasa terkini."
 }

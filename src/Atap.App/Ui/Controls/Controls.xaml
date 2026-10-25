@@ -11,11 +11,12 @@
   <controls:PillRadiusConverter x:Key="controls.PillRadius" />
 
   <!-- Keyboard focus rings. WPF shows them only when focus came from the keyboard, never after a click. -->
+  <!-- For buttons, chips, switches and rows. They are 6 pixel rounded rectangles, so the ring is one too. -->
   <Style x:Key="focus.round">
     <Setter Property="Control.Template">
       <Setter.Value>
         <ControlTemplate>
-          <Border x:Name="Ring" Margin="-3" BorderThickness="2" CornerRadius="999" BorderBrush="{DynamicResource TextBrush}" SnapsToDevicePixels="True" />
+          <Border x:Name="Ring" Margin="-3" BorderThickness="2" CornerRadius="8" BorderBrush="{DynamicResource TextBrush}" SnapsToDevicePixels="True" />
           <ControlTemplate.Triggers>
             <DataTrigger Binding="{Binding IsHigh, Source={x:Static controls:Contrast.Current}}" Value="True">
               <Setter TargetName="Ring" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
@@ -57,7 +58,7 @@
     </Setter>
   </Style>
 
-  <!-- IconButton: 32 by 32, round, a 16 pixel icon. Hover and press change the background only. -->
+  <!-- IconButton: 32 by 32, a 6 pixel rounded square, a 16 pixel icon. Hover and press change the background only. -->
   <Style TargetType="controls:IconButton">
     <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     <Setter Property="Background" Value="Transparent" />
@@ -76,7 +77,7 @@
                   Background="{TemplateBinding Background}"
                   BorderBrush="{TemplateBinding BorderBrush}"
                   BorderThickness="{TemplateBinding BorderThickness}"
-                  CornerRadius="999"
+                  CornerRadius="6"
                   SnapsToDevicePixels="True">
             <controls:StrokeIcon x:Name="Glyph"
                                  Data="{TemplateBinding Icon}"
@@ -124,6 +125,69 @@
         </ControlTemplate>
       </Setter.Value>
     </Setter>
+  </Style>
+
+  <!-- Notch.Button: a button with words on the dark notch, such as Add, Save or Join. A 6 pixel rounded rectangle.
+       Widgets base their own buttons on it and change only what differs, such as the colours or the padding.
+       Notch.AccentButton is the filled one for the main action. -->
+  <Style x:Key="Notch.Button" TargetType="Button">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource focus.round}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="Background" Value="{DynamicResource RaisedBrush}" />
+    <Setter Property="BorderBrush" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="12,5" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome"
+                  Background="{TemplateBinding Background}"
+                  BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}"
+                  CornerRadius="6"
+                  Padding="{TemplateBinding Padding}"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter x:Name="Body"
+                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                              RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.85" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.4" />
+            </Trigger>
+            <!-- High contrast: button colours with a visible edge, highlight on hover. -->
+            <DataTrigger Binding="{Binding IsHigh, Source={x:Static controls:Contrast.Current}}" Value="True">
+              <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource {x:Static SystemColors.ControlBrushKey}}" />
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+              <Setter TargetName="Chrome" Property="BorderThickness" Value="1" />
+              <Setter TargetName="Body" Property="TextElement.Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}" />
+            </DataTrigger>
+            <MultiDataTrigger>
+              <MultiDataTrigger.Conditions>
+                <Condition Binding="{Binding IsHigh, Source={x:Static controls:Contrast.Current}}" Value="True" />
+                <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True" />
+              </MultiDataTrigger.Conditions>
+              <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource {x:Static SystemColors.HighlightBrushKey}}" />
+              <Setter TargetName="Body" Property="TextElement.Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}" />
+            </MultiDataTrigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="Notch.AccentButton" TargetType="Button" BasedOn="{StaticResource Notch.Button}">
+    <Setter Property="Background" Value="{DynamicResource ProductivityAccentBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource NotchSurfaceBrush}" />
   </Style>
 
   <!-- ProgressPill: a 6 pixel bar with round ends. ProgressBar sizes PART_Indicator from PART_Track. -->
@@ -359,10 +423,18 @@
     <Setter Property="TextTrimming" Value="None" />
   </Style>
 
-  <!-- A small second line, such as an artist or "in 23 minutes". -->
+  <!-- A small second line, such as an artist, "in 23 minutes" or "Paused". -->
   <Style x:Key="card.Caption" TargetType="TextBlock" BasedOn="{StaticResource card.Text}">
     <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
     <Setter Property="FontSize" Value="11" />
+  </Style>
+
+  <!-- What a widget says when it has nothing to show, such as "No alarms yet." The same look in every widget. -->
+  <Style x:Key="card.Empty" TargetType="TextBlock" BasedOn="{StaticResource card.Text}">
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="TextTrimming" Value="None" />
   </Style>
 
 </ResourceDictionary>

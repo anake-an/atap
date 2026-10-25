@@ -52,7 +52,7 @@
                            Margin="0,0,6,0" />
       <TextBlock x:Name="Phase"
                  Text="{Binding PhaseText}"
-                 Foreground="{DynamicResource PrimaryTextBrush}"
+                 Foreground="{DynamicResource TextBrush}"
                  FontSize="13"
                  FontWeight="SemiBold"
                  VerticalAlignment="Center" />
@@ -76,7 +76,7 @@
                 VerticalAlignment="Center"
                 Margin="4,0">
       <TextBlock Text="{Binding ShortText}"
-                 Foreground="{DynamicResource PrimaryTextBrush}"
+                 Foreground="{DynamicResource TextBrush}"
                  FontSize="13"
                  FontWeight="SemiBold"
                  HorizontalAlignment="Center"
@@ -84,8 +84,7 @@
                  Typography.NumeralAlignment="Tabular" />
       <TextBlock x:Name="State"
                  Text="{Binding CompactState}"
-                 Foreground="{DynamicResource SecondaryTextBrush}"
-                 FontSize="11"
+                 Style="{DynamicResource card.Caption}"
                  HorizontalAlignment="Center"
                  VerticalAlignment="Center"
                  Margin="6,0,0,0"

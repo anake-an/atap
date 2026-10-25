@@ -16,15 +16,15 @@
           Width="22"
           Height="22"
           VerticalAlignment="Center">
-      <Border CornerRadius="5" Background="{DynamicResource PlaceholderBrush}">
+      <Border CornerRadius="6" Background="{DynamicResource PlaceholderBrush}">
         <TextBlock Text="&#xE8D6;"
                    FontFamily="{StaticResource IconFont}"
                    FontSize="11"
-                   Foreground="{DynamicResource SecondaryTextBrush}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center" />
       </Border>
-      <Border CornerRadius="5">
+      <Border CornerRadius="6">
         <Border.Background>
           <ImageBrush ImageSource="{Binding AlbumArt}" Stretch="UniformToFill" />
         </Border.Background>
@@ -69,15 +69,15 @@
       </Grid.RowDefinitions>
 
       <Grid Width="64" Height="64" VerticalAlignment="Center">
-        <Border CornerRadius="10" Background="{DynamicResource PlaceholderBrush}">
+        <Border CornerRadius="8" Background="{DynamicResource PlaceholderBrush}">
           <TextBlock Text="&#xE8D6;"
                      FontFamily="{StaticResource IconFont}"
                      FontSize="24"
-                     Foreground="{DynamicResource SecondaryTextBrush}"
+                     Foreground="{DynamicResource TextSecondaryBrush}"
                      HorizontalAlignment="Center"
                      VerticalAlignment="Center" />
         </Border>
-        <Border CornerRadius="10">
+        <Border CornerRadius="8">
           <Border.Background>
             <ImageBrush ImageSource="{Binding AlbumArt}" Stretch="UniformToFill" />
           </Border.Background>
@@ -86,12 +86,12 @@
 
       <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
         <TextBlock Text="{Binding Title}"
-                   Foreground="{DynamicResource PrimaryTextBrush}"
+                   Foreground="{DynamicResource TextBrush}"
                    FontSize="14"
                    FontWeight="SemiBold"
                    TextTrimming="CharacterEllipsis" />
         <TextBlock Text="{Binding Artist}"
-                   Foreground="{DynamicResource SecondaryTextBrush}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
                    FontSize="12"
                    TextTrimming="CharacterEllipsis" />
 
@@ -131,7 +131,7 @@
                              Margin="0,8,0,0"
                              Value="{Binding Progress, Mode=OneWay}"
                              Maximum="100"
-                             Accent="{DynamicResource AccentBrush}"
+                             Accent="{DynamicResource MediaAccentBrush}"
                              AutomationProperties.Name="{loc:T media.progress}"
                              Visibility="{Binding HasProgress, Converter={StaticResource media.visible}}" />
     </Grid>

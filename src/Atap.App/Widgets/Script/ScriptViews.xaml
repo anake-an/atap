@@ -97,7 +97,7 @@
     <TextBlock DataContext="{Binding ViewModel}"
                AutomationProperties.Name="{Binding AccessibleSummary}"
                Text="{Binding CompactText}"
-               Foreground="{DynamicResource PrimaryTextBrush}"
+               Foreground="{DynamicResource TextBrush}"
                FontSize="13"
                FontWeight="SemiBold"
                MaxWidth="140"

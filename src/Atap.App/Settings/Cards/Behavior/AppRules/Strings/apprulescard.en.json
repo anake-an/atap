@@ -2,7 +2,7 @@
   "apprulescard.title": "When an app is in front",
   "apprulescard.list": "App rules",
   "apprulescard.listHint": "Change the notch while an app is in front, such as a slim notch for a game. Changes wait a moment, so switching windows quickly does not flip it back and forth.",
-  "apprulescard.app": "App, such as valorant.exe",
+  "apprulescard.app": "App name, such as Valorant",
   "apprulescard.add": "Add app",
   "apprulescard.remove": "Remove",
   "apprulescard.profile": "Profile",
