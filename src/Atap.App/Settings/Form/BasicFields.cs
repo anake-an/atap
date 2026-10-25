@@ -123,10 +123,14 @@ internal sealed class ChoiceField : SettingField
         get => _selected;
         set
         {
-            if (value is not null && value != _selected)
-                Commit(value.Value);
+            // While the labels are rebuilt the list may briefly select nothing or the first item. That is not a pick.
+            if (_relabelling || value is null || value.Value == _selected?.Value)
+                return;
+            Commit(value.Value);
         }
     }
+
+    private bool _relabelling;
 
     public override void Refresh(SettingValues values)
     {
@@ -135,8 +139,22 @@ internal sealed class ChoiceField : SettingField
         OnPropertyChanged(nameof(Selected));
     }
 
-    protected override void RebuildText() =>
-        Options = (Definition.Choices ?? []).Select(c => new ChoiceOption(c, Strings[$"{Definition.Label}.{c}"])).ToList();
+    // New labels make new option objects, so the selection moves to the new object with the same value.
+    protected override void RebuildText()
+    {
+        var value = _selected?.Value;
+        _relabelling = true;
+        try
+        {
+            Options = (Definition.Choices ?? []).Select(c => new ChoiceOption(c, Strings[$"{Definition.Label}.{c}"])).ToList();
+            _selected = value is null ? null : Options.FirstOrDefault(o => o.Value == value);
+            OnPropertyChanged(nameof(Selected));
+        }
+        finally
+        {
+            _relabelling = false;
+        }
+    }
 }
 
 /// <summary>String, Url, Time, Folder and File: a text box. Folder and File add a Browse button.</summary>
