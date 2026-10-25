@@ -60,7 +60,7 @@
                 Visibility="{Binding HasItems, Converter={StaticResource clipboard.visible}}">
           <TextBlock Text="{loc:T clipboard.clear}" />
         </Button>
-        <TextBlock Text="{loc:T clipboard.empty}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+        <TextBlock Text="{loc:T clipboard.empty}" Style="{DynamicResource card.Empty}"
                    Visibility="{Binding IsEmpty, Converter={StaticResource clipboard.visible}}" />
       </StackPanel>
     </controls:WidgetCard>

@@ -84,8 +84,7 @@
                  Typography.NumeralAlignment="Tabular" />
       <TextBlock x:Name="State"
                  Text="{Binding CompactState}"
-                 Foreground="{DynamicResource TextSecondaryBrush}"
-                 FontSize="11"
+                 Style="{DynamicResource card.Caption}"
                  HorizontalAlignment="Center"
                  VerticalAlignment="Center"
                  Margin="6,0,0,0"

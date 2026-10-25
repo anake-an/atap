@@ -31,7 +31,7 @@
         </Grid>
         <controls:ProgressPill Value="{Binding Count, Mode=OneWay}" Maximum="{Binding Goal, Mode=OneWay}" Margin="0,8,0,0"
                                Accent="{DynamicResource ProductivityAccentBrush}" AutomationProperties.Name="{Binding CountText}" />
-        <TextBlock Text="{Binding NextText}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,6,0,0"
+        <TextBlock Text="{Binding NextText}" Style="{DynamicResource card.Caption}" Margin="0,6,0,0"
                    TextTrimming="CharacterEllipsis" />
       </StackPanel>
     </controls:WidgetCard>

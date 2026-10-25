@@ -11,9 +11,7 @@
   <DataTemplate x:Key="world-clock.none">
     <TextBlock Text="{loc:T worldclock.none}"
                AutomationProperties.Name="{loc:T worldclock.none}"
-               Foreground="{DynamicResource TextSecondaryBrush}"
-               FontSize="12"
-               TextWrapping="Wrap" />
+               Style="{DynamicResource card.Empty}" />
   </DataTemplate>
 
   <!-- Small: the first place, large. -->

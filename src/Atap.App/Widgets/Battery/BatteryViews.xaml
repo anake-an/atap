@@ -59,7 +59,7 @@
           <TextBlock Text="{Binding SaverText}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,6,0,0"
                      Visibility="{Binding SaverOn, Converter={StaticResource battery.visible}}" />
         </StackPanel>
-        <TextBlock Text="{loc:T battery.none}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"
+        <TextBlock Text="{loc:T battery.none}" Style="{DynamicResource card.Empty}"
                    Visibility="{Binding HasNoBattery, Converter={StaticResource battery.visible}}" />
       </Grid>
     </controls:WidgetCard>

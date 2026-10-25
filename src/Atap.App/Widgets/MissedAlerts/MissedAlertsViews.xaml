@@ -90,8 +90,7 @@
 
         <TextBlock DockPanel.Dock="Top"
                    Text="{loc:T missed-alerts.empty}"
-                   Foreground="{DynamicResource TextMutedBrush}"
-                   FontSize="12"
+                   Style="{DynamicResource card.Empty}"
                    Margin="0,8,0,2"
                    Visibility="{Binding IsEmpty, Converter={StaticResource missed-alerts.visible}}" />
 

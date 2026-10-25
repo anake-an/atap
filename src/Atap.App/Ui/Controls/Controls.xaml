@@ -423,10 +423,18 @@
     <Setter Property="TextTrimming" Value="None" />
   </Style>
 
-  <!-- A small second line, such as an artist or "in 23 minutes". -->
+  <!-- A small second line, such as an artist, "in 23 minutes" or "Paused". -->
   <Style x:Key="card.Caption" TargetType="TextBlock" BasedOn="{StaticResource card.Text}">
     <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
     <Setter Property="FontSize" Value="11" />
+  </Style>
+
+  <!-- What a widget says when it has nothing to show, such as "No alarms yet." The same look in every widget. -->
+  <Style x:Key="card.Empty" TargetType="TextBlock" BasedOn="{StaticResource card.Text}">
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="TextTrimming" Value="None" />
   </Style>
 
 </ResourceDictionary>

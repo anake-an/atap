@@ -158,7 +158,7 @@
           <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="260" Focusable="False">
             <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource todo.editItem}" Focusable="False" />
           </ScrollViewer>
-          <TextBlock Text="{loc:T todo.empty}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"
+          <TextBlock Text="{loc:T todo.empty}" Style="{DynamicResource card.Empty}"
                      Visibility="{Binding HasNone, Converter={StaticResource todo.visible}}" />
         </Grid>
       </DockPanel>

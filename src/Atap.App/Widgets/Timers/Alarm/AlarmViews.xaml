@@ -116,7 +116,7 @@
       </Border>
       <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource alarm.row}" Focusable="False"
                     Visibility="{Binding HasAlarms, Converter={StaticResource alarm.visible}}" />
-      <TextBlock Text="{loc:T alarm.empty}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,6"
+      <TextBlock Text="{loc:T alarm.empty}" Style="{DynamicResource card.Empty}" Margin="0,0,0,6"
                  Visibility="{Binding HasNoAlarms, Converter={StaticResource alarm.visible}}" />
       <Button Style="{StaticResource alarm.button}" HorizontalAlignment="Left" Margin="0,6,0,0" Command="{Binding AddCommand}"
               AutomationProperties.Name="{loc:T alarm.add}">
