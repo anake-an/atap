@@ -145,6 +145,30 @@ public sealed class StudentWidgetsTests : IDisposable
     }
 
     [Fact]
+    public void Card_KeepsAnAssignmentTheWidgetTickedDone_WhenItAddsAnother()
+    {
+        var now = _services.Time.GetUtcNow();
+        var storage = new WidgetStorage(AssignmentsDescriptor.TypeIdValue, _services.Paths);
+        var quiz = Assignment.Create("1", "Quiz 2", "", new DateOnly(2026, 10, 26), null, now);
+        storage.Save(AssignmentsDescriptor.DataFile, new AssignmentDocument { Assignments = [quiz] }, StudentJsonContext.Default.AssignmentDocument);
+        using var card = new StudentCardViewModel(
+            new WidgetStorage(NextClassDescriptor.TypeIdValue, _services.Paths),
+            storage,
+            _services.Layout,
+            _services.Text,
+            _services.Time);
+
+        // The widget ticks it done while the card is open.
+        storage.Save(AssignmentsDescriptor.DataFile, new AssignmentDocument { Assignments = [quiz.Complete(now)] }, StudentJsonContext.Default.AssignmentDocument);
+        card.Title = "Lab 3";
+        card.AddAssignmentCommand.Execute(null);
+
+        var stored = storage.Load(AssignmentsDescriptor.DataFile, StudentJsonContext.Default.AssignmentDocument, new AssignmentDocument());
+        Assert.True(stored.Find("1")?.Done);
+        Assert.Equal("Lab 3", Assert.Single(card.Assignments).Title);
+    }
+
+    [Fact]
     public void Card_RefusesAClassThatEndsBeforeItStarts()
     {
         using var card = new StudentCardViewModel(
