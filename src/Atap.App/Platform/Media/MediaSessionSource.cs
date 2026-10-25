@@ -251,7 +251,7 @@ internal sealed class MediaSessionSource : ISharedService<MediaSessionSource>, I
     }
 
     /// <summary>Decodes the thumbnail at a small size. Returns null when the app gives none.</summary>
-    private static async Task<BitmapImage?> LoadThumbnailAsync(IRandomAccessStreamReference? thumbnail)
+    internal static async Task<BitmapSource?> LoadThumbnailAsync(IRandomAccessStreamReference? thumbnail)
     {
         if (thumbnail is null)
             return null;
@@ -260,7 +260,7 @@ internal sealed class MediaSessionSource : ISharedService<MediaSessionSource>, I
         {
             using var winRtStream = await thumbnail.OpenReadAsync();
             using var source = winRtStream.AsStreamForRead();
-            var buffer = new MemoryStream();
+            using var buffer = new MemoryStream();
             await source.CopyToAsync(buffer);
             buffer.Position = 0;
 
@@ -270,14 +270,28 @@ internal sealed class MediaSessionSource : ISharedService<MediaSessionSource>, I
             image.DecodePixelWidth = ArtDecodeSize;
             image.StreamSource = buffer;
             image.EndInit();
-            image.Freeze();
-            return image;
+            return PixelsOnly(image);
         }
         catch (Exception ex)
         {
             Debug.WriteLine($"Media: thumbnail failed: {ex.Message}");
             return null;
         }
+    }
+
+    /// <summary>
+    /// A copy of the decoded pixels alone. A BitmapImage keeps the stream it was read from, so each cover would
+    /// also keep its whole image file, which can be far larger than the small picture shown.
+    /// </summary>
+    internal static BitmapSource PixelsOnly(BitmapSource image)
+    {
+        var pixels = new FormatConvertedBitmap(image, PixelFormats.Pbgra32, null, 0);
+        var stride = pixels.PixelWidth * 4;
+        var buffer = new byte[stride * pixels.PixelHeight];
+        pixels.CopyPixels(buffer, stride, 0);
+        var copy = BitmapSource.Create(pixels.PixelWidth, pixels.PixelHeight, image.DpiX, image.DpiY, PixelFormats.Pbgra32, null, buffer, stride);
+        copy.Freeze();
+        return copy;
     }
 
     private async Task RunControlAsync(Func<GlobalSystemMediaTransportControlsSession, Task<bool>> action)
