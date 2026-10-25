@@ -58,11 +58,13 @@ public sealed class AlarmWidget : WidgetBase
 
     public static readonly TimeSpan SnoozeLength = TimeSpan.FromMinutes(5);
 
-    private static readonly ScheduleOptions Exact = new(TimeSpan.Zero, false, MissedRun.RunOnce);
+    // Due times come from local times, so a time zone change works them out again.
+    private static readonly ScheduleOptions Exact = new(TimeSpan.Zero, false, MissedRun.RunOnce, WallClock: true);
 
     private readonly AlarmsViewModel _viewModel;
     private AlarmDocument _document = new();
     private IDisposable? _wake;
+    private IDisposable? _tick;
     private string? _ringingId;
     private DateTimeOffset _snoozeOfferEnds;
 
@@ -81,14 +83,19 @@ public sealed class AlarmWidget : WidgetBase
     public override Task StartAsync(SettingValues settings, CancellationToken cancellationToken = default)
     {
         _document = Context.Storage.Load(DataFile, TimersJsonContext.Default.AlarmDocument, new AlarmDocument()).Normalize(Now);
+        Context.Visibility.Changed += OnVisibilityChanged;
         Check();
+        FollowVisibility();
         return Task.CompletedTask;
     }
 
     public override Task StopAsync()
     {
+        Context.Visibility.Changed -= OnVisibilityChanged;
         _wake?.Dispose();
         _wake = null;
+        _tick?.Dispose();
+        _tick = null;
         return Task.CompletedTask;
     }
 
@@ -172,6 +179,25 @@ public sealed class AlarmWidget : WidgetBase
     {
         _wake = null;
         Check();
+    }
+
+    private void OnVisibilityChanged(object? sender, EventArgs e)
+    {
+        _viewModel.Tick(Now);
+        FollowVisibility();
+    }
+
+    /// <summary>"in 9 h 12 min" counts down each minute while the card is on screen, and nothing ticks while it is not.</summary>
+    private void FollowVisibility()
+    {
+        var shown = Context.Visibility.Value is WidgetVisibility.Compact or WidgetVisibility.Expanded or WidgetVisibility.Panel;
+        if (shown && _tick is null)
+            _tick = Context.Scheduler.EveryMinute(() => _viewModel.Tick(Now));
+        else if (!shown && _tick is not null)
+        {
+            _tick.Dispose();
+            _tick = null;
+        }
     }
 }
 

@@ -105,8 +105,9 @@ public sealed class RainAlertsWidget(WidgetContext context) : WidgetBase(context
 
     private void OnAppSettingsChanged(object? sender, SettingsChangedEventArgs e)
     {
+        // A state picked after start has no warnings yet, so they are fetched now. The HTTP cache answers when they are.
         if (e.Keys.Contains(MalaysiaKeys.State))
-            Update();
+            _ = LoadAsync();
     }
 
     private void OnVisibilityChanged(object? sender, EventArgs e) => Update();

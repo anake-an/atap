@@ -35,6 +35,7 @@ public sealed class NextMeetingTests : IDisposable
         var widget = new NextMeetingWidget(context, link => opened = link);
 
         await widget.StartAsync(settings);
+        await widget.Loading;
         var view = Assert.IsType<NextMeetingViewModel>(widget.ViewModel);
 
         var request = Assert.Single(http.Requests);
@@ -68,14 +69,57 @@ public sealed class NextMeetingTests : IDisposable
         await widget.StopAsync();
     }
 
+    [Fact]
+    public async Task FeedThatCannotBeFetched_SaysSo_InsteadOfNoMeetings()
+    {
+        var http = new FakeCalendar("") { Fails = true };
+        var (widget, _) = await StartAsync(http);
+
+        Assert.Equal("Could not load your calendar. Check the link and your connection.", Assert.IsType<NextMeetingViewModel>(widget.ViewModel).Message);
+        await widget.StopAsync();
+    }
+
+    [Fact]
+    public async Task MeetingLaterThisHour_CountsDownEachMinute_WhileTheCardIsShown()
+    {
+        // 09:40, so the meeting is not live and no change is due before 09:35.
+        var http = new FakeCalendar(
+            "BEGIN:VCALENDAR\r\nBEGIN:VEVENT\r\nUID:a\r\nSUMMARY:Stand-up\r\nDTSTART:20261025T094000Z\r\nDTEND:20261025T100000Z\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n");
+        var (widget, view) = await StartAsync(http);
+        Assert.Equal("In 40 min", view.When);
+
+        _visibility.Value = WidgetVisibility.Expanded;
+        _services.Time.Advance(TimeSpan.FromMinutes(10));
+
+        Assert.Equal("In 30 min", view.When);
+        await widget.StopAsync();
+    }
+
+    private async Task<(NextMeetingWidget Widget, NextMeetingViewModel View)> StartAsync(FakeCalendar http)
+    {
+        var descriptor = new NextMeetingDescriptor();
+        var context = _services.CreateContext(descriptor.TypeId, descriptor, _lifetime, _visibility, http);
+        var reference = context.Secrets.Put("https://calendar.example/private.ics");
+        var settings = new SettingValues(descriptor.Settings, new Dictionary<string, JsonElement> { [NextMeetingDescriptor.UrlKey] = JsonSerializer.SerializeToElement(reference) });
+        var widget = new NextMeetingWidget(context, _ => { });
+        await widget.StartAsync(settings);
+        await widget.Loading;
+        return (widget, Assert.IsType<NextMeetingViewModel>(widget.ViewModel));
+    }
+
     private sealed class FakeCalendar(string body) : IHttpDataService
     {
         public List<FetchRequest> Requests { get; } = [];
 
+        /// <summary>Answers like an offline or failed fetch: no body at all.</summary>
+        public bool Fails { get; init; }
+
         public Task<FetchResult> GetAsync(FetchRequest request, CancellationToken cancellationToken = default)
         {
             Requests.Add(request);
-            return Task.FromResult(new FetchResult(FetchStatus.Fresh, Encoding.UTF8.GetBytes(body), DateTimeOffset.UtcNow, FetchError.None));
+            return Task.FromResult(Fails
+                ? FetchResult.Fail(FetchStatus.Failed, FetchError.Network)
+                : new FetchResult(FetchStatus.Fresh, Encoding.UTF8.GetBytes(body), DateTimeOffset.UtcNow, FetchError.None));
         }
     }
 }

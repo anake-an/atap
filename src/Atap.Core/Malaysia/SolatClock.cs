@@ -52,7 +52,10 @@ public static class SolatClock
         var live = (next is { } n && n.Time - now <= liveBefore)
             || (current is { } c && now - c.Time < JustStarted);
 
-        var hijri = today.Hijri ?? HijriDate.FromGregorian(today.Date, hijriOffset);
+        // The Hijri day begins at Maghrib, so from then on the next fast belongs to tomorrow's date. The evening
+        // before 1 Ramadan counts down to the first imsak, and the last evening of Ramadan does not.
+        var fastDate = now >= today.Maghrib ? today.Date.AddDays(1) : today.Date;
+        var hijri = schedule.DayOf(fastDate)?.Hijri ?? HijriDate.FromGregorian(fastDate, hijriOffset);
         var isRamadan = ramadan switch
         {
             RamadanMode.On => true,

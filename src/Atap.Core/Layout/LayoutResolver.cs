@@ -19,7 +19,11 @@ public enum LayoutField
 public static class LayoutResolver
 {
     /// <summary>What <paramref name="profileId"/> shows, with inherited fields filled in from the Default.</summary>
-    public static EffectiveLayout Resolve(LayoutDocument document, string? profileId)
+    /// <param name="worksWithoutPlacement">
+    /// True for instances that keep running without a placement, such as alarms. The Default's ones are added to a
+    /// profile with its own widget list, so an alarm still rings while that profile is active.
+    /// </param>
+    public static EffectiveLayout Resolve(LayoutDocument document, string? profileId, Func<string, bool>? worksWithoutPlacement = null)
     {
         ArgumentNullException.ThrowIfNull(document);
         var profile = document.FindProfile(profileId);
@@ -27,9 +31,19 @@ public static class LayoutResolver
             ? EffectiveLayout.Snapshot(EffectiveLayout.DefaultProfileId, document.EnabledWidgets, document.CompactPriority, document.States)
             : EffectiveLayout.Snapshot(
                 profile.Id,
-                profile.EnabledWidgets ?? document.EnabledWidgets,
+                EnabledWidgetsOf(profile, document, worksWithoutPlacement),
                 profile.CompactPriority ?? document.CompactPriority,
                 profile.States ?? document.States);
+    }
+
+    /// <summary>The profile's own list followed by the Default's instances that work without a placement, or the Default's list when it has none.</summary>
+    private static IEnumerable<string> EnabledWidgetsOf(LayoutProfile profile, LayoutDocument document, Func<string, bool>? worksWithoutPlacement)
+    {
+        if (profile.EnabledWidgets is not { } own)
+            return document.EnabledWidgets;
+        if (worksWithoutPlacement is null)
+            return own;
+        return own.Concat(document.EnabledWidgets.Where(id => !own.Contains(id, StringComparer.Ordinal) && worksWithoutPlacement(id)));
     }
 
     /// <summary>True when the profile has its own copy of <paramref name="field"/>. Always false for the Default.</summary>

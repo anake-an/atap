@@ -99,6 +99,34 @@ public class SolatClockTests
     }
 
     [Fact]
+    public void At_RamadanAuto_AfterMaghrib_FollowsTomorrowsHijriDay()
+    {
+        // 25 October is the last day of Sha'ban and 26 October is 1 Ramadan.
+        var eve = October.DayOf(new DateOnly(2026, 10, 25))! with { Hijri = new HijriDate(1448, 8, 30) };
+        var first = October.DayOf(new DateOnly(2026, 10, 26))! with { Hijri = new HijriDate(1448, 9, 1) };
+        var schedule = new PrayerSchedule("SGR01", PrayerSource.Esolat, [eve, first]);
+
+        Assert.False(At(Myt.At(2026, 10, 25, 18, 58), RamadanMode.Auto, schedule).IsRamadan);
+        var evening = At(Myt.At(2026, 10, 25, 20, 0), RamadanMode.Auto, schedule);
+        Assert.True(evening.IsRamadan);
+        Assert.Equal(new PrayerTime(Prayer.Imsak, Myt.At(2026, 10, 26, 5, 38), new DateOnly(2026, 10, 26)), evening.Fast);
+    }
+
+    [Fact]
+    public void At_RamadanAuto_LastEveningOfRamadan_HasNoImsakCountdown()
+    {
+        // 25 October is 30 Ramadan and 26 October is 1 Syawal.
+        var last = October.DayOf(new DateOnly(2026, 10, 25))! with { Hijri = new HijriDate(1448, 9, 30) };
+        var eid = October.DayOf(new DateOnly(2026, 10, 26))! with { Hijri = new HijriDate(1448, 10, 1) };
+        var schedule = new PrayerSchedule("SGR01", PrayerSource.Esolat, [last, eid]);
+
+        Assert.Equal(Prayer.Maghrib, At(Myt.At(2026, 10, 25, 12, 0), RamadanMode.Auto, schedule).Fast?.Prayer);
+        var evening = At(Myt.At(2026, 10, 25, 20, 0), RamadanMode.Auto, schedule);
+        Assert.False(evening.IsRamadan);
+        Assert.Null(evening.Fast);
+    }
+
+    [Fact]
     public void NextChange_BeforeTheWindow_IsWhenTheWindowOpens()
     {
         Assert.Equal(Myt.At(2026, 10, 25, 16, 9), SolatClock.NextChange(October, Myt.At(2026, 10, 25, 16, 0), TenMinutes));

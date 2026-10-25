@@ -702,6 +702,19 @@ public sealed class LayoutStoreTests : IDisposable
     }
 
     [Fact]
+    public void ProfileWithItsOwnList_KeepsTheAlarmRunning()
+    {
+        Write("""{ "schemaVersion": 3, "enabledWidgets": [ "clock", "alarm" ], "profiles": [ { "id": "gaming", "name": "Gaming", "enabledWidgets": [ "media" ] } ] }""");
+        var store = Store();
+        store.Load();
+        store.SetActiveProfile("gaming");
+
+        store.WorksWithoutPlacement = id => id == "alarm";
+
+        Assert.Equal(["media", "alarm"], store.Active.EnabledWidgets);
+    }
+
+    [Fact]
     public void OutsideChange_DroppingTheActiveProfile_FallsBackToDefault()
     {
         Write("""{ "schemaVersion": 3, "enabledWidgets": [ "clock", "media" ], "profiles": [ { "id": "gaming", "name": "Gaming", "enabledWidgets": [ "media" ] } ] }""");

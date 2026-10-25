@@ -66,7 +66,8 @@ public sealed class WaterWidget : WidgetBase
     public const string StateFile = "water.json";
 
     // A gentle reminder: it may run a minute late to share a wake, and runs once after sleep to plan the next.
-    private static readonly ScheduleOptions Gentle = new(TimeSpan.FromMinutes(1), false, MissedRun.RunOnce);
+    // The active hours are local, so a time zone change plans again.
+    private static readonly ScheduleOptions Gentle = new(TimeSpan.FromMinutes(1), false, MissedRun.RunOnce, WallClock: true);
 
     private readonly WaterViewModel _viewModel;
     private readonly ISessionLock _session;
