@@ -67,8 +67,8 @@ internal sealed class SettingsCardViewModel : ObservableObject, IDisposable
 
     public bool HasTitle => !string.IsNullOrEmpty(TitleKey);
 
-    /// <summary>The card's own view model, shown with the template its views give for that type.</summary>
-    public object? Content { get; }
+    /// <summary>The card's own view model, shown with the template its views give for that type. Null once closed.</summary>
+    public object? Content { get; private set; }
 
     public bool Failed => Content is null;
 
@@ -83,8 +83,15 @@ internal sealed class SettingsCardViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(FailedText));
     }
 
+    /// <summary>
+    /// Disposes the card's view model and lets go of it. A screen reader or another app that reads windows can
+    /// keep the closed window's automation peers, and the card shells with them, for a while. The card's own
+    /// view model then still goes.
+    /// </summary>
     public void Dispose()
     {
+        if (_lifetime.IsDisposed)
+            return;
         try
         {
             (Content as IDisposable)?.Dispose();
@@ -94,6 +101,8 @@ internal sealed class SettingsCardViewModel : ObservableObject, IDisposable
             _log($"Settings card '{Id}' failed to close.", ex);
         }
         _lifetime.Dispose();
+        Content = null;
+        OnPropertyChanged(nameof(Content));
     }
 }
 
@@ -104,8 +113,8 @@ internal sealed class SettingsCardViewModel : ObservableObject, IDisposable
 internal sealed class SettingsPageViewModel : ObservableObject, IDisposable
 {
     private readonly ILocalizer _text;
-    private readonly List<object> _items;
-    private readonly List<object> _moreItems;
+    private List<object> _items;
+    private List<object> _moreItems;
 
     public SettingsPageViewModel(SettingsPage page, SettingsShellContext context, Action<Uri> ensureViews)
     {
@@ -152,10 +161,15 @@ internal sealed class SettingsPageViewModel : ObservableObject, IDisposable
             card.OnLanguageChanged();
     }
 
+    /// <summary>Disposes every form and card, and lets go of them, so the page shows nothing and holds nothing.</summary>
     public void Dispose()
     {
         foreach (var item in _items.Concat(_moreItems))
             (item as IDisposable)?.Dispose();
+        _items = [];
+        _moreItems = [];
+        OnPropertyChanged(nameof(Items));
+        OnPropertyChanged(nameof(MoreItems));
     }
 
     private static List<object> Build(

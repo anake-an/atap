@@ -145,7 +145,8 @@ public sealed class SettingsShellTests : IDisposable
         var window = CreateWindow([Language], [typeof(EarlyAboutCard), typeof(AdvancedCard)]);
         foreach (var page in SettingsPages.All)
             window.Show(page.Id);
-        var cards = window.BuiltPages.SelectMany(p => p.Cards).ToList();
+        var pages = window.BuiltPages.ToList();
+        var cards = pages.SelectMany(p => p.Cards).ToList();
         var models = cards.Select(c => c.Content).OfType<CardModel>().ToList();
         Assert.Equal(2, models.Count);
 
@@ -155,6 +156,9 @@ public sealed class SettingsShellTests : IDisposable
         Assert.All(models, m => Assert.True(m.Disposed));
         Assert.All(models, m => Assert.True(m.Resource.Disposed));
         Assert.Null(window.Current);
+        // A screen reader can keep a closed window's views, and the card shells in them, for a while. What they showed still goes.
+        Assert.All(cards, c => Assert.Null(c.Content));
+        Assert.All(pages, p => Assert.Empty(p.Items.Concat(p.MoreItems)));
     }
 
     [Fact]

@@ -90,10 +90,11 @@ internal sealed class SettingsWindowViewModel : ObservableObject, IDisposable
             return;
         _disposed = true;
         _context.Text.LanguageChanged -= OnLanguageChanged;
-        Current = null;
+        // Pages first, while the window still shows the current one, so its views let go of the cards too.
         foreach (var page in _pages.Values)
             page.Dispose();
         _pages.Clear();
+        Current = null;
     }
 
     private SettingsPageViewModel PageFor(SettingsPage page)
