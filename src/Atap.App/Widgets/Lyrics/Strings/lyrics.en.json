@@ -5,7 +5,7 @@
   "lyrics.romanize": "Show Japanese and Korean lines in Latin letters",
   "lyrics.romanizeHint": "Adds a line in Latin letters under lyrics written in kana or Hangul.",
   "lyrics.translateUrl": "Translation link",
-  "lyrics.translateUrlHint": "Leave empty to turn translation off. Atap puts the line playing now in place of {text} and the language in place of {lang}, for example https://translate.example.com/translate?q={text}&target={lang}. Use your own service or one you trust, since each line is sent to it.",
+  "lyrics.translateUrlHint": "Leave empty to turn translation off. Atap puts the line playing now in place of {text} and the language in place of {lang}, for example https://translate.example.com/translate?q={text}&target={lang}. Use your own service or one you trust, since each line is sent to it. The link stays on this PC and is never synced.",
   "lyrics.translateTo": "Translate into",
   "lyrics.translateTo.en": "English",
   "lyrics.translateTo.ms": "Malay",

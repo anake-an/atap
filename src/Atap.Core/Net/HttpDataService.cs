@@ -181,11 +181,16 @@ public sealed class HttpDataService : IDisposable
         return null;
     }
 
-    /// <summary>How a request is named in <see cref="Attempted"/>: the host when the widget declares it, else a short hash.</summary>
+    /// <summary>
+    /// How a request is named in <see cref="Attempted"/>: the host when the widget declares it, else a short hash.
+    /// The hash is salted per run, so a host in a log someone shares cannot be guessed by hashing names.
+    /// </summary>
     internal static string SiteFor(Uri url, WidgetCapabilities capabilities, bool fromSecret) =>
         !fromSecret && IsDeclared(url, capabilities)
             ? url.IdnHost.ToLowerInvariant()
-            : "site-" + HttpCache.Hash(url.IdnHost.ToLowerInvariant())[..8];
+            : "site-" + HttpCache.Hash(SiteSalt + url.IdnHost.ToLowerInvariant())[..8];
+
+    private static readonly string SiteSalt = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(16)) + ":";
 
     private static bool IsDeclared(Uri url, WidgetCapabilities capabilities) =>
         capabilities.NetworkHosts.Any(h => string.Equals(h, url.IdnHost, StringComparison.OrdinalIgnoreCase));

@@ -19,7 +19,7 @@ A few features fetch data from the internet. Each one is listed here. Everything
 | Home Assistant | The MQTT broker you enter | The connection, with the user name and password you set | Off until you add the widget |
 | Command bar web search | The search engine you pick, through your browser | What you typed, only when you press Enter on the web search row | On, always the last row |
 
-Most requests use https and go to the fixed hosts listed above. Next meeting, Value from a link, Home Assistant and lyrics translation go to the address you enter. They may use plain http or plain MQTT only for an address on your own network. Each web request carries a user agent with the Atap version and the project's web address.
+Most requests use https and go to the fixed hosts listed above. Next meeting, Value from a link, Home Assistant and lyrics translation go to the address you enter. They may use plain http or plain MQTT only for an address on your own network: 127.x, 10.x, 172.16 to 172.31, 192.168.x, 169.254.x, and 100.64 to 100.127, which Tailscale uses. On a mobile or ISP network that also uses 100.64 addresses, turn on https or TLS for anything with a password. Each web request carries a user agent with the Atap version and the project's web address.
 
 Atap keeps a copy of what it downloads, so the notch still works offline. The copy is in `%LOCALAPPDATA%\AtapData\cache`. You can clear it in **Settings > Privacy > Saved data**. Lyrics translations are never saved there. They stay in memory and are gone when the song changes.
 
