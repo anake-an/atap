@@ -32,11 +32,11 @@ internal sealed class LanguageFeatureDescriptor : IFeatureDescriptor
     public bool IsEnabled(SettingValues settings, AppMode mode) => true;
 
     public IAppFeature Create(FeatureContext context) =>
-        new LanguageFeature(context.Settings, context.Text as Localizer ?? Localizer.Instance);
+        new LanguageFeature(context.Settings, context.Text as Localizer ?? Localizer.Instance, context.Ui);
 }
 
 /// <summary>Switches the text and the UI culture when the language setting changes. Bound text updates at once.</summary>
-internal sealed class LanguageFeature(IAppSettingsView settings, Localizer text) : IAppFeature
+internal sealed class LanguageFeature(IAppSettingsView settings, Localizer text, SynchronizationContext ui) : IAppFeature
 {
     public Task StartAsync()
     {
@@ -60,10 +60,11 @@ internal sealed class LanguageFeature(IAppSettingsView settings, Localizer text)
         return language;
     }
 
-    // Changed is raised on the UI thread.
+    // Changed is raised on the UI thread, often from inside the click that picked the language. Switching
+    // every label then would rebuild the very control being clicked, so the switch waits until the click is done.
     private void OnChanged(object? sender, SettingsChangedEventArgs e)
     {
         if (e.Keys.Contains(LanguageFeatureDescriptor.ChoiceKey))
-            Apply(text, settings.Values.GetString(LanguageFeatureDescriptor.ChoiceKey), LanguageNative.WindowsDisplayCulture());
+            ui.Post(_ => Apply(text, settings.Values.GetString(LanguageFeatureDescriptor.ChoiceKey), LanguageNative.WindowsDisplayCulture()), null);
     }
 }
