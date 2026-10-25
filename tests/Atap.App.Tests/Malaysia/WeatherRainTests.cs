@@ -103,6 +103,19 @@ public sealed class WeatherRainTests : IDisposable
     }
 
     [Fact]
+    public async Task Rain_AStatePickedAfterStart_FetchesTheWarningsAtOnce()
+    {
+        _dataGov.Warnings = CurrentWarnings;
+        var (_, rain) = await StartRainAsync();
+        Assert.Equal(0, _dataGov.Requests);
+
+        _services.Settings.Set(MalaysiaKeys.State, "SGR");
+
+        Assert.Equal(1, _dataGov.Requests);
+        Assert.Equal("Thunderstorms Warning", Assert.Single(rain.Warnings).Title);
+    }
+
+    [Fact]
     public void Rain_WorksWithoutAPlacement() => Assert.True(new RainAlertsDescriptor().WorksWithoutPlacement);
 
     private async Task<WeatherViewModel> StartWeatherAsync()
