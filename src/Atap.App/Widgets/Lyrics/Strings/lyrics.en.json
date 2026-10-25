@@ -19,7 +19,7 @@
   "lyrics.noSong": "Play a song to see its lyrics.",
   "lyrics.loading": "Looking for the lyrics.",
   "lyrics.instrumental": "This song has no words.",
-  "lyrics.none": "No lyrics found for this song.",
+  "lyrics.none": "No lyrics for this song.",
   "lyrics.failed": "Could not reach LRCLIB. Check your connection.",
   "lyrics.accessible": "Lyrics. {line}"
 }

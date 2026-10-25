@@ -241,10 +241,10 @@ public sealed class PanelTests : IAsyncLifetime
         grid.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
         grid.Arrange(new Rect(grid.DesiredSize));
 
-        // Row 0: medium and small, 60 tall. Row 1: large, 20 tall. Four columns wide.
+        // Medium and small side by side, 60 tall, the small one grown into the free fourth column. Large under them.
         Assert.Equal(new Size(430, 90), grid.DesiredSize);
         Assert.Equal(new Rect(0, 0, 210, 60), Slot(grid.Children[0]));
-        Assert.Equal(new Rect(220, 0, 100, 60), Slot(grid.Children[1]));
+        Assert.Equal(new Rect(220, 0, 210, 60), Slot(grid.Children[1]));
         Assert.Equal(new Rect(0, 70, 430, 20), Slot(grid.Children[2]));
     });
 

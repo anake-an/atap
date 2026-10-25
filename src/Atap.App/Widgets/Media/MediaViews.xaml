@@ -55,7 +55,6 @@
   <DataTemplate x:Key="media.Expanded.Medium">
     <Grid DataContext="{Binding ViewModel}"
           AutomationProperties.Name="{Binding AccessibleSummary}"
-          Width="320"
           Margin="2,4">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="Auto" />
