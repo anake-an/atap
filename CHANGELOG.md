@@ -6,6 +6,64 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 
 ## [Unreleased]
 
+## [1.1.0-preview.1] - 2026-10-26
+
+A preview of 1.1.0 with fixes for what people found in 1.0.0, and a new Edit layout with a live picture of your notch. Stable users are not moved to previews by the updater.
+
+### Added
+
+- Edit layout now shows your notch as it will look. Drag widgets onto it, move them around, drop them on another panel page, or drag them off to remove them.
+- Every widget in the Add widgets list shows a preview with sample content, its sizes and one line about what it does.
+- Settings shows a picture of your notch in each state, with an Edit layout button.
+
+### Changed
+
+- The notch states have plain names: Small notch, When you point at it, When you click it and When something is live.
+- Click a widget on the notch picture to pick its size, move it or remove it. The keyboard works too: arrow keys pick a widget, Ctrl and an arrow key moves it, and Delete removes it.
+- Buttons across Atap have the same rounded square shape.
+- Chips, badges and alarm days are rounded squares too, and the alarm switch looks like the switches in Settings.
+- Text on the notch uses the same colours in every widget.
+- Widgets with nothing to show say so in the same way, and paused timers look the same.
+- Edit layout is called Sunting susun atur everywhere in Malay, and Mute is Bisu.
+- Quick toggles is called Suis pantas in Malay, and the Water widget is now Water reminder.
+- The notch menu says Screen instead of Monitor, and its update messages are full sentences.
+- The Push widget is now Progress from programs, and the Script widget is Your own script.
+- The resource meter, version card and app rules use plain words.
+- Edit layout in the notch menu no longer says coming soon.
+- Settings says Delete for profiles and Clear for finished to-dos.
+
+### Fixed
+
+- A click on the notch opens your own widgets, a size bigger than on hover, instead of a fixed music and Missed page. The missed alerts card only shows when you missed something.
+- Cards in the open notch and the panel fit together with no empty black gaps, and cards side by side line up.
+- The Lyrics card stays small when a song has no lyrics.
+- Hovering and clicking the notch is smooth again: no flicker, no jump and no empty moment while it changes size.
+- The music bars beside the album art move while a song plays, and the open notch shows how far through the song you are.
+- The small focus timer has a button to stop and start over.
+- On a side edge, the small notch shows the focus time when paused and no longer leaves a gap.
+- The volume mixer shows plain app names, calls Windows' own sounds "System sounds" and shows each app once, with its helpers.
+- Long sound output names show in full when you point at them.
+- Edit layout opens fully on the screen the notch is on, below the notch, even when your screens use different scaling.
+- Picking Bahasa Melayu or English in Settings switches the language in one click, without the page flickering.
+- Atap uses less memory after you close Settings.
+- Atap gives memory back to Windows after you close Settings or setup.
+- Album art takes less memory while music plays.
+- Closing setup with the X button no longer keeps it in memory.
+- Things that were due while the PC slept still happen after it wakes. A profile switches at its set time, the battery stops showing as live, finished live activities clear and sync catches up.
+- A widget you just added picks up its first settings change straight away.
+- The notch notices when a video or browser goes full screen with F11 or its own full screen button.
+- Alarms, reminders and other widgets that need no place on the notch keep working in a profile with its own widget list.
+- Time left on alarms, assignments and the next meeting counts down each minute while you can see it.
+- The next meeting widget says when your calendar could not be loaded, instead of saying you have no meetings.
+- A big calendar no longer makes the notch stutter while it loads.
+- Rain alerts show up as soon as you pick your state, without waiting for the next check.
+- Ticking an assignment done on the notch is kept when you add or remove one in Settings.
+- The Ramadan countdown follows the Hijri day, which begins at Maghrib. The evening before Ramadan counts down to the first imsak, and the last evening of Ramadan does not.
+- Prayer times and the Hijri date load for your new area when you change it while they are still loading.
+- The Caps Lock indicator always matches your keyboard light.
+- Alarms, to-do reminders, the next class and water reminders keep their local time when you change time zone.
+- The command bar opens centred on a screen with a different scale.
+
 ## [1.0.0] - 2026-10-26
 
 First public release of Atap, a free notch for Windows. It is open source under the MIT licence, made in Malaysia, and available in English and Bahasa Melayu. Releases are not code signed yet, so Windows SmartScreen may warn when you run the installer. Installers and portable zips are provided for x64 and Arm64 PCs.
@@ -113,5 +171,6 @@ First public release of Atap, a free notch for Windows. It is open source under 
 - A sync file cannot turn on the local API, PATH or start with Windows. Secret values never leave the PC, and a synced widget asks for its keys again if another PC changes where it connects.
 - Text in pushes and alerts is cleaned before it is shown, and the `atap` tool prints only short, plain error codes.
 
-[Unreleased]: https://github.com/anake-an/atap/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/anake-an/atap/compare/v1.1.0-preview.1...HEAD
+[1.1.0-preview.1]: https://github.com/anake-an/atap/compare/v1.0.0...v1.1.0-preview.1
 [1.0.0]: https://github.com/anake-an/atap/releases/tag/v1.0.0
