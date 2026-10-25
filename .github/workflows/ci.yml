@@ -1,7 +1,7 @@
 name: CI
 
-# Code scanning: add a CodeQL workflow (github/codeql-action, C#) when the repo goes public at
-# launch. It is left out for now because code scanning on a private repo needs GitHub Advanced Security.
+# Code scanning runs through CodeQL default setup in the repository settings (C# and Actions),
+# turned on at the v1.0.0 launch, so there is no CodeQL workflow file here.
 
 on:
   push:

@@ -162,12 +162,18 @@ The secret name `SIGNPATH_API_TOKEN` comes from the SignPath docs. The three var
 
 If SignPath Foundation says no, buy a Certum Open Source Code Signing certificate. It is made for open source developers and has a yearly fee. Certum keeps the key on a smart card or in its cloud signing service, so the SignPath steps in the workflow would be replaced. `vpk pack` can sign with `signtool.exe` through `--signParams`.
 
-## Repository settings for a public release
+## Repository settings
 
-Check these before and after the repository goes public:
+The repository went public with v1.0.0. These are set, and should stay set:
 
-- Enable CodeQL code scanning.
-- Add branch protection on `main`, with CI required.
-- Enable private vulnerability reporting, so [SECURITY.md](../SECURITY.md) works as written.
-- Enable GitHub Discussions, so [SUPPORT.md](../SUPPORT.md) works as written.
+- CodeQL default setup for C# and Actions.
+- The `main` ruleset: changes go through a pull request, squash merge only, the "Build and test" check must pass, and no force push or deletion.
+- The `release tags` ruleset: only admins can create, move or delete `v*` tags.
+- Private vulnerability reporting, so [SECURITY.md](../SECURITY.md) works as written.
+- Secret scanning with push protection, Dependabot alerts and Dependabot security updates.
+- GitHub Discussions, so [SUPPORT.md](../SUPPORT.md) works as written.
+- Workflows from outside contributors wait for approval. The default workflow token can only read.
+
+Still to do:
+
 - Apply to SignPath Foundation for code signing. See [Code signing](#code-signing).
