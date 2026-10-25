@@ -87,6 +87,26 @@ public sealed class StudentWidgetsTests : IDisposable
     }
 
     [Fact]
+    public async Task Assignments_DueToday_CountsDownEachMinute_WhileShown()
+    {
+        var now = _services.Time.GetUtcNow();
+        new WidgetStorage(AssignmentsDescriptor.TypeIdValue, _services.Paths).Save(AssignmentsDescriptor.DataFile, new AssignmentDocument
+        {
+            Assignments = [Assignment.Create("1", "Quiz 2", "", new DateOnly(2026, 10, 25), new TimeOnly(12, 0), now)],
+        }, StudentJsonContext.Default.AssignmentDocument);
+        var (widget, view) = await StartAsync<AssignmentsViewModel>(new AssignmentsDescriptor());
+        Assert.Equal("Due today, 3 h left", view.First?.Countdown);
+
+        _visibility.Value = WidgetVisibility.Panel;
+        Advance(TimeSpan.FromMinutes(10));
+        _services.Time.Advance(TimeSpan.FromSeconds(1)); // Past the 09:10 tick.
+
+        Assert.Equal("Due today, 2 h 50 min left", view.First?.Countdown);
+        await widget.StopAsync();
+        Assert.Equal(0, _services.Scheduler.Stats.ArmedItems);
+    }
+
+    [Fact]
     public async Task Assignments_TickingDone_RemovesItFromTheList()
     {
         var now = _services.Time.GetUtcNow();

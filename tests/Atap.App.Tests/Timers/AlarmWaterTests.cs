@@ -57,6 +57,22 @@ public sealed class AlarmWaterTests : IDisposable
     }
 
     [Fact]
+    public async Task Alarm_TimeLeft_CountsDownEachMinute_OnlyWhileShown()
+    {
+        var (widget, alarms) = await StartAlarmAsync();
+        AddAlarm(alarms, hourSteps: 2, minuteSteps: 2);
+        Assert.Equal("in 10 min", alarms.NextText);
+
+        _visibility.Value = WidgetVisibility.Expanded;
+        Advance(TimeSpan.FromMinutes(3));
+        Assert.Equal("in 7 min", alarms.NextText);
+
+        _visibility.Value = WidgetVisibility.Hidden;
+        Assert.Equal(1, _services.Scheduler.Stats.ArmedItems);
+        await widget.StopAsync();
+    }
+
+    [Fact]
     public async Task Alarm_Snooze_RingsAgainFiveMinutesLater()
     {
         var (_, alarms) = await StartAlarmAsync();
