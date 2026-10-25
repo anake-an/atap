@@ -1,4 +1,5 @@
 using System.Windows;
+using Atap.Platform.Diagnostics;
 
 namespace Atap.Features.Onboarding;
 
@@ -9,7 +10,11 @@ internal partial class OnboardingWindow : Window, IOnboardingWindow
         InitializeComponent();
         DataContext = viewModel;
         viewModel.CloseRequested += (_, _) => Close();
-        Closed += (_, _) => viewModel.Dispose();
+        Closed += (_, _) =>
+        {
+            viewModel.Dispose();
+            MemoryTrim.Soon(Dispatcher);
+        };
     }
 
     public static IOnboardingWindow Open(OnboardingViewModel viewModel)
