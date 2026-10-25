@@ -62,6 +62,9 @@ public sealed class StrokeIcon : FrameworkElement
     {
         var data = Data;
         var brush = Foreground;
+        // Nothing around it set a colour: use the theme's text colour, which high contrast swaps, not a fixed one.
+        if (DependencyPropertyHelper.GetValueSource(this, ForegroundProperty).BaseValueSource == BaseValueSource.Default)
+            brush = TryFindResource("TextBrush") as Brush ?? brush;
         var size = Math.Min(ActualWidth, ActualHeight);
         if (data is null || brush is null || size <= 0)
             return;

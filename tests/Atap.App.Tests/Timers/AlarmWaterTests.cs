@@ -103,7 +103,7 @@ public sealed class AlarmWaterTests : IDisposable
         alarms.Rows[0].IsOn = false;
 
         Assert.Equal(0, _services.Scheduler.Stats.ArmedItems);
-        Assert.Equal("No alarms on", alarms.NextText);
+        Assert.Equal("No alarms on.", alarms.NextText);
     }
 
     [Fact]

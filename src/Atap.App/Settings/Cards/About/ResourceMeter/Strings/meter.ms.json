@@ -1,7 +1,7 @@
 {
   "meter.title": "Apa yang Atap gunakan",
   "meter.summary": "Atap menggunakan {mb} MB memori dan {cpu}% pemproses.",
-  "meter.measuring": "Sedang mengukur...",
+  "meter.measuring": "Sedang mengukur…",
   "meter.hint": "Diukur pada PC ini setiap 2 saat semasa halaman ini dibuka. Tiada apa-apa dihantar ke mana-mana.",
   "meter.details": "Butiran",
   "meter.copy": "Salin butiran",
@@ -9,14 +9,14 @@
   "meter.copyFailed": "Tidak dapat menyalin, cuba lagi",
   "meter.mb": "{mb} MB",
   "meter.privateBytes": "Memori",
-  "meter.workingSet": "Memori dalam RAM, termasuk bahagian yang dikongsi",
-  "meter.managedHeap": "Memori .NET",
+  "meter.workingSet": "Memori yang digunakan, termasuk bahagian yang dikongsi",
+  "meter.managedHeap": "Memori untuk data Atap sendiri",
   "meter.cpu": "Pemproses",
-  "meter.threads": "Bebenang",
-  "meter.handles": "Pemegang Windows",
-  "meter.timers": "Pemasa menunggu",
-  "meter.wakes": "Bangun dalam sejam yang lalu",
+  "meter.threads": "Tugas yang berjalan serentak",
+  "meter.handles": "Item Windows yang digunakan",
+  "meter.timers": "Pemasa yang ditetapkan",
+  "meter.wakes": "Kali Atap aktif dalam sejam yang lalu",
   "meter.widgets": "Widget berjalan",
-  "meter.shared": "Sumber Windows dikongsi",
-  "meter.assemblies": "Pustaka kod dimuatkan"
+  "meter.shared": "Sumber data langsung yang digunakan",
+  "meter.assemblies": "Bahagian Atap yang dimuatkan"
 }

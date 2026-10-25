@@ -6,7 +6,7 @@
   "next-meeting.privacy": "Atap downloads your calendar from the link you give it, every 15 minutes. The calendar stays in memory and is never saved to disk.",
   "next-meeting.noLink": "Add your calendar link in this widget's settings.",
   "next-meeting.failed": "Could not load your calendar. Check the link and your connection.",
-  "next-meeting.loading": "Loading your calendar.",
+  "next-meeting.loading": "Loading your calendar…",
   "next-meeting.none": "No meetings today or tomorrow.",
   "next-meeting.untitled": "Meeting",
   "next-meeting.now": "Now",

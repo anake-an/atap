@@ -28,7 +28,9 @@ internal sealed class LayoutEditorDescriptor : IFeatureDescriptor
     public IAppFeature Create(FeatureContext context) => new LayoutEditorFeature(
         context.Commands,
         context.Notch,
-        () => LayoutEditorWindow.Open(new LayoutEditorViewModel(context.Layout, context.Services.Catalog, context.Text, new LayoutBackup(context.Paths.LayoutFile))));
+        () => LayoutEditorWindow.Open(
+            new LayoutEditorViewModel(context.Layout, context.Services.Catalog, context.Text, new LayoutBackup(context.Paths.LayoutFile)),
+            EditorScreen.ForNotch(context.Services.NotchHost)));
 }
 
 /// <summary>Opens one editor at a time and puts the notch in edit mode while it is open.</summary>

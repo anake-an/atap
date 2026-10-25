@@ -97,14 +97,7 @@
                 </MultiDataTrigger.Conditions>
                 <Setter Property="MinWidth" Value="96" />
               </MultiDataTrigger>
-              <!-- On a side edge the slots stack, so the gap is vertical. -->
-              <MultiDataTrigger>
-                <MultiDataTrigger.Conditions>
-                  <Condition Binding="{Binding State}" Value="{x:Static core:NotchState.Compact}" />
-                  <Condition Binding="{Binding IsVertical}" Value="True" />
-                </MultiDataTrigger.Conditions>
-                <Setter Property="MinHeight" Value="56" />
-              </MultiDataTrigger>
+              <!-- A side edge has no camera, so the stacked slots sit together with no gap between them. -->
             </Style.Triggers>
           </Style>
         </ItemsControl.Style>

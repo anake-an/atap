@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Atap.Core.Layout;
 using Atap.Core.Placement;
@@ -74,7 +75,7 @@ public sealed class LayoutMigrationTests : IDisposable
     }
 
     [Fact]
-    public void V2_LoadsUnchangedAndSavesAsV3()
+    public void V2_LoadsUnchangedAndSavesAsCurrent()
     {
         Write(V2Fixture);
         var store = new LayoutStore(LayoutPath);
@@ -94,7 +95,7 @@ public sealed class LayoutMigrationTests : IDisposable
         Assert.False(settings.GetBool("use24Hour"));
 
         var saved = JsonNode.Parse(File.ReadAllText(LayoutPath))!.AsObject();
-        Assert.Equal(3, saved["schemaVersion"]!.GetValue<int>());
+        Assert.Equal(LayoutDocument.CurrentSchemaVersion, saved["schemaVersion"]!.GetValue<int>());
         Assert.IsType<JsonArray>(saved["profiles"]);
 
         var reload = new LayoutStore(LayoutPath);
@@ -157,7 +158,7 @@ public sealed class LayoutMigrationTests : IDisposable
 
         Assert.Equal(7, root["custom"]!.GetValue<int>());
         Assert.Equal("red", root["states"]!["panel"]!["tint"]!.GetValue<string>());
-        Assert.Equal(3, root["schemaVersion"]!.GetValue<int>());
+        Assert.Equal(LayoutDocument.CurrentSchemaVersion, root["schemaVersion"]!.GetValue<int>());
     }
 
     [Fact]
@@ -197,6 +198,62 @@ public sealed class LayoutMigrationTests : IDisposable
         var again = new LayoutStore(LayoutPath);
         again.Load();
         Assert.Equal(FileLoadOutcome.Migrated, again.LastLoadOutcome);
+    }
+
+    // The panel page 1.0 wrote for a new install and for the Minimal preset.
+    private const string OldDefaultPanel = """
+        { "pages": [ { "id": "main", "name": "Main", "placements": [
+          { "widgetId": "media", "size": "medium", "order": 0, "slot": "center" },
+          { "widgetId": "missed-alerts", "size": "medium", "order": 1, "slot": "center" } ] } ] }
+        """;
+
+    [Fact]
+    public void V3_UntouchedDefaultPanel_FollowsTheHoverViewAfterTheUpgrade()
+    {
+        var root = JsonNode.Parse($$"""
+            { "schemaVersion": 3, "states": { "panel": {{OldDefaultPanel}} },
+              "profiles": [ { "id": "work", "states": { "panel": {{OldDefaultPanel}} } }, { "id": "games" } ] }
+            """)!.AsObject();
+
+        LayoutMigrations.Upgrade(root, 3);
+
+        var layout = root.Deserialize<LayoutDocument>(LayoutStore.JsonOptions)!;
+        layout.Normalize();
+        var expected = DefaultLayout.Create().States.Panel.Pages[0].Placements;
+        Assert.Equal(expected, Assert.Single(layout.States.Panel.Pages).Placements);
+        Assert.Equal(expected, Assert.Single(layout.Profiles[0].States!.Panel.Pages).Placements);
+        Assert.Null(layout.Profiles[1].States);
+        Assert.True(PanelContent.FollowsHover(LayoutResolver.Resolve(layout, null).PanelPages));
+    }
+
+    [Theory]
+    [InlineData("""{ "widgetId": "media", "size": "large", "order": 0, "slot": "center" }""")]
+    [InlineData("""{ "widgetId": "clock", "size": "medium", "order": 0, "slot": "center" }""")]
+    [InlineData("""{ "widgetId": "media", "size": "medium", "order": 0, "slot": "center", "pinned": true }""")]
+    public void V3_PanelTheUserArranged_IsKept(string first)
+    {
+        var panel = $$"""
+            { "pages": [ { "id": "main", "name": "Main", "placements": [ {{first}},
+              { "widgetId": "missed-alerts", "size": "medium", "order": 1, "slot": "center" } ] } ] }
+            """;
+        var root = JsonNode.Parse($$"""{ "schemaVersion": 3, "states": { "panel": {{panel}} } }""")!.AsObject();
+        var before = root["states"]!["panel"]!.ToJsonString();
+
+        LayoutMigrations.Upgrade(root, 3);
+
+        Assert.Equal(before, root["states"]!["panel"]!.ToJsonString());
+    }
+
+    [Fact]
+    public void V3_DefaultPanelWithASecondPage_IsKept()
+    {
+        var root = JsonNode.Parse($$"""{ "schemaVersion": 3, "states": { "panel": {{OldDefaultPanel}} } }""")!.AsObject();
+        root["states"]!["panel"]!["pages"]!.AsArray().Add(new JsonObject { ["id"] = "more", ["placements"] = new JsonArray() });
+        var before = root["states"]!["panel"]!.ToJsonString();
+
+        LayoutMigrations.Upgrade(root, 3);
+
+        Assert.Equal(before, root["states"]!["panel"]!.ToJsonString());
     }
 
     private void Write(string json)

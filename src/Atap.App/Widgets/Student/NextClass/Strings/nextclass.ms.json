@@ -2,7 +2,7 @@
   "nextclass.name": "Kelas seterusnya",
   "nextclass.description": "Kelas seterusnya daripada jadual waktu anda, pada notch 15 minit sebelum kelas bermula.",
   "nextclass.noTimetable": "Tambah jadual waktu anda dalam Tetapan, di halaman Apa yang dipaparkan.",
-  "nextclass.noneSoon": "Tiada kelas akan datang.",
+  "nextclass.noneSoon": "Tiada kelas dalam masa terdekat.",
   "nextclass.endsIn": "tamat dalam {time}",
   "nextclass.range": "{start} hingga {end}",
   "nextclass.tomorrowAt": "Esok, {time}",

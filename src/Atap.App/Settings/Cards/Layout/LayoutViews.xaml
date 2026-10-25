@@ -5,23 +5,62 @@
 
   <!-- Merged into the settings window only while it is open. Loaded on its own, so the settings styles
        are DynamicResource: they come from the window. -->
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Atap;component/Ui/Preview/PreviewViews.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+
   <BooleanToVisibilityConverter x:Key="Card.BoolToVisibility" />
+
+  <!-- One notch state: its plain name and what it means, beside a picture of it with sample content. Every picture
+       is drawn at the same scale, so the states compare like they do on screen. -->
+  <DataTemplate x:Key="Card.StatePicture">
+    <Grid Margin="0,12,0,0" AutomationProperties.Name="{Binding AutomationName}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="200" />
+        <ColumnDefinition Width="*" />
+      </Grid.ColumnDefinitions>
+      <StackPanel Margin="0,0,16,0">
+        <TextBlock Text="{Binding Label}" Style="{DynamicResource Settings.Label}" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding Hint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" />
+        <TextBlock Text="{Binding Note}" Style="{DynamicResource Settings.Hint}" FontStyle="Italic"
+                   Visibility="{Binding HasNote, Converter={StaticResource Card.BoolToVisibility}}" />
+      </StackPanel>
+      <Border Grid.Column="1" CornerRadius="6" Background="{DynamicResource WindowBrush}" Padding="8,0,8,8" MaxHeight="150" ClipToBounds="True">
+        <Viewbox Stretch="Uniform" StretchDirection="DownOnly" VerticalAlignment="Top">
+          <Grid Width="680">
+            <ContentPresenter Content="{Binding}" HorizontalAlignment="Center" VerticalAlignment="Top" />
+          </Grid>
+        </Viewbox>
+      </Border>
+    </Grid>
+  </DataTemplate>
 
   <DataTemplate DataType="{x:Type layout:LayoutCardViewModel}">
     <StackPanel>
-      <Border Style="{DynamicResource Settings.Card}" Visibility="{Binding CanEdit, Converter={StaticResource Card.BoolToVisibility}}">
-        <Grid>
-          <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-          </Grid.ColumnDefinitions>
-          <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
-            <TextBlock Text="{loc:T layoutcard.edit}" Style="{DynamicResource Settings.Label}" />
-            <TextBlock Text="{loc:T layoutcard.editHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" />
-          </StackPanel>
-          <Button Grid.Column="1" Style="{DynamicResource Settings.AccentButton}" Content="{loc:T layoutcard.edit}"
-                  Command="{Binding EditCommand}" VerticalAlignment="Center" />
-        </Grid>
+      <!-- Your notch at a glance, and the way into the editor. -->
+      <Border Style="{DynamicResource Settings.Card}">
+        <StackPanel>
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+              <TextBlock Text="{loc:T layoutcard.summary}" Style="{DynamicResource Settings.Label}" />
+              <TextBlock Text="{loc:T layoutcard.summaryHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" />
+            </StackPanel>
+            <Button Grid.Column="1" Style="{DynamicResource Settings.AccentButton}" Content="{loc:T layoutcard.edit}"
+                    Command="{Binding EditCommand}" VerticalAlignment="Center"
+                    Visibility="{Binding CanEdit, Converter={StaticResource Card.BoolToVisibility}}" />
+          </Grid>
+          <ItemsControl ItemsSource="{Binding Pictures}" ItemTemplate="{StaticResource Card.StatePicture}" Focusable="False">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <StackPanel />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+          </ItemsControl>
+        </StackPanel>
       </Border>
       <Border Style="{DynamicResource Settings.Card}" Visibility="{Binding CanRestore, Converter={StaticResource Card.BoolToVisibility}}">
         <StackPanel>

@@ -10,7 +10,7 @@
                 AutomationProperties.Name="{loc:T layouteditor.notchBadge}">
       <controls:StrokeIcon Data="{DynamicResource icon.edit}" Foreground="{DynamicResource AccentBrush}"
                            Width="14" Height="14" Margin="0,0,6,0" VerticalAlignment="Center" />
-      <TextBlock Text="{loc:T layouteditor.notchBadge}" Foreground="{DynamicResource PrimaryTextBrush}"
+      <TextBlock Text="{loc:T layouteditor.notchBadge}" Foreground="{DynamicResource TextBrush}"
                  FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
     </StackPanel>
   </DataTemplate>

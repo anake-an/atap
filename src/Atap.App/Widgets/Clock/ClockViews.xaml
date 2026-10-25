@@ -12,18 +12,18 @@
           VerticalAlignment="Center">
       <TextBlock x:Name="Across"
                  Text="{Binding Time}"
-                 Foreground="{DynamicResource PrimaryTextBrush}"
+                 Foreground="{DynamicResource TextBrush}"
                  FontSize="13"
                  FontWeight="SemiBold"
                  Margin="4,0" />
       <StackPanel x:Name="Stacked" Visibility="Collapsed" HorizontalAlignment="Center">
         <TextBlock Text="{Binding Hours}"
-                   Foreground="{DynamicResource PrimaryTextBrush}"
+                   Foreground="{DynamicResource TextBrush}"
                    FontSize="13"
                    FontWeight="SemiBold"
                    HorizontalAlignment="Center" />
         <TextBlock Text="{Binding Minutes}"
-                   Foreground="{DynamicResource PrimaryTextBrush}"
+                   Foreground="{DynamicResource TextBrush}"
                    FontSize="13"
                    FontWeight="SemiBold"
                    HorizontalAlignment="Center"

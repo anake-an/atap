@@ -14,7 +14,7 @@
                 Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0">
       <controls:StrokeIcon Data="{DynamicResource icon.calendar}" Foreground="{DynamicResource ProductivityAccentBrush}"
                            Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,6,0" />
-      <TextBlock Text="{Binding Short}" Foreground="{DynamicResource PrimaryTextBrush}" FontSize="13" FontWeight="SemiBold"
+      <TextBlock Text="{Binding Short}" Foreground="{DynamicResource TextBrush}" FontSize="13" FontWeight="SemiBold"
                  VerticalAlignment="Center" MaxWidth="120" TextTrimming="CharacterEllipsis" />
     </StackPanel>
   </DataTemplate>
@@ -22,7 +22,7 @@
   <!-- Compact, right of the camera: "12 min" before it starts, then the room. -->
   <DataTemplate x:Key="next-class.Compact.Right">
     <TextBlock DataContext="{Binding ViewModel}" AutomationProperties.Name="{Binding AccessibleSummary}"
-               Text="{Binding CompactRight}" Foreground="{DynamicResource PrimaryTextBrush}" FontSize="13" FontWeight="SemiBold"
+               Text="{Binding CompactRight}" Foreground="{DynamicResource TextBrush}" FontSize="13" FontWeight="SemiBold"
                VerticalAlignment="Center" Margin="4,0" MaxWidth="120" TextTrimming="CharacterEllipsis" />
   </DataTemplate>
 

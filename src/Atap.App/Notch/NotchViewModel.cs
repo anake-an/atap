@@ -66,8 +66,8 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
         UpdateState(force: true);
     }
 
-    /// <summary>Raised after the content for a new surface has been set; the view resizes (or hides) on this.</summary>
-    public event EventHandler? ContentChanged;
+    /// <summary>Raised after the content has been set. The view resizes (or hides) on this, and fades content in only when it is new.</summary>
+    public event EventHandler<NotchContentChangedEventArgs>? ContentChanged;
 
     /// <summary>The resolved surface. Hidden while a full-screen app is in front or a rule hides the notch.</summary>
     public NotchSurface Surface
@@ -223,7 +223,7 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
                 return;
             RebuildItems();
             ReportVisibility();
-            ContentChanged?.Invoke(this, EventArgs.Empty);
+            ContentChanged?.Invoke(this, NotchContentChangedEventArgs.Swapped);
         }
     }
 
@@ -271,18 +271,30 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
 
     private void OnWidgetLiveChanged(object? sender, EventArgs e) => UpdateState();
 
+    // A card that comes or goes changes the open notch's grid, so it is rebuilt then. Other surfaces only re-check.
+    private void OnWidgetContentChanged(object? sender, EventArgs e) =>
+        UpdateState(force: ShownSurface is NotchSurface.Expanded or NotchSurface.Panel);
+
     private void AttachWidgets()
     {
         _widgets = _host.Widgets;
         _widgetsById = _widgets.ToDictionary(w => w.Id, StringComparer.Ordinal);
         foreach (var widget in _widgets)
+        {
             widget.IsLiveChanged += OnWidgetLiveChanged;
+            if (widget is IOptionalContent optional)
+                optional.HasContentChanged += OnWidgetContentChanged;
+        }
     }
 
     private void DetachWidgets()
     {
         foreach (var widget in _widgets)
+        {
             widget.IsLiveChanged -= OnWidgetLiveChanged;
+            if (widget is IOptionalContent optional)
+                optional.HasContentChanged -= OnWidgetContentChanged;
+        }
     }
 
     private void UpdateState(bool force = false)
@@ -325,7 +337,7 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
             if (!wasHidden || force)
             {
                 _host.ReportVisibility(this, NothingShown);
-                ContentChanged?.Invoke(this, EventArgs.Empty);
+                ContentChanged?.Invoke(this, NotchContentChangedEventArgs.Refreshed);
             }
             return;
         }
@@ -362,11 +374,13 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
             {
                 _shownContent = content;
                 _shownBanner = banner;
-                ContentChanged?.Invoke(this, EventArgs.Empty);
+                ContentChanged?.Invoke(this, NotchContentChangedEventArgs.Refreshed);
             }
             return;
         }
 
+        // New content fades in. The same content rebuilt, such as after a layout save or a card that came or went, only resizes.
+        var swapped = !unchanged || wasHidden;
         ShownSurface = next;
         State = DisplayStateOf(next);
         // A panel opened by a drag shows the page with the file shelf.
@@ -378,7 +392,7 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
         _shownContent = SurfaceContent;
         _shownBanner = Banner;
         ReportVisibility();
-        ContentChanged?.Invoke(this, EventArgs.Empty);
+        ContentChanged?.Invoke(this, swapped ? NotchContentChangedEventArgs.Swapped : NotchContentChangedEventArgs.Refreshed);
     }
 
     /// <summary>Surfaces without placements borrow the shape of the closest state.</summary>
@@ -397,7 +411,12 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
     private bool IsVisible(WidgetPlacement placement, NotchState state, IWidget? compactOwner) =>
         _widgetsById.TryGetValue(placement.WidgetId, out var widget)
         && widget.Descriptor.SupportedStates.Contains(state)
-        && (state != NotchState.Compact || widget == compactOwner);
+        && (state != NotchState.Compact || widget == compactOwner)
+        && (state is not (NotchState.Expanded or NotchState.Panel) || HasContent(placement.WidgetId));
+
+    /// <summary>False while an optional card, such as the missed alerts with nothing missed, has nothing to show.</summary>
+    private bool HasContent(string instanceId) =>
+        !_widgetsById.TryGetValue(instanceId, out var widget) || widget is not IOptionalContent { HasContent: false };
 
     private void RebuildItems()
     {
@@ -453,9 +472,9 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
         }
     }
 
-    private List<IReadOnlyList<WidgetPlacement>> VisiblePanelPages() => _active.PanelPages
-        .Select(page => (IReadOnlyList<WidgetPlacement>)page.Placements.Where(p => IsVisible(p, NotchState.Panel, null)).ToList())
-        .Where(page => page.Count > 0)
+    // An unfilled panel follows the hover view, a size up. See PanelContent.
+    private List<IReadOnlyList<WidgetPlacement>> VisiblePanelPages() => PanelContent
+        .Pages(_active, id => _widgetsById.TryGetValue(id, out var widget) ? widget.Descriptor : null, HasContent)
         .ToList();
 
     /// <summary>The panel page, among those that show, with a file shelf on it. -1 when there is none.</summary>

@@ -20,7 +20,7 @@
                 Margin="4,0">
       <controls:StatusDot Level="{Binding Level}" VerticalAlignment="Center" Margin="0,0,6,0" />
       <TextBlock Text="{Binding Title}"
-                 Foreground="{DynamicResource PrimaryTextBrush}"
+                 Foreground="{DynamicResource TextBrush}"
                  FontSize="13"
                  FontWeight="SemiBold"
                  MaxWidth="120"
@@ -34,7 +34,7 @@
     <TextBlock DataContext="{Binding ViewModel}"
                AutomationProperties.Name="{Binding AccessibleSummary}"
                Text="{Binding CompactText}"
-               Foreground="{DynamicResource PrimaryTextBrush}"
+               Foreground="{DynamicResource TextBrush}"
                FontSize="13"
                FontWeight="SemiBold"
                MaxWidth="140"

@@ -12,5 +12,7 @@
   "audio.mixer.mute": "Mute {app}",
   "audio.mixer.unmute": "Unmute {app}",
   "audio.mixer.muted": "Muted",
-  "audio.mixer.accessible": "Volume mixer. {count} apps"
+  "audio.mixer.accessible": "Volume mixer. {count} apps",
+  "audio.mixer.systemSounds": "System sounds",
+  "audio.mixer.otherApp": "Another app"
 }

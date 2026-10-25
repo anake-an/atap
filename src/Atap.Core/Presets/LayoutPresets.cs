@@ -39,6 +39,10 @@ public static class LayoutPresets
     /// <summary>True when the preset has a widget that fetches from the internet.</summary>
     public static bool UsesInternet(LayoutPreset preset) => preset == LayoutPreset.Malaysia;
 
+    /// <summary>
+    /// The panel is the bigger hover view: it starts with the hover widgets, then has more. The missed alerts come
+    /// last and show only while something was missed. Minimal puts nothing else there, so its panel follows the hover view.
+    /// </summary>
     public static IReadOnlyList<PresetPlacement> PlacementsOf(LayoutPreset preset) => preset switch
     {
         LayoutPreset.Student =>
@@ -46,6 +50,7 @@ public static class LayoutPresets
             new("clock", Idle, WidgetSize.Small),
             new("media", Open, WidgetSize.Medium),
             new("focus-timer", Open, WidgetSize.Medium),
+            new("media", Panel, WidgetSize.Medium),
             new("focus-timer", Panel, WidgetSize.Medium),
             new("stopwatch", Panel, WidgetSize.Small),
             new("alarm", Panel, WidgetSize.Small),
@@ -56,6 +61,7 @@ public static class LayoutPresets
             new("clock", Idle, WidgetSize.Small),
             new("media", Open, WidgetSize.Medium),
             new("focus-timer", Open, WidgetSize.Small),
+            new("media", Panel, WidgetSize.Medium),
             new("focus-timer", Panel, WidgetSize.Medium),
             new("world-clock", Panel, WidgetSize.Medium),
             new("alarm", Panel, WidgetSize.Small),
@@ -67,6 +73,7 @@ public static class LayoutPresets
             new("waktu-solat", Open, WidgetSize.Medium),
             new("media", Open, WidgetSize.Medium),
             new("waktu-solat", Panel, WidgetSize.Medium),
+            new("media", Panel, WidgetSize.Medium),
             new("weather", Panel, WidgetSize.Medium),
             new("hijri", Panel, WidgetSize.Small),
             new("holidays", Panel, WidgetSize.Small),
@@ -76,7 +83,6 @@ public static class LayoutPresets
         [
             new("clock", Idle, WidgetSize.Small),
             new("media", Open, WidgetSize.Medium),
-            new("media", Panel, WidgetSize.Medium),
             new("missed-alerts", Panel, WidgetSize.Medium),
         ],
     };

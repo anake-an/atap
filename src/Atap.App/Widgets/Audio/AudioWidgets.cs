@@ -266,17 +266,27 @@ public sealed class AudioMixerViewModel : ObservableObject, IAccessibleSummary, 
     internal void Show(IReadOnlyList<AppAudio> apps)
     {
         _apps = apps;
-        Rows = apps.Select(a => new MixerRow(
-            a.Name,
-            a.Muted ? 0 : a.VolumePercent,
-            a.Muted ? _text["audio.mixer.muted"] : a.VolumePercent.ToString(CultureInfo.CurrentCulture) + "%",
-            a.Muted,
-            new RelayCommand(() => _change(a, -AudioMixerWidget.Step)),
-            new RelayCommand(() => _change(a, AudioMixerWidget.Step)),
-            new RelayCommand(() => _mute(a)),
-            _text.Format(a.Muted ? "audio.mixer.unmute" : "audio.mixer.mute", ("app", a.Name)))).ToList();
+        Rows = apps.Select(a =>
+        {
+            var name = NameOf(a);
+            return new MixerRow(
+                name,
+                a.Muted ? 0 : a.VolumePercent,
+                a.Muted ? _text["audio.mixer.muted"] : a.VolumePercent.ToString(CultureInfo.CurrentCulture) + "%",
+                a.Muted,
+                new RelayCommand(() => _change(a, -AudioMixerWidget.Step)),
+                new RelayCommand(() => _change(a, AudioMixerWidget.Step)),
+                new RelayCommand(() => _mute(a)),
+                _text.Format(a.Muted ? "audio.mixer.unmute" : "audio.mixer.mute", ("app", name)));
+        }).ToList();
         OnPropertyChanged(string.Empty);
     }
+
+    /// <summary>"System sounds" for Windows' own sounds, "Another app" when Windows says nothing usable.</summary>
+    internal string NameOf(AppAudio app) =>
+        app.IsSystemSounds ? _text["audio.mixer.systemSounds"]
+        : string.IsNullOrWhiteSpace(app.Name) ? _text["audio.mixer.otherApp"]
+        : app.Name;
 
     public void Dispose() => _text.LanguageChanged -= OnLanguageChanged;
 

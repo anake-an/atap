@@ -14,10 +14,11 @@
   <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
   <FontFamily x:Key="TextFont">Segoe UI Variable Text, Segoe UI</FontFamily>
 
-  <!-- The brushes today's widgets use. New code should prefer the token brushes from Tokens.xaml. -->
+  <!-- Older brush keys. New code uses the token brushes from Tokens.xaml. PrimaryTextBrush and SecondaryTextBrush
+       are kept for outside views and show the same colours as TextBrush and TextSecondaryBrush. -->
   <SolidColorBrush x:Key="NotchBackgroundBrush" Color="Black" />
-  <SolidColorBrush x:Key="PrimaryTextBrush" Color="#FFFFFFFF" />
-  <SolidColorBrush x:Key="SecondaryTextBrush" Color="#99FFFFFF" />
+  <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource TextColor}" />
+  <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource TextSecondaryColor}" />
   <SolidColorBrush x:Key="PlaceholderBrush" Color="#FF2A2A2A" />
   <SolidColorBrush x:Key="AccentBrush" Color="#FF30D158" />
   <SolidColorBrush x:Key="ButtonHoverBrush" Color="#26FFFFFF" />
@@ -28,21 +29,21 @@
       <Setter.Value>
         <ControlTemplate>
           <Border Margin="-2"
-                  CornerRadius="10"
+                  CornerRadius="8"
                   BorderThickness="2"
-                  BorderBrush="{DynamicResource PrimaryTextBrush}"
+                  BorderBrush="{DynamicResource TextBrush}"
                   SnapsToDevicePixels="True" />
         </ControlTemplate>
       </Setter.Value>
     </Setter>
   </Style>
 
-  <!-- Flat round icon button for widget controls. It takes focus only while the panel has the keyboard, so a
-       click on the notch never takes focus from the app in front. -->
+  <!-- Flat icon button for widget controls, a 6 pixel rounded square like every notch button. It takes focus only
+       while the panel has the keyboard, so a click on the notch never takes focus from the app in front. -->
   <Style x:Key="IconButton" TargetType="Button">
     <Setter Property="Focusable" Value="False" />
     <Setter Property="FocusVisualStyle" Value="{StaticResource NotchFocusVisual}" />
-    <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
     <Setter Property="FontSize" Value="14" />
     <Setter Property="Width" Value="32" />
@@ -51,7 +52,7 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="Button">
-          <Border x:Name="Chrome" Background="Transparent" CornerRadius="16">
+          <Border x:Name="Chrome" Background="Transparent" CornerRadius="6">
             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Border>
           <ControlTemplate.Triggers>

@@ -33,6 +33,13 @@ public class PageDots : FrameworkElement
         nameof(CurrentBrush), typeof(Brush), typeof(PageDots),
         new FrameworkPropertyMetadata(Brushes.White, FrameworkPropertyMetadataOptions.AffectsRender));
 
+    /// <summary>The dots take the theme's text colours unless set, so high contrast repaints them too.</summary>
+    public PageDots()
+    {
+        SetResourceReference(DotBrushProperty, "TextSecondaryBrush");
+        SetResourceReference(CurrentBrushProperty, "TextBrush");
+    }
+
     public int Count
     {
         get => (int)GetValue(CountProperty);

@@ -24,7 +24,7 @@
                     <controls:IconButton Icon="{DynamicResource icon.volumeMute}" Label="{Binding MuteLabel}" Command="{Binding Mute}" />
                   </StackPanel>
                   <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Name}" ToolTip="{Binding Name}" Foreground="{DynamicResource TextBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding Value}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
                   </StackPanel>
                 </DockPanel>

@@ -1,6 +1,8 @@
 using Atap.Composition;
 using Atap.Core.Commands;
 using Atap.Core.Layout;
+using Atap.Core.Layout.Editing;
+using Atap.Core.Widgets;
 using Atap.Features.LayoutEditor;
 using Atap.Notch;
 using Atap.Tests.Infrastructure;
@@ -171,6 +173,207 @@ public sealed class LayoutEditorTests : IDisposable
         Assert.False(notch.IsSet(NotchFlag.Editing));
         await feature.DisposeAsync();
     }
+
+    [Fact]
+    public void Tabs_UsePlainNames()
+    {
+        using var editor = NewEditor();
+
+        Assert.Equal(["Small notch", "When you point at it", "When you click it", "When something is live"], editor.Tabs.Select(t => t.Label));
+        Assert.Equal("The notch grows a little when you point at it.", editor.TabHint);
+    }
+
+    [Fact]
+    public void Gallery_ShowsEveryWidgetWithAPreviewAndAPlainLine()
+    {
+        using var editor = NewEditor();
+        var catalog = Discovery.Widgets(typeof(App).Assembly);
+
+        var items = editor.Gallery.SelectMany(g => g.Items).ToList();
+
+        Assert.Equal(catalog.Descriptors.Count, items.Count);
+        Assert.All(items, item =>
+        {
+            catalog.TryGet(item.TypeId, out var descriptor);
+            Assert.True(item.Preview?.IsSample, $"{item.TypeId} has no sample preview.");
+            Assert.NotEmpty(item.Line);
+            Assert.Equal(descriptor!.SupportedSizes.Count, item.Sizes.Count);
+            Assert.Equal(descriptor.SupportedSizes.Min(), item.Preview!.Size);
+        });
+        Assert.Equal(["Media", "Productivity", "System", "Your own", "Malaysia"], editor.Gallery.Select(g => g.Name));
+    }
+
+    [Fact]
+    public void DragFromTheGallery_ShowsWhereItGoes_ThenAddsItThere()
+    {
+        using var editor = NewEditor();
+
+        editor.BeginDrag(EditorDrag.FromGallery("stopwatch"));
+        editor.DragOver(editor.Spot, 0);
+
+        Assert.Equal(["stopwatch", "media"], editor.Picture.Tiles.Select(t => t.InstanceId));
+        Assert.True(editor.Picture.Tiles[0].IsMarker);
+        Assert.Equal("Let go to add it here", editor.DragHint);
+        Assert.False(editor.IsDirty);
+
+        Assert.Equal(EditResult.Applied, editor.Drop());
+
+        Assert.Equal(["stopwatch", "media"], editor.Picture.Tiles.Select(t => t.InstanceId));
+        Assert.DoesNotContain(editor.Picture.Tiles, t => t.IsMarker);
+        Assert.Equal(0, editor.SelectedIndex);
+        Assert.True(editor.Picture.Tiles[0].IsSelected);
+        editor.UndoCommand.Execute(null);
+        Assert.Equal(["media"], editor.Picture.Tiles.Select(t => t.InstanceId));
+    }
+
+    [Fact]
+    public void DragFromTheGallery_LetGoOutside_ChangesNothing()
+    {
+        using var editor = NewEditor();
+
+        editor.BeginDrag(EditorDrag.FromGallery("stopwatch"));
+        editor.DragOver(null, 0);
+        Assert.Equal("Let go here to cancel", editor.DragHint);
+
+        Assert.Equal(EditResult.Unchanged, editor.Drop());
+        Assert.False(editor.IsDirty);
+        Assert.False(editor.IsDragging);
+    }
+
+    [Fact]
+    public void DragWhereItCannotGo_SaysSo_AndChangesNothing()
+    {
+        using var editor = NewEditor();
+        editor.Tab = EditorTab.Idle;
+
+        editor.BeginDrag(EditorDrag.FromGallery("media"));
+        editor.DragOver(editor.Spot, 0);
+
+        Assert.Equal("Cannot go here", editor.DragHint);
+        Assert.DoesNotContain(editor.Picture.Tiles, t => t.IsMarker);
+        Assert.Equal(EditResult.Rejected, editor.Drop());
+        Assert.False(editor.IsDirty);
+    }
+
+    [Fact]
+    public void DragATileOffTheNotch_RemovesIt_AndUndoBringsItBack()
+    {
+        using var editor = NewEditor();
+        AddFromGallery(editor, "focus-timer");
+
+        editor.BeginDrag(EditorDrag.FromPreview(editor.Spot, 1));
+        Assert.True(editor.IsDraggingPlaced);
+        editor.DragOver(null, 0);
+        Assert.Equal(["media"], editor.Picture.Tiles.Select(t => t.InstanceId));
+        Assert.Equal("Let go to remove it", editor.DragHint);
+
+        Assert.Equal(EditResult.Applied, editor.Drop());
+        Assert.Single(editor.Tiles);
+        Assert.Equal("Removed. Press Undo to bring it back.", editor.StatusText);
+
+        editor.UndoCommand.Execute(null);
+        Assert.Equal(2, editor.Tiles.Count);
+    }
+
+    [Fact]
+    public void DragATileWithinTheNotch_Reorders()
+    {
+        using var editor = NewEditor();
+        AddFromGallery(editor, "focus-timer");
+        AddFromGallery(editor, "stopwatch");
+
+        editor.BeginDrag(EditorDrag.FromPreview(editor.Spot, 0));
+        editor.DragOver(editor.Spot, editor.DropIndexAt(10_000, 10));
+        Assert.Equal(["focus-timer", "stopwatch", "media"], editor.Picture.Tiles.Select(t => t.InstanceId));
+        editor.Drop();
+
+        Assert.Equal(["Focus timer", "Stopwatch", "Now playing"], editor.Tiles.Select(t => t.Name));
+        Assert.Equal(2, editor.SelectedIndex);
+    }
+
+    [Fact]
+    public void DragATileOntoAnotherPage_MovesItThere()
+    {
+        _services.Layout.Update(d => d.States.Panel.Pages[0].Placements.Insert(0, new WidgetPlacement { WidgetId = "media", Size = WidgetSize.Medium }));
+        using var editor = NewEditor();
+        editor.Tab = EditorTab.Panel;
+        editor.AddPageCommand.Execute(null);
+        editor.SelectedPage = editor.Pages[0];
+
+        editor.BeginDrag(EditorDrag.FromPreview(editor.Spot, 1));
+        editor.DragOver(LayoutEditorViewModel.PageSpot(1), int.MaxValue);
+        Assert.Equal("Let go to move it to Page 2", editor.DragHint);
+        editor.Drop();
+
+        Assert.Equal(1, editor.SelectedPage?.Index);
+        Assert.Equal(["missed-alerts"], editor.Picture.Tiles.Select(t => t.InstanceId));
+        editor.SelectedPage = editor.Pages[0];
+        Assert.Equal(["media"], editor.Picture.Tiles.Select(t => t.InstanceId));
+    }
+
+    [Fact]
+    public void TheSelectedWidget_MovesResizesAndRemoves_WithoutAMouse()
+    {
+        using var editor = NewEditor();
+        AddFromGallery(editor, "focus-timer");
+        Assert.Equal(1, editor.SelectedIndex);
+        Assert.Equal("Focus timer", editor.Selected?.Name);
+
+        editor.MoveSelected(-1);
+        Assert.Equal(0, editor.SelectedIndex);
+        Assert.Equal("focus-timer", editor.Picture.Tiles[0].InstanceId);
+
+        editor.Selected!.Sizes.Single(s => s.Name == "Medium").Pick.Execute(null);
+        Assert.Equal(WidgetSize.Medium, editor.Picture.Tiles[0].Size);
+        Assert.True(editor.Picture.Tiles[0].IsSelected);
+
+        editor.RemoveSelected();
+        Assert.Single(editor.Tiles);
+        Assert.False(editor.HasSelection);
+        Assert.True(editor.ShowsSelectHint);
+    }
+
+    [Fact]
+    public void DropIndexAt_ReadsThePicture()
+    {
+        using var editor = NewEditor();
+
+        // The open notch holds one Medium widget, 320 wide.
+        Assert.Equal(0, editor.DropIndexAt(10, 10));
+        Assert.Equal(1, editor.DropIndexAt(300, 10));
+    }
+
+    [Fact]
+    public void Priority_ShowsTheSmallNotchOfTheFirstLiveWidget()
+    {
+        using var editor = NewEditor();
+        editor.Tab = EditorTab.Priority;
+
+        Assert.Equal(["media"], editor.Picture.Tiles.Select(t => t.InstanceId));
+        Assert.Equal("When something is live", editor.Picture.Label);
+    }
+
+    [Fact]
+    public void Window_Builds() => Sta.Run(() =>
+    {
+        using var editor = NewEditor();
+        var window = (System.Windows.Window)Activator.CreateInstance(
+            typeof(LayoutEditorWindow),
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic,
+            null,
+            [editor, null],
+            null)!;
+        try
+        {
+            window.Measure(new System.Windows.Size(1120, 760));
+            window.Arrange(new System.Windows.Rect(0, 0, 1120, 760));
+            window.UpdateLayout();
+        }
+        finally
+        {
+            window.Close();
+        }
+    });
 
     private LayoutEditorViewModel NewEditor() =>
         new(_services.Layout, Discovery.Widgets(typeof(App).Assembly), _services.Text, _backup);

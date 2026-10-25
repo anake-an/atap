@@ -38,7 +38,8 @@ public static class DefaultLayout
             {
                 Placements = [new WidgetPlacement { WidgetId = MediaWidgetId, Size = WidgetSize.Medium }],
             },
-            // A click opens the panel, so it starts with something in it: music and the alerts missed while quiet.
+            // A click opens the panel. Until the user fills it, the panel shows the hover widgets a size up
+            // (see PanelContent), and after them the alerts missed while quiet, only when there are some.
             Panel = new PanelLayout
             {
                 Pages =
@@ -47,11 +48,7 @@ public static class DefaultLayout
                     {
                         Id = PanelLayout.MainPageId,
                         Name = PanelLayout.MainPageName,
-                        Placements =
-                        [
-                            new WidgetPlacement { WidgetId = MediaWidgetId, Size = WidgetSize.Medium },
-                            new WidgetPlacement { WidgetId = MissedAlertsWidgetId, Size = WidgetSize.Medium, Order = 1 },
-                        ],
+                        Placements = [new WidgetPlacement { WidgetId = MissedAlertsWidgetId, Size = WidgetSize.Medium }],
                     },
                 ],
             },
