@@ -82,6 +82,13 @@ foreach (var (name, width, height, share) in tiles)
     }
 }
 
+// Store listing art, uploaded in Partner Center by hand: 1:1 box art with the icon only, and 9:16
+// poster art with the icon and the Store name under it.
+using (var box = full.Render(2160, 2160, 1080, ink))
+    Write(Path.Combine(brandDir, "store", "listing", "BoxArt-2160x2160.png"), EncodePng(box));
+using (var poster = PosterArt(full, ink))
+    Write(Path.Combine(brandDir, "store", "listing", "PosterArt-1440x2160.png"), EncodePng(poster));
+
 // Website icons from the same master, so the browser tab, the page header and the app match. They go to
 // assets/brand/web, and from there into the website repo by hand.
 var site = Path.Combine(brandDir, "web");
@@ -94,6 +101,21 @@ Write(Path.Combine(site, "og-image.png"), EncodePng(ShareImage(full)));
 
 Console.WriteLine("Done.");
 return;
+
+// The 1440 x 2160 poster for the Store listing: the icon a little above the middle, the Store name under it.
+static SKImage PosterArt(MasterSvg master, SKColor background)
+{
+    const int W = 1440, H = 2160, Icon = 720;
+    using var surface = SKSurface.Create(new SKImageInfo(W, H, SKColorType.Rgba8888, SKAlphaType.Premul));
+    var canvas = surface.Canvas;
+    canvas.Clear(background);
+    using (var icon = master.Render(Icon, Icon, Icon, background: null))
+        canvas.DrawImage(icon, (W - Icon) / 2f, 620);
+    using var font = new SKFont(SKTypeface.FromFamilyName("Segoe UI", SKFontStyle.Bold), 150);
+    using var paint = new SKPaint { Color = SKColor.Parse("#FAFAF9"), IsAntialias = true };
+    canvas.DrawText("Atap Notch", W / 2f, 1560, SKTextAlign.Center, font, paint);
+    return surface.Snapshot();
+}
 
 // The 1200 x 630 picture shown when someone shares a link to the website: the notch at the top of a
 // screen, then the icon, the name and the line from the home page. The times match the home page demo.
