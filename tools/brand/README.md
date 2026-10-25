@@ -22,6 +22,7 @@ The generator reads `<rect>` and `<path>` elements and their `x`, `y`, `width`, 
 - `src/Atap.App/Ui/Theme/Brand.xaml`, the logo as WPF shapes under the key `Brand.Logo`. The Settings window uses it, so the logo stays sharp at any size and display scale.
 - `assets/brand/web/favicon.svg`, `favicon-48.png`, `apple-touch-icon.png` and `og-image.png` for the website, which lives in its own repo. `og-image.png` is the picture shown when someone shares a link to the website.
 - `assets/brand/store/<name>.scale-100.png` and `<name>.scale-200.png` for the Microsoft Store: StoreLogo, Square44x44Logo, Square71x71Logo, Square150x150Logo, Wide310x150Logo, Square310x310Logo and SplashScreen. Each one is the icon centered on ink `#0C0A09`. The icon size is set per tile in `generate.cs`.
+- `assets/brand/store/listing/BoxArt-2160x2160.png` and `PosterArt-1440x2160.png`, the 1:1 box art and 9:16 poster art for the Store listing. They are uploaded in Partner Center by hand.
 
 ## Not part of the app build
 
