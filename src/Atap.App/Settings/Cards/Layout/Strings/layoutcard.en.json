@@ -1,7 +1,8 @@
 {
   "layoutcard.title": "Layout",
+  "layoutcard.summary": "Your notch at a glance",
+  "layoutcard.summaryHint": "What the notch shows in each state right now, with sample content. Press Edit layout to change it.",
   "layoutcard.edit": "Edit layout",
-  "layoutcard.editHint": "Choose what shows on the notch, at each size, and on each panel page.",
   "layoutcard.restore": "Previous layout",
   "layoutcard.restoreHint": "Brings back the layout from before the last time you pressed Done. Press it again to swap back.",
   "layoutcard.restoreButton": "Bring it back",
