@@ -1,0 +1,181 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a to-do instance exists. Nothing in it animates. Typing works in the Panel,
+       which takes the keyboard. The open notch shows the list without a text box. -->
+
+  <BooleanToVisibilityConverter x:Key="todo.visible" />
+
+  <!-- A dark text box for the notch. -->
+  <Style x:Key="todo.input" TargetType="TextBox">
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource TextBrush}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource ProductivityAccentBrush}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="Padding" Value="10,6" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="TextBox">
+          <Border x:Name="Chrome" CornerRadius="8" Background="{DynamicResource RaisedBrush}" BorderThickness="1"
+                  BorderBrush="Transparent" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+            <ScrollViewer x:Name="PART_ContentHost" Focusable="False" VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource ProductivityAccentBrush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- Done or not: a round tick. -->
+  <Style x:Key="todo.check" TargetType="CheckBox">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="CheckBox">
+          <Border x:Name="Ring" Width="18" Height="18" CornerRadius="9" BorderThickness="1.5"
+                  BorderBrush="{DynamicResource TextSecondaryBrush}" Background="Transparent">
+            <controls:StrokeIcon x:Name="Tick" Data="{DynamicResource icon.check}" Width="13" Height="13" StrokeThickness="3"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center"
+                                 Foreground="{DynamicResource NotchSurfaceBrush}" Visibility="Collapsed" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Ring" Property="Background" Value="{DynamicResource ProductivityAccentBrush}" />
+              <Setter TargetName="Ring" Property="BorderBrush" Value="{DynamicResource ProductivityAccentBrush}" />
+              <Setter TargetName="Tick" Property="Visibility" Value="Visible" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A small text button for due dates and Clear done. -->
+  <Style x:Key="todo.chip" TargetType="Button">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome" CornerRadius="6" Padding="10,3" Background="{DynamicResource RaisedBrush}">
+            <ContentPresenter TextElement.FontSize="11" RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- One task in the open notch: tick and title. -->
+  <DataTemplate x:Key="todo.item">
+    <Grid Margin="0,3" AutomationProperties.Name="{Binding Title}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <CheckBox Style="{StaticResource todo.check}" IsChecked="{Binding Done, Mode=OneWay}" Command="{Binding Toggle}"
+                VerticalAlignment="Center" Margin="0,0,8,0" AutomationProperties.Name="{Binding Title}" />
+      <TextBlock x:Name="Title" Grid.Column="1" Text="{Binding Title}" Foreground="{DynamicResource TextBrush}" FontSize="13"
+                 TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+      <TextBlock x:Name="Due" Grid.Column="2" Text="{Binding Due}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
+                 VerticalAlignment="Center" Margin="8,0,0,0" />
+    </Grid>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding Done}" Value="True">
+        <Setter TargetName="Title" Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+        <Setter TargetName="Title" Property="TextDecorations" Value="Strikethrough" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Overdue}" Value="True">
+        <Setter TargetName="Due" Property="Foreground" Value="{DynamicResource SystemAccentBrush}" />
+      </DataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
+
+  <!-- One task in the panel: also due chips and remove. -->
+  <DataTemplate x:Key="todo.editItem">
+    <StackPanel Margin="0,0,0,6" AutomationProperties.Name="{Binding Title}">
+      <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource todo.item}" />
+      <StackPanel x:Name="Chips" Orientation="Horizontal" Margin="26,2,0,0">
+        <Button Style="{StaticResource todo.chip}" Content="{loc:T todo.today}" Command="{Binding DueToday}" Margin="0,0,4,0" />
+        <Button Style="{StaticResource todo.chip}" Content="{loc:T todo.tomorrow}" Command="{Binding DueTomorrow}" Margin="0,0,4,0" />
+        <Button Style="{StaticResource todo.chip}" Content="{loc:T todo.noDate}" Command="{Binding ClearDue}" Margin="0,0,4,0"
+                Visibility="{Binding HasDue, Converter={StaticResource todo.visible}}" />
+        <Button Style="{StaticResource todo.chip}" Content="{loc:T todo.remove}" Command="{Binding Delete}" />
+      </StackPanel>
+    </StackPanel>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding Done}" Value="True">
+        <Setter TargetName="Chips" Property="Visibility" Value="Collapsed" />
+      </DataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
+
+  <!-- The open notch: the next few tasks. -->
+  <DataTemplate x:Key="todo.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T todo.name}"
+                         Icon="{DynamicResource icon.list}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <ItemsControl ItemsSource="{Binding Top}" ItemTemplate="{StaticResource todo.item}" Focusable="False" />
+        <TextBlock Text="{Binding CountText}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,4,0,0" />
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <!-- The panel: add, tick, set a due day, remove. -->
+  <DataTemplate x:Key="todo.Panel">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T todo.name}"
+                         Icon="{DynamicResource icon.list}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <DockPanel>
+        <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
+          <TextBox x:Name="Input" Style="{StaticResource todo.input}" Text="{Binding NewTitle, UpdateSourceTrigger=PropertyChanged}"
+                   AutomationProperties.Name="{loc:T todo.addHint}">
+            <TextBox.InputBindings>
+              <KeyBinding Key="Enter" Command="{Binding AddCommand}" />
+            </TextBox.InputBindings>
+          </TextBox>
+          <TextBlock x:Name="Hint" Text="{loc:T todo.addHint}" Foreground="{DynamicResource TextMutedBrush}" FontSize="13"
+                     Margin="11,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False" Visibility="Collapsed" />
+        </Grid>
+        <DockPanel DockPanel.Dock="Bottom" Margin="0,4,0,0">
+          <Button DockPanel.Dock="Right" Style="{StaticResource todo.chip}" Content="{loc:T todo.clearDone}" Command="{Binding ClearDoneCommand}"
+                  Visibility="{Binding HasDone, Converter={StaticResource todo.visible}}" />
+          <TextBlock Text="{Binding CountText}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" VerticalAlignment="Center" />
+        </DockPanel>
+        <Grid>
+          <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="260" Focusable="False">
+            <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource todo.editItem}" Focusable="False" />
+          </ScrollViewer>
+          <TextBlock Text="{loc:T todo.empty}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"
+                     Visibility="{Binding HasNone, Converter={StaticResource todo.visible}}" />
+        </Grid>
+      </DockPanel>
+    </controls:WidgetCard>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding ViewModel.NewTitle}" Value="">
+        <Setter TargetName="Hint" Property="Visibility" Value="Visible" />
+      </DataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
+
+</ResourceDictionary>

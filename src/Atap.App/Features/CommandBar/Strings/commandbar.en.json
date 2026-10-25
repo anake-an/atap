@@ -1,0 +1,15 @@
+{
+  "commandbar.open": "Command bar",
+  "commandbar.placeholder": "Type a command, a sum or an app",
+  "commandbar.results": "Results",
+  "commandbar.copy": "Enter to copy",
+  "commandbar.kind.command": "Atap",
+  "commandbar.kind.app": "App",
+  "commandbar.kind.web": "Web",
+  "commandbar.searchWeb": "Search the web for \"{query}\"",
+  "commandbar.search": "Search the web with",
+  "commandbar.search.google": "Google",
+  "commandbar.search.bing": "Bing",
+  "commandbar.search.duckduckgo": "DuckDuckGo",
+  "commandbar.searchHint": "The last row of the command bar searches the web. It opens only when you press Enter on it."
+}

@@ -1,0 +1,41 @@
+<Project>
+
+  <!-- Shared settings for every project in the repo. Package versions live in Directory.Packages.props. -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Deterministic>true</Deterministic>
+    <!-- Atap ships English and Bahasa Melayu only, so no other culture folders come from packages or the runtime. -->
+    <SatelliteResourceLanguages>en;ms</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <!-- Lock files pin every package version, transitive ones included. CI restores in locked mode. -->
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Product>Atap</Product>
+    <Authors>Aniq Najmuddin</Authors>
+    <Copyright>Copyright (c) 2026 Aniq Najmuddin</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/anake-an/atap</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/anake-an/atap</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <!-- Versioning: MinVer reads git tags such as v0.1.0 or v0.1.0-preview.1. Untagged commits get X.Y.Z-preview.0.N. -->
+  <PropertyGroup>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
+  </PropertyGroup>
+
+  <!-- GitHub Actions: reproducible paths, no warnings allowed, and every restore (publish included) must match the lock files. -->
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RestoreLockedMode>true</RestoreLockedMode>
+  </PropertyGroup>
+
+</Project>

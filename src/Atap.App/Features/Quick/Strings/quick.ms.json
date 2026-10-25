@@ -1,0 +1,14 @@
+{
+  "quick.trayIcon": "Ikon di sebelah jam",
+  "quick.trayIconHint": "Ikon Atap di antara ikon tersembunyi di sebelah jam. Klik untuk tetapan pantas, klik kanan untuk pilihan lain.",
+  "quick.command.open": "Tetapan pantas",
+  "quick.keywords": "pantas dulang tray popup tukar cepat",
+  "quick.hideNotch": "Sembunyikan notch selama 1 jam",
+  "quick.command.pauseAlerts": "Jeda makluman selama 1 jam",
+  "quick.pauseKeywords": "jeda senyap bisu makluman pemberitahuan jam",
+  "quick.pauseHint": "Makluman penting masih ditunjukkan.",
+  "quick.allSettings": "Semua tetapan",
+  "quick.menu.settings": "Tetapan",
+  "quick.menu.about": "Perihal Atap",
+  "quick.menu.quit": "Keluar dari Atap"
+}

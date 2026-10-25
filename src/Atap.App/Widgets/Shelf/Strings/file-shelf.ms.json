@@ -1,0 +1,9 @@
+{
+  "file-shelf.name": "Rak fail",
+  "file-shelf.description": "Lepaskan fail dan folder di sini supaya sentiasa dekat. Klik untuk membuka, atau seret keluar untuk menggunakannya di tempat lain.",
+  "file-shelf.empty": "Lepaskan fail atau folder di sini.",
+  "file-shelf.clear": "Kosongkan rak",
+  "file-shelf.missing": "{name}, telah dipindahkan atau dipadam",
+  "file-shelf.removeItem": "Buang {name} daripada rak",
+  "file-shelf.accessible": "Rak fail. {count} item"
+}

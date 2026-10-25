@@ -1,0 +1,218 @@
+<Window x:Class="Atap.Features.LayoutEditor.LayoutEditorWindow"
+        x:ClassModifier="internal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:Atap.Ui.Localization"
+        Title="{loc:T layouteditor.title}"
+        Icon="/Atap;component/Assets/atap.ico"
+        Width="980" Height="680" MinWidth="760" MinHeight="520"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource WindowBrush}"
+        Foreground="{DynamicResource InkBrush}"
+        FontFamily="{StaticResource TextFont}"
+        FontSize="14"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+
+  <!-- Created when the editor opens and closed when it is done. Nothing is saved until Done. -->
+  <Window.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Atap;component/Ui/Theme/Settings.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <!-- One placed widget: its name, size chips, and buttons to move or remove it. -->
+      <DataTemplate x:Key="Editor.Tile">
+        <Border Style="{StaticResource Settings.Card}" Margin="0,0,0,8" Padding="14,10" AutomationProperties.Name="{Binding Name}">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock Text="{Binding Name}" Style="{StaticResource Settings.Label}" />
+              <TextBlock Text="{Binding Detail}" Style="{StaticResource Settings.Hint}"
+                         Visibility="{Binding HasDetail, Converter={StaticResource Settings.BoolToVisibility}}" />
+            </StackPanel>
+            <ItemsControl Grid.Column="1" ItemsSource="{Binding Sizes}" Focusable="False" VerticalAlignment="Center" Margin="0,0,12,0">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Button x:Name="Chip" Style="{StaticResource Settings.Button}" Content="{Binding Label}" Command="{Binding Pick}"
+                          MinWidth="36" Padding="8,4" Margin="0,0,4,0"
+                          AutomationProperties.Name="{Binding Name}" ToolTip="{Binding Name}" />
+                  <DataTemplate.Triggers>
+                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                      <Setter TargetName="Chip" Property="Style" Value="{StaticResource Settings.AccentButton}" />
+                    </DataTrigger>
+                  </DataTemplate.Triggers>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+              <Button Style="{StaticResource Settings.Button}" Content="{loc:T layouteditor.earlier}" AutomationProperties.HelpText="{Binding Name}" Command="{Binding MoveEarlier}"
+                      IsEnabled="{Binding CanMoveEarlier}" Margin="0,0,4,0" />
+              <Button Style="{StaticResource Settings.Button}" Content="{loc:T layouteditor.later}" AutomationProperties.HelpText="{Binding Name}" Command="{Binding MoveLater}"
+                      IsEnabled="{Binding CanMoveLater}" Margin="0,0,4,0" />
+              <Button Style="{StaticResource Settings.Button}" Content="{loc:T layouteditor.remove}" AutomationProperties.HelpText="{Binding Name}" Command="{Binding Remove}" />
+            </StackPanel>
+          </Grid>
+        </Border>
+      </DataTemplate>
+
+      <!-- A widget to add, with why it cannot go here when it cannot. -->
+      <DataTemplate x:Key="Editor.GalleryItem">
+        <Grid Margin="0,0,0,10" AutomationProperties.Name="{Binding Name}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel Margin="0,0,10,0">
+            <TextBlock Text="{Binding Name}" Style="{StaticResource Settings.Label}" />
+            <TextBlock Text="{Binding Description}" Style="{StaticResource Settings.Hint}" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Note}" Style="{StaticResource Settings.Hint}" FontStyle="Italic"
+                       Visibility="{Binding HasNote, Converter={StaticResource Settings.BoolToVisibility}}" />
+          </StackPanel>
+          <Button Grid.Column="1" Style="{StaticResource Settings.Button}" Content="{loc:T layouteditor.add}" AutomationProperties.HelpText="{Binding Name}" Command="{Binding Add}"
+                  VerticalAlignment="Top" />
+        </Grid>
+      </DataTemplate>
+    </ResourceDictionary>
+  </Window.Resources>
+
+  <Grid Margin="24,16,24,16">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <!-- Title, the profile being edited, and undo. -->
+    <DockPanel>
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+        <Button Style="{StaticResource Settings.Button}" Content="{loc:T layouteditor.undo}" Command="{Binding UndoCommand}"
+                IsEnabled="{Binding CanUndo}" Margin="0,0,6,0" />
+        <Button Style="{StaticResource Settings.Button}" Content="{loc:T layouteditor.redo}" Command="{Binding RedoCommand}"
+                IsEnabled="{Binding CanRedo}" />
+      </StackPanel>
+      <StackPanel>
+        <TextBlock Text="{loc:T layouteditor.title}" Style="{StaticResource Settings.PageTitle}" AutomationProperties.HeadingLevel="Level1" />
+        <TextBlock Text="{Binding ProfileText}" Style="{StaticResource Settings.Hint}" />
+      </StackPanel>
+    </DockPanel>
+
+    <!-- layout.json changed outside Atap while editing. -->
+    <Border Grid.Row="1" Style="{StaticResource Settings.Card}" Margin="0,8,0,0"
+            Visibility="{Binding ChangedOutside, Converter={StaticResource Settings.BoolToVisibility}}">
+      <DockPanel>
+        <Button DockPanel.Dock="Right" Style="{StaticResource Settings.AccentButton}" Content="{loc:T layouteditor.reload}"
+                Command="{Binding ReloadCommand}" />
+        <TextBlock Text="{loc:T layouteditor.changedOutside}" Style="{StaticResource Settings.Label}" TextWrapping="Wrap"
+                   VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
+      </DockPanel>
+    </Border>
+
+    <!-- Which state to arrange, and what it is. -->
+    <StackPanel Grid.Row="2" Margin="0,12,0,8">
+      <ListBox Style="{StaticResource Settings.Segmented}" ItemsSource="{Binding Tabs}" SelectedItem="{Binding SelectedTab}"
+               HorizontalAlignment="Left" AutomationProperties.Name="{loc:T layouteditor.tabs}" />
+      <TextBlock Text="{Binding TabHint}" Style="{StaticResource Settings.Hint}" Margin="0,6,0,0" TextWrapping="Wrap" />
+    </StackPanel>
+
+    <Grid Grid.Row="3">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="20" />
+        <ColumnDefinition Width="320" />
+      </Grid.ColumnDefinitions>
+
+      <!-- The tiles in this state, or the priority list. -->
+      <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
+        <StackPanel>
+          <DockPanel Margin="0,0,0,10" Visibility="{Binding IsPanel, Converter={StaticResource Settings.BoolToVisibility}}">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+              <Button Style="{StaticResource Settings.Button}" Content="{loc:T layouteditor.addPage}" Command="{Binding AddPageCommand}"
+                      IsEnabled="{Binding CanAddPage}" Margin="0,0,6,0" />
+              <Button Style="{StaticResource Settings.Button}" Content="{loc:T layouteditor.removePage}" Command="{Binding RemovePageCommand}"
+                      IsEnabled="{Binding CanRemovePage}" />
+            </StackPanel>
+            <ListBox Style="{StaticResource Settings.Segmented}" ItemsSource="{Binding Pages}" SelectedItem="{Binding SelectedPage}"
+                     HorizontalAlignment="Left" AutomationProperties.Name="{loc:T layouteditor.pages}" />
+          </DockPanel>
+
+          <ItemsControl ItemsSource="{Binding Tiles}" ItemTemplate="{StaticResource Editor.Tile}" Focusable="False" />
+          <Border Style="{StaticResource Settings.Card}" Visibility="{Binding HasNoTiles, Converter={StaticResource Settings.BoolToVisibility}}">
+            <TextBlock Text="{loc:T layouteditor.empty}" Style="{StaticResource Settings.Hint}" TextWrapping="Wrap" />
+          </Border>
+
+          <ItemsControl ItemsSource="{Binding Priority}" Focusable="False"
+                        Visibility="{Binding IsPriority, Converter={StaticResource Settings.BoolToVisibility}}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Style="{StaticResource Settings.Card}" Margin="0,0,0,8" Padding="14,10" AutomationProperties.Name="{Binding Name}">
+                  <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                      <Button Style="{StaticResource Settings.Button}" Content="{loc:T layouteditor.up}" AutomationProperties.HelpText="{Binding Name}" Command="{Binding MoveUp}"
+                              IsEnabled="{Binding CanMoveUp}" Margin="0,0,4,0" />
+                      <Button Style="{StaticResource Settings.Button}" Content="{loc:T layouteditor.down}" AutomationProperties.HelpText="{Binding Name}" Command="{Binding MoveDown}"
+                              IsEnabled="{Binding CanMoveDown}" />
+                    </StackPanel>
+                    <TextBlock Text="{Binding Rank}" Style="{StaticResource Settings.Hint}" Width="24" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Name}" Style="{StaticResource Settings.Label}" VerticalAlignment="Center" />
+                  </DockPanel>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- Add widgets: search, then each group. -->
+      <Border Grid.Column="2" Style="{StaticResource Settings.Card}" Padding="14"
+              Visibility="{Binding IsArranging, Converter={StaticResource Settings.BoolToVisibility}}">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top">
+            <TextBlock Text="{loc:T layouteditor.addWidgets}" Style="{StaticResource Settings.SectionTitle}" Margin="0,0,0,8" />
+            <Grid Margin="0,0,0,10">
+              <TextBox Style="{StaticResource Settings.TextBox}" Text="{Binding Search, UpdateSourceTrigger=PropertyChanged}"
+                       AutomationProperties.Name="{loc:T layouteditor.search}" />
+              <TextBlock Text="{loc:T layouteditor.search}" Style="{StaticResource Settings.Hint}" IsHitTestVisible="False"
+                         Margin="12,0,0,0" VerticalAlignment="Center"
+                         Visibility="{Binding HasNoSearch, Converter={StaticResource Settings.BoolToVisibility}}" />
+            </Grid>
+          </StackPanel>
+          <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
+            <ItemsControl ItemsSource="{Binding Gallery}" Focusable="False">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <StackPanel>
+                    <TextBlock Text="{Binding Name}" Style="{StaticResource Settings.Hint}" FontWeight="SemiBold" Margin="0,4,0,6" />
+                    <ItemsControl ItemsSource="{Binding Items}" ItemTemplate="{StaticResource Editor.GalleryItem}" Focusable="False" />
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+    </Grid>
+
+    <!-- What happens to the changes, and the ways out. -->
+    <DockPanel Grid.Row="4" Margin="0,14,0,0">
+      <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+        <Button Style="{StaticResource Settings.Button}" Content="{loc:T layouteditor.reset}" Command="{Binding ResetCommand}" Margin="0,0,6,0" />
+        <Button Style="{StaticResource Settings.Button}" Content="{loc:T layouteditor.cancel}" Command="{Binding CancelCommand}" Margin="0,0,6,0" />
+        <Button Style="{StaticResource Settings.AccentButton}" Content="{loc:T layouteditor.done}" Command="{Binding DoneCommand}" />
+      </StackPanel>
+      <TextBlock Text="{Binding StatusText}" Style="{StaticResource Settings.Hint}" VerticalAlignment="Center"
+                 AutomationProperties.LiveSetting="Polite" />
+    </DockPanel>
+  </Grid>
+</Window>

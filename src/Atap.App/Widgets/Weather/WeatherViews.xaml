@@ -1,0 +1,104 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:weather="clr-namespace:Atap.Widgets.Weather"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a weather instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="weather.visible" />
+  <weather:IconKeyConverter x:Key="weather.icon" />
+
+  <DataTemplate x:Key="weather.today">
+    <StackPanel AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <controls:StrokeIcon Data="{Binding Today.IconKey, Converter={StaticResource weather.icon}}"
+                             Foreground="{DynamicResource MalaysiaAccentBrush}" Width="26" Height="26"
+                             VerticalAlignment="Center" Margin="0,0,10,0" />
+        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+          <TextBlock Text="{Binding Today.Temperatures}" Foreground="{DynamicResource TextBrush}" FontSize="18" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding Place}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
+        </StackPanel>
+      </Grid>
+      <TextBlock Text="{Binding TodayDetail}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"
+                 Margin="0,6,0,0" TextWrapping="Wrap" />
+    </StackPanel>
+  </DataTemplate>
+
+  <DataTemplate x:Key="weather.message">
+    <TextBlock Text="{Binding Message}" AutomationProperties.Name="{Binding Message}"
+               Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+  </DataTemplate>
+
+  <!-- Small: today only. -->
+  <DataTemplate x:Key="weather.Expanded.Small">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T weather.name}"
+                         Icon="{DynamicResource icon.cloud}"
+                         Accent="{DynamicResource MalaysiaAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Grid>
+        <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource weather.today}"
+                          Visibility="{Binding HasForecast, Converter={StaticResource weather.visible}}" />
+        <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource weather.message}"
+                          Visibility="{Binding HasMessage, Converter={StaticResource weather.visible}}" />
+      </Grid>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <!-- Medium: today, then the next three days. -->
+  <DataTemplate x:Key="weather.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T weather.name}"
+                         Icon="{DynamicResource icon.cloud}"
+                         Accent="{DynamicResource MalaysiaAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Grid>
+        <Grid Visibility="{Binding HasForecast, Converter={StaticResource weather.visible}}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource weather.today}" Margin="0,0,12,0" />
+          <ItemsControl Grid.Column="1" ItemsSource="{Binding Next}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Grid Margin="0,1" AutomationProperties.Name="{Binding Day}">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="34" />
+                    <ColumnDefinition Width="20" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Text="{Binding Day}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" />
+                  <controls:StrokeIcon Grid.Column="1" Data="{Binding IconKey, Converter={StaticResource weather.icon}}"
+                                       Foreground="{DynamicResource TextBrush}" Width="13" Height="13" VerticalAlignment="Center"
+                                       ToolTip="{Binding Condition}" />
+                  <TextBlock Grid.Column="2" Text="{Binding Temperatures}" Foreground="{DynamicResource TextBrush}" FontSize="11"
+                             VerticalAlignment="Center" Margin="4,0,0,0" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </Grid>
+        <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource weather.message}"
+                          Visibility="{Binding HasMessage, Converter={StaticResource weather.visible}}" />
+      </Grid>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="weather.Panel.Small">
+    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource weather.Expanded.Small}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+  <DataTemplate x:Key="weather.Panel">
+    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource weather.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

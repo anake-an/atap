@@ -1,0 +1,11 @@
+{
+  "networkuse.title": "What uses the internet",
+  "networkuse.hint": "Only these parts of Atap go online, and only while they are on.",
+  "networkuse.none": "Nothing in Atap uses the internet right now.",
+  "networkuse.on": "On",
+  "networkuse.off": "Off",
+  "networkuse.hosts": "Connects to {hosts}.",
+  "networkuse.userUrls": "Connects to addresses you type in.",
+  "networkuse.updates": "Update checks",
+  "networkuse.updatesDetail": "Asks GitHub whether a newer Atap is out."
+}

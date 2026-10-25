@@ -1,0 +1,114 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a next meeting instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="next-meeting.visible" />
+
+  <Style x:Key="next-meeting.join" TargetType="Button">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
+    <Setter Property="Foreground" Value="{DynamicResource NotchSurfaceBrush}" />
+    <Setter Property="Background" Value="{DynamicResource ProductivityAccentBrush}" />
+    <Setter Property="Padding" Value="12,5" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome" CornerRadius="6" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.FontSize="12"
+                              TextElement.FontWeight="SemiBold" RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.85" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- Compact, left of the camera: a calendar icon and the title, from 5 minutes before. -->
+  <DataTemplate x:Key="next-meeting.Compact.Left">
+    <StackPanel DataContext="{Binding ViewModel}"
+                AutomationProperties.Name="{Binding AccessibleSummary}"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Margin="4,0">
+      <controls:StrokeIcon Data="{DynamicResource icon.calendar}"
+                           Foreground="{DynamicResource ProductivityAccentBrush}"
+                           Width="16"
+                           Height="16"
+                           VerticalAlignment="Center"
+                           Margin="0,0,6,0" />
+      <TextBlock Text="{Binding Title}"
+                 Foreground="{DynamicResource PrimaryTextBrush}"
+                 FontSize="13"
+                 FontWeight="SemiBold"
+                 MaxWidth="140"
+                 TextTrimming="CharacterEllipsis"
+                 VerticalAlignment="Center" />
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- Compact, right of the camera: "In 4 min" or "Now". -->
+  <DataTemplate x:Key="next-meeting.Compact.Right">
+    <TextBlock DataContext="{Binding ViewModel}"
+               AutomationProperties.Name="{Binding AccessibleSummary}"
+               Text="{Binding When}"
+               Foreground="{DynamicResource PrimaryTextBrush}"
+               FontSize="13"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center"
+               Margin="4,0" />
+  </DataTemplate>
+
+  <!-- The next meeting, when, where, a Join button when there is a link, and up to three after it. -->
+  <DataTemplate x:Key="next-meeting.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T next-meeting.name}"
+                         Icon="{DynamicResource icon.calendar}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <StackPanel Visibility="{Binding HasNext, Converter={StaticResource next-meeting.visible}}">
+          <TextBlock Text="{Binding When}" Foreground="{DynamicResource ProductivityAccentBrush}" FontSize="12" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding Title}" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="SemiBold"
+                     TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+          <TextBlock Text="{Binding Location}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextTrimming="CharacterEllipsis"
+                     Visibility="{Binding HasLocation, Converter={StaticResource next-meeting.visible}}" />
+          <Button Style="{StaticResource next-meeting.join}" Command="{Binding JoinCommand}" HorizontalAlignment="Left" Margin="0,8,0,0"
+                  AutomationProperties.Name="{loc:T next-meeting.join}"
+                  Visibility="{Binding CanJoin, Converter={StaticResource next-meeting.visible}}">
+            <TextBlock Text="{loc:T next-meeting.join}" />
+          </Button>
+        </StackPanel>
+        <TextBlock Text="{Binding Message}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+                   Visibility="{Binding ShowMessage, Converter={StaticResource next-meeting.visible}}" />
+        <ItemsControl ItemsSource="{Binding Later}" Focusable="False" Margin="0,10,0,0"
+                      Visibility="{Binding HasLater, Converter={StaticResource next-meeting.visible}}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <DockPanel Margin="0,0,0,4" AutomationProperties.Name="{Binding Title}">
+                <TextBlock DockPanel.Dock="Left" Text="{Binding Time}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"
+                           Typography.NumeralAlignment="Tabular" Margin="0,0,8,0" />
+                <TextBlock Text="{Binding Title}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" TextTrimming="CharacterEllipsis" />
+              </DockPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="next-meeting.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource next-meeting.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

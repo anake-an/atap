@@ -1,0 +1,9 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- A live widget owns the notch: its left and right placements around the camera gap. -->
+  <DataTemplate x:Key="surface.Compact">
+    <ContentPresenter Content="{Binding}" ContentTemplate="{DynamicResource notch.slots}" />
+  </DataTemplate>
+
+</ResourceDictionary>

@@ -1,0 +1,15 @@
+{
+  "notchsize.size": "Notch size",
+  "notchsize.size.normal": "Normal",
+  "notchsize.size.slim": "Slim",
+  "notchsize.size.tucked": "Tucked away",
+  "notchsize.sizeHint": "Slim is a thin bar that opens when you point at it. Tucked away is a line at the edge, and only urgent alerts drop down.",
+  "notchsize.menu.normal": "Normal size",
+  "notchsize.menu.slim": "Slim",
+  "notchsize.menu.tucked": "Tuck away",
+  "notchsize.menu.hideHour": "Hide for 1 hour",
+  "notchsize.command.showNow": "Show the notch again",
+  "notchsize.sizeKeywords": "small minimize minimise thin hide size bar line",
+  "notchsize.hideKeywords": "hide away later minimize minimise hour",
+  "notchsize.showKeywords": "show unhide bring back notch"
+}

@@ -1,0 +1,6 @@
+{
+  "clock.name": "Jam",
+  "clock.description": "Menunjukkan masa.",
+  "clock.use24Hour": "Format 24 jam",
+  "clock.accessible": "Jam, {time}"
+}

@@ -1,0 +1,17 @@
+{
+  "settings.window.title": "Atap Settings",
+  "settings.nav.name": "Settings pages",
+  "settings.page.home": "Home",
+  "settings.page.homeHint": "Show or hide Atap, pick your language and choose where the notch sits.",
+  "settings.page.shows": "What it shows",
+  "settings.page.showsHint": "The things on your notch and how each one is doing.",
+  "settings.page.prayer": "Prayer times",
+  "settings.page.prayerHint": "Prayer times for your area in Malaysia.",
+  "settings.page.privacy": "Privacy",
+  "settings.page.privacyHint": "What Atap sends over the internet, and your data on this PC.",
+  "settings.page.about": "About",
+  "settings.page.aboutHint": "Your version of Atap, updates and licences.",
+  "settings.comingSoon.generic": "More settings are coming in a later update.",
+  "settings.comingSoon.prayer": "Prayer times are coming in a later update.",
+  "settings.card.failed": "This part of Settings could not be shown."
+}

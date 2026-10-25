@@ -1,0 +1,4 @@
+{
+  "volumeoverlay.keys": "Show the volume on the notch for volume keys",
+  "volumeoverlay.keysHint": "When you change the volume with the keyboard or another app, the notch shows the new level."
+}

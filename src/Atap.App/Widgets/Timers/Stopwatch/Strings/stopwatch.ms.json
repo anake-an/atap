@@ -1,0 +1,12 @@
+{
+  "stopwatch.name": "Jam randik",
+  "stopwatch.description": "Mengira masa dari sifar, dengan pusingan. Terus mengira walaupun Atap dimulakan semula.",
+  "stopwatch.start": "Mula",
+  "stopwatch.stop": "Henti",
+  "stopwatch.resume": "Sambung",
+  "stopwatch.lapButton": "Pusingan",
+  "stopwatch.reset": "Set semula",
+  "stopwatch.lap": "Pusingan {number}",
+  "stopwatch.accessible": "Jam randik. {time}",
+  "stopwatch.accessibleRunning": "Jam randik, sedang berjalan. {time}"
+}

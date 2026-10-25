@@ -1,0 +1,10 @@
+{
+  "layoutcard.title": "Layout",
+  "layoutcard.edit": "Edit layout",
+  "layoutcard.editHint": "Choose what shows on the notch, at each size, and on each panel page.",
+  "layoutcard.restore": "Previous layout",
+  "layoutcard.restoreHint": "Brings back the layout from before the last time you pressed Done. Press it again to swap back.",
+  "layoutcard.restoreButton": "Bring it back",
+  "layoutcard.restored": "The previous layout is back.",
+  "layoutcard.restoreFailed": "Could not bring back the previous layout."
+}

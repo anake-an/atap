@@ -1,0 +1,21 @@
+{
+  "studentcard.title": "Classes and assignments",
+  "studentcard.timetable": "Your timetable",
+  "studentcard.timetableHint": "The Next class widget uses this. Add each class once with its weekday and time.",
+  "studentcard.day": "Day",
+  "studentcard.start": "Starts",
+  "studentcard.end": "Ends",
+  "studentcard.code": "Course code",
+  "studentcard.className": "Class name",
+  "studentcard.room": "Room",
+  "studentcard.addClass": "Add class",
+  "studentcard.classInvalid": "A class needs a code or a name, and must end after it starts.",
+  "studentcard.assignments": "Your assignments",
+  "studentcard.assignmentsHint": "The Assignments widget counts down to each one. Due at 11:59 PM on the day.",
+  "studentcard.assignmentTitle": "Assignment",
+  "studentcard.course": "Course",
+  "studentcard.due": "Due",
+  "studentcard.addAssignment": "Add assignment",
+  "studentcard.assignmentInvalid": "An assignment needs a name.",
+  "studentcard.remove": "Remove"
+}

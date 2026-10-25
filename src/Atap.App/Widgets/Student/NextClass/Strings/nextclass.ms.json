@@ -1,0 +1,13 @@
+{
+  "nextclass.name": "Kelas seterusnya",
+  "nextclass.description": "Kelas seterusnya daripada jadual waktu anda, pada notch 15 minit sebelum kelas bermula.",
+  "nextclass.noTimetable": "Tambah jadual waktu anda dalam Tetapan, di halaman Apa yang dipaparkan.",
+  "nextclass.noneSoon": "Tiada kelas akan datang.",
+  "nextclass.endsIn": "tamat dalam {time}",
+  "nextclass.range": "{start} hingga {end}",
+  "nextclass.tomorrowAt": "Esok, {time}",
+  "nextclass.laterToday": "Kemudian hari ini",
+  "nextclass.accessible": "Kelas seterusnya. {name}, {room}, {when}",
+  "nextclass.accessibleNow": "Kelas sekarang. {name}, {room}, {when}",
+  "nextclass.accessibleMessage": "Kelas seterusnya. {message}"
+}

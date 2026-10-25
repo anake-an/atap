@@ -1,0 +1,14 @@
+{
+  "quick.trayIcon": "Icon by the clock",
+  "quick.trayIconHint": "An Atap icon in the hidden icons by the clock. Click it for quick settings, right-click it for more.",
+  "quick.command.open": "Quick settings",
+  "quick.keywords": "quick tray popup toggle fast",
+  "quick.hideNotch": "Hide the notch for 1 hour",
+  "quick.command.pauseAlerts": "Pause alerts for 1 hour",
+  "quick.pauseKeywords": "pause quiet mute silence alerts notifications hour",
+  "quick.pauseHint": "Urgent alerts still show.",
+  "quick.allSettings": "All settings",
+  "quick.menu.settings": "Settings",
+  "quick.menu.about": "About Atap",
+  "quick.menu.quit": "Quit Atap"
+}

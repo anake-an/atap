@@ -1,0 +1,12 @@
+{
+  "mediacommands.playPause": "Play or pause music",
+  "mediacommands.next": "Next track",
+  "mediacommands.previous": "Previous track",
+  "mediacommands.volumeUp": "Volume up",
+  "mediacommands.volumeDown": "Volume down",
+  "mediacommands.mute": "Mute or unmute",
+  "mediacommands.volume": "Volume",
+  "mediacommands.muted": "Muted",
+  "mediacommands.musicKeywords": "music media song track play pause skip next previous spotify",
+  "mediacommands.volumeKeywords": "volume sound louder quieter mute unmute speaker audio"
+}

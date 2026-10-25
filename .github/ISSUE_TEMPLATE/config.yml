@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/anake-an/atap/security/advisories/new
+    about: Do not open a public issue. Report it privately through GitHub Security Advisories.
+  - name: Help pages
+    url: https://atap.novafortress.my/help
+    about: Setup guides and answers to common questions.
+  - name: Ask a question
+    url: https://github.com/anake-an/atap/discussions
+    about: Use Discussions for questions and ideas that are not bug reports.

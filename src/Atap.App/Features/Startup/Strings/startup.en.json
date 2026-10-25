@@ -1,0 +1,4 @@
+{
+  "startup.enabled": "Start with Windows",
+  "startup.enabledHint": "Atap opens by itself when you sign in."
+}

@@ -1,0 +1,15 @@
+{
+  "widgetlist.title": "Pada notch anda",
+  "widgetlist.empty": "Belum ada apa-apa pada notch anda.",
+  "widgetlist.named": "{name} ({instance})",
+  "widgetlist.status.running": "Berfungsi",
+  "widgetlist.status.needsSetup": "Perlu disediakan",
+  "widgetlist.status.needsApproval": "Menunggu kebenaran anda",
+  "widgetlist.status.offline": "Luar talian",
+  "widgetlist.status.failed": "Berhenti kerana masalah",
+  "widgetlist.status.stopped": "Tidak berjalan",
+  "widgetlist.restart": "Mula semula",
+  "widgetlist.restartName": "Mula semula {name}",
+  "widgetlist.settingsShort": "Tetapan",
+  "widgetlist.settings": "Tetapan untuk {name}"
+}

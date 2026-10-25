@@ -1,0 +1,97 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a holidays instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="holidays.visible" />
+
+  <DataTemplate x:Key="holidays.message">
+    <TextBlock Text="{Binding Message}" AutomationProperties.Name="{Binding Message}"
+               Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+  </DataTemplate>
+
+  <!-- Small: the next holiday. -->
+  <DataTemplate x:Key="holidays.Expanded.Small">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T holidays.name}"
+                         Icon="{DynamicResource icon.calendar}"
+                         Accent="{DynamicResource MalaysiaAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Grid>
+        <StackPanel Visibility="{Binding HasNext, Converter={StaticResource holidays.visible}}">
+          <TextBlock Text="{Binding Next.Name}" Foreground="{DynamicResource TextBrush}" FontSize="14" FontWeight="SemiBold"
+                     TextWrapping="Wrap" MaxHeight="40" TextTrimming="CharacterEllipsis" />
+          <TextBlock Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,2,0,0">
+            <Run Text="{Binding Next.Date, Mode=OneWay}" />
+            <Run Text="·" />
+            <Run Text="{Binding Next.Until, Mode=OneWay}" />
+          </TextBlock>
+          <TextBlock Text="{loc:T holidays.mayChange}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,4,0,0"
+                     Visibility="{Binding Next.Tentative, Converter={StaticResource holidays.visible}}" />
+        </StackPanel>
+        <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource holidays.message}"
+                          Visibility="{Binding HasMessage, Converter={StaticResource holidays.visible}}" />
+      </Grid>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <!-- Medium: the next few, with dates that may change marked. -->
+  <DataTemplate x:Key="holidays.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T holidays.name}"
+                         Icon="{DynamicResource icon.calendar}"
+                         Accent="{DynamicResource MalaysiaAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Grid>
+        <StackPanel Visibility="{Binding HasNext, Converter={StaticResource holidays.visible}}">
+          <ItemsControl ItemsSource="{Binding Upcoming}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Grid Margin="0,2" AutomationProperties.Name="{Binding Name}">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <StackPanel>
+                    <TextBlock Foreground="{DynamicResource TextBrush}" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis">
+                      <Run Text="{Binding Name, Mode=OneWay}" />
+                      <Run x:Name="Star" Text="*" Foreground="{DynamicResource MalaysiaAccentBrush}" />
+                    </TextBlock>
+                    <TextBlock Text="{Binding Date}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
+                  </StackPanel>
+                  <TextBlock Grid.Column="1" Text="{Binding Until}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
+                             VerticalAlignment="Center" Margin="8,0,0,0" />
+                </Grid>
+                <DataTemplate.Triggers>
+                  <DataTrigger Binding="{Binding Tentative}" Value="False">
+                    <Setter TargetName="Star" Property="Text" Value="" />
+                  </DataTrigger>
+                </DataTemplate.Triggers>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,4,0,0" TextWrapping="Wrap">
+            <Run Text="{Binding Scope, Mode=OneWay}" />
+            <Run Text="{loc:T holidays.starNote}" />
+          </TextBlock>
+        </StackPanel>
+        <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource holidays.message}"
+                          Visibility="{Binding HasMessage, Converter={StaticResource holidays.visible}}" />
+      </Grid>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="holidays.Panel.Small">
+    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource holidays.Expanded.Small}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+  <DataTemplate x:Key="holidays.Panel">
+    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource holidays.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

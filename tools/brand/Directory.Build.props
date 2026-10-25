@@ -1,0 +1,6 @@
+<Project>
+
+  <!-- The brand generator (generate.cs) is a standalone file-based app and not part of Atap.sln.
+       This file replaces the repo-wide Directory.Build.props, so MinVer, lock files and the CI settings do not apply here. -->
+
+</Project>

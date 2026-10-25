@@ -1,0 +1,23 @@
+{
+  "malaysia.state": "Negeri",
+  "malaysia.zone": "Kawasan",
+  "malaysia.hijriOffset": "Laraskan tarikh Hijrah",
+  "malaysia.hijriOffsetHint": "Mengalihkan tarikh Hijrah sehingga 2 hari. Hanya digunakan apabila tarikh rasmi JAKIM tiada.",
+  "malaysia.days": "hari",
+  "malaysia.area.title": "Kawasan anda",
+  "malaysia.area.summary": "Waktu solat untuk {areas} ({zone}).",
+  "malaysia.area.none": "Pilih negeri dan kawasan anda untuk melihat waktu solat. Tiada apa-apa diambil sehingga anda memilih.",
+  "malaysia.area.state": "Negeri",
+  "malaysia.area.zone": "Kawasan",
+  "malaysia.area.zoneHint": "Zon JAKIM bagi daerah anda.",
+  "malaysia.area.find": "Cari kawasan saya",
+  "malaysia.area.findHint": "Menggunakan Lokasi Windows sekali sahaja. Lokasi anda kekal dalam PC ini.",
+  "malaysia.area.finding": "Mencari kawasan anda…",
+  "malaysia.area.found": "Anda nampaknya berada di {areas} ({zone}).",
+  "malaysia.area.use": "Guna kawasan ini",
+  "malaysia.area.locationOff": "Lokasi Windows dimatikan. Hidupkannya, atau pilih kawasan anda di atas.",
+  "malaysia.area.openLocation": "Buka tetapan Lokasi",
+  "malaysia.area.notFound": "Lokasi anda tidak dapat dikesan. Pilih kawasan anda di atas.",
+  "malaysia.area.abroad": "Anda nampaknya berada di luar Malaysia. Pilih kawasan anda di atas.",
+  "malaysia.area.alreadySet": "Ini memang kawasan anda."
+}

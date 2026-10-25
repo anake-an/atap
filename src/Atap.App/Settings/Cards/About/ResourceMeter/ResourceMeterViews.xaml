@@ -1,0 +1,45 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:meter="clr-namespace:Atap.Settings.Cards.About.ResourceMeter"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Merged into the settings window only while it is open. Loaded on its own, so the settings styles
+       are DynamicResource: they come from the window. -->
+
+  <DataTemplate DataType="{x:Type meter:ResourceMeterViewModel}">
+    <Border Style="{DynamicResource Settings.Card}" meter:MeterShown.Track="True">
+      <StackPanel>
+        <DockPanel LastChildFill="True">
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,0,0">
+            <TextBlock Text="{Binding CopyStatus}" Style="{DynamicResource Settings.Hint}" VerticalAlignment="Center" Margin="0,0,10,0"
+                       AutomationProperties.LiveSetting="Polite" />
+            <Button Style="{DynamicResource Settings.Button}" Content="{loc:T meter.copy}" Command="{Binding CopyCommand}" />
+          </StackPanel>
+          <StackPanel VerticalAlignment="Center">
+            <TextBlock Text="{Binding Summary}" Style="{DynamicResource Settings.Label}" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <TextBlock Text="{loc:T meter.hint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" />
+          </StackPanel>
+        </DockPanel>
+
+        <Expander Style="{DynamicResource Settings.Expander}" Header="{loc:T meter.details}" Margin="0,10,0,0"
+                  AutomationProperties.Name="{loc:T meter.details}">
+          <ItemsControl ItemsSource="{Binding Rows}" Focusable="False" Margin="0,6,0,0">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Grid Margin="0,3">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Text="{Binding Label}" Style="{DynamicResource Settings.Hint}" />
+                  <TextBlock Grid.Column="1" Text="{Binding Value}" Style="{DynamicResource Settings.Label}" Margin="16,0,0,0" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </Expander>
+      </StackPanel>
+    </Border>
+  </DataTemplate>
+
+</ResourceDictionary>

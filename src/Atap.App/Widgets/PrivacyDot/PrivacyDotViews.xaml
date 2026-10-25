@@ -1,0 +1,71 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a privacy dot instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="privacy-dot.visible" />
+
+  <!-- Compact, left of the camera: a teal dot for the camera, an amber dot for the mic. -->
+  <DataTemplate x:Key="privacy-dot.Compact.Left">
+    <StackPanel DataContext="{Binding ViewModel}"
+                AutomationProperties.Name="{Binding AccessibleSummary}"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Margin="4,0">
+      <Ellipse Width="8" Height="8" Fill="{DynamicResource MediaAccentBrush}" VerticalAlignment="Center" Margin="0,0,4,0"
+               Visibility="{Binding CameraOn, Converter={StaticResource privacy-dot.visible}}" />
+      <Ellipse Width="8" Height="8" Fill="{DynamicResource ProductivityAccentBrush}" VerticalAlignment="Center"
+               Visibility="{Binding MicOn, Converter={StaticResource privacy-dot.visible}}" />
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- Compact, right of the camera: "Camera", "Mic" or "Camera and mic". -->
+  <DataTemplate x:Key="privacy-dot.Compact.Right">
+    <TextBlock DataContext="{Binding ViewModel}"
+               AutomationProperties.Name="{Binding AccessibleSummary}"
+               Text="{Binding CompactText}"
+               Foreground="{DynamicResource PrimaryTextBrush}"
+               FontSize="13"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center"
+               Margin="4,0" />
+  </DataTemplate>
+
+  <!-- Which apps use the camera and the mic, or a line saying none do. -->
+  <DataTemplate x:Key="privacy-dot.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T privacy-dot.name}"
+                         Icon="{DynamicResource icon.camera}"
+                         Accent="{DynamicResource SystemAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <DockPanel Margin="0,0,0,6" Visibility="{Binding CameraOn, Converter={StaticResource privacy-dot.visible}}">
+          <Ellipse DockPanel.Dock="Left" Width="8" Height="8" Fill="{DynamicResource MediaAccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+          <StackPanel>
+            <TextBlock Text="{loc:T privacy-dot.camera}" Foreground="{DynamicResource TextBrush}" FontSize="12" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding CameraApps}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+        </DockPanel>
+        <DockPanel Margin="0,0,0,6" Visibility="{Binding MicOn, Converter={StaticResource privacy-dot.visible}}">
+          <Ellipse DockPanel.Dock="Left" Width="8" Height="8" Fill="{DynamicResource ProductivityAccentBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+          <StackPanel>
+            <TextBlock Text="{loc:T privacy-dot.mic}" Foreground="{DynamicResource TextBrush}" FontSize="12" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding MicApps}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+        </DockPanel>
+        <TextBlock Text="{loc:T privacy-dot.none}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+                   Visibility="{Binding NoneOn, Converter={StaticResource privacy-dot.visible}}" />
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="privacy-dot.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource privacy-dot.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

@@ -1,0 +1,42 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls">
+
+  <BooleanToVisibilityConverter x:Key="panel.visible" />
+
+  <!-- A click opens the panel: one page of widgets on the grid, a new alert above them and the page dots below. -->
+  <DataTemplate x:Key="surface.Panel">
+    <StackPanel MinWidth="320">
+      <ContentPresenter Content="{Binding}" ContentTemplate="{DynamicResource notch.banner}" />
+      <ContentPresenter Content="{Binding}" ContentTemplate="{DynamicResource notch.grid}" />
+
+      <StackPanel Margin="8,6"
+                  HorizontalAlignment="Center"
+                  Visibility="{Binding IsGridEmpty, Converter={StaticResource panel.visible}}">
+        <TextBlock Text="{loc:T panel.empty}"
+                   Foreground="{DynamicResource PrimaryTextBrush}"
+                   FontSize="13"
+                   FontWeight="SemiBold"
+                   HorizontalAlignment="Center" />
+        <TextBlock Text="{loc:T panel.emptyHint}"
+                   Foreground="{DynamicResource SecondaryTextBrush}"
+                   FontSize="12"
+                   Margin="0,2,0,0"
+                   TextWrapping="Wrap"
+                   TextAlignment="Center"
+                   MaxWidth="280" />
+      </StackPanel>
+
+      <controls:PageDots Count="{Binding PageCount}"
+                         SelectedIndex="{Binding PageIndex}"
+                         DotBrush="{DynamicResource SecondaryTextBrush}"
+                         CurrentBrush="{DynamicResource PrimaryTextBrush}"
+                         HorizontalAlignment="Center"
+                         Margin="0,8,0,0"
+                         Cursor="Hand"
+                         Visibility="{Binding HasPages, Converter={StaticResource panel.visible}}" />
+    </StackPanel>
+  </DataTemplate>
+
+</ResourceDictionary>

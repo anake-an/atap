@@ -1,0 +1,210 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization"
+                    xmlns:script="clr-namespace:Atap.Widgets.Script">
+
+  <!-- Notch templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       script.editor is the program editor in the widget's settings. It gets the settings form's CustomField.
+       Merged only while a script instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="script.visible" />
+  <script:ScriptEditorConverter x:Key="script.editorFor" />
+
+  <!-- Settings buttons as 6 px rounded rectangles. Settings.* styles come from the settings form around the editor. -->
+  <Style x:Key="script.button" TargetType="Button">
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource Settings.FocusVisual}" />
+    <Setter Property="Background" Value="{DynamicResource SettingsCardBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SettingsCardBorderBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource InkBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Padding" Value="12,5" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="MinWidth" Value="80" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="HorizontalAlignment" Value="Left" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SettingsNavSelectedBrush}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource WindowBrush}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Opacity" Value="0.5" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="script.accentButton" TargetType="Button" BasedOn="{StaticResource script.button}">
+    <Setter Property="Background" Value="{DynamicResource ToggleOnBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource ToggleOnBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource SettingsCardBrush}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.9" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.8" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Opacity" Value="0.5" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- Compact, left of the camera: the icon, while the value needs attention. -->
+  <DataTemplate x:Key="script.Compact.Left">
+    <StackPanel DataContext="{Binding ViewModel}"
+                AutomationProperties.Name="{Binding AccessibleSummary}"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Margin="4,0">
+      <controls:StrokeIcon Data="{DynamicResource icon.play}"
+                           Foreground="{DynamicResource CustomAccentBrush}"
+                           Width="16"
+                           Height="16"
+                           VerticalAlignment="Center" />
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- Compact, right of the camera: the value, such as "92%". -->
+  <DataTemplate x:Key="script.Compact.Right">
+    <TextBlock DataContext="{Binding ViewModel}"
+               AutomationProperties.Name="{Binding AccessibleSummary}"
+               Text="{Binding CompactText}"
+               Foreground="{DynamicResource PrimaryTextBrush}"
+               FontSize="13"
+               FontWeight="SemiBold"
+               MaxWidth="140"
+               TextTrimming="CharacterEllipsis"
+               VerticalAlignment="Center"
+               Margin="4,0" />
+  </DataTemplate>
+
+  <!-- The value in the chosen template, and a plain sentence when it did not run or went wrong. -->
+  <DataTemplate x:Key="script.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{Binding Title}"
+                         Icon="{DynamicResource icon.play}"
+                         Accent="{DynamicResource CustomAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <ContentPresenter Content="{Binding Value}" ContentTemplateSelector="{DynamicResource value.selector}"
+                          Visibility="{Binding HasValue, Converter={StaticResource script.visible}}" />
+        <TextBlock Text="{Binding Message}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+                   Margin="0,4,0,0"
+                   Visibility="{Binding HasMessage, Converter={StaticResource script.visible}}" />
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="script.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource script.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+  <!-- The program editor: program, options one per line, folder, exactly what will run, then Approve. -->
+  <DataTemplate x:Key="script.editorView" DataType="{x:Type script:ScriptEditorViewModel}">
+    <StackPanel AutomationProperties.Name="{loc:T script.program}">
+      <TextBlock Text="{loc:T script.editor.program}" Style="{DynamicResource Settings.Label}" />
+      <Grid Margin="0,4,0,0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBox Style="{DynamicResource Settings.TextBox}" Text="{Binding Program, UpdateSourceTrigger=PropertyChanged}" MaxLength="1024"
+                 AutomationProperties.Name="{loc:T script.editor.program}" AutomationProperties.HelpText="{loc:T script.editor.programHint}" />
+        <Button Grid.Column="1" Style="{StaticResource script.button}" Margin="8,0,0,0" Content="{loc:T script.editor.browse}"
+                AutomationProperties.HelpText="{loc:T script.editor.program}" Command="{Binding BrowseProgramCommand}"
+                Visibility="{Binding CanBrowse, Converter={StaticResource script.visible}}" />
+      </Grid>
+      <TextBlock Text="{loc:T script.editor.programHint}" Style="{DynamicResource Settings.Hint}" />
+
+      <TextBlock Text="{loc:T script.editor.arguments}" Style="{DynamicResource Settings.Label}" Margin="0,12,0,0" />
+      <TextBox Style="{DynamicResource Settings.TextBox}" Margin="0,4,0,0" Text="{Binding Arguments, UpdateSourceTrigger=PropertyChanged}"
+               AcceptsReturn="True" TextWrapping="NoWrap" MinHeight="72" VerticalContentAlignment="Top"
+               AutomationProperties.Name="{loc:T script.editor.arguments}" AutomationProperties.HelpText="{loc:T script.editor.argumentsHint}" />
+      <TextBlock Text="{loc:T script.editor.argumentsHint}" Style="{DynamicResource Settings.Hint}" />
+
+      <TextBlock Text="{loc:T script.editor.folder}" Style="{DynamicResource Settings.Label}" Margin="0,12,0,0" />
+      <Grid Margin="0,4,0,0">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBox Style="{DynamicResource Settings.TextBox}" Text="{Binding WorkingFolder, UpdateSourceTrigger=PropertyChanged}" MaxLength="1024"
+                 AutomationProperties.Name="{loc:T script.editor.folder}" AutomationProperties.HelpText="{loc:T script.editor.folderHint}" />
+        <Button Grid.Column="1" Style="{StaticResource script.button}" Margin="8,0,0,0" Content="{loc:T script.editor.browse}"
+                AutomationProperties.HelpText="{loc:T script.editor.folder}" Command="{Binding BrowseFolderCommand}"
+                Visibility="{Binding CanBrowse, Converter={StaticResource script.visible}}" />
+      </Grid>
+      <TextBlock Text="{loc:T script.editor.folderHint}" Style="{DynamicResource Settings.Hint}" />
+
+      <TextBlock Text="{Binding ProblemText}" Style="{DynamicResource Settings.Error}"
+                 Visibility="{Binding HasProblem, Converter={StaticResource script.visible}}" />
+      <TextBlock Text="{loc:T script.editor.cloudWarning}" Style="{DynamicResource Settings.Error}"
+                 Visibility="{Binding HasCloudWarning, Converter={StaticResource script.visible}}" />
+
+      <Border Margin="0,12,0,0" Padding="12,10" CornerRadius="6" BorderThickness="1"
+              Background="{DynamicResource WindowBrush}" BorderBrush="{DynamicResource SettingsCardBorderBrush}"
+              Visibility="{Binding HasReview, Converter={StaticResource script.visible}}">
+        <StackPanel>
+          <TextBlock Text="{loc:T script.editor.review}" Style="{DynamicResource Settings.Label}" FontWeight="SemiBold" />
+          <ItemsControl ItemsSource="{Binding Review}" Focusable="False" IsTabStop="False" Margin="0,4,0,0"
+                        AutomationProperties.Name="{loc:T script.editor.review}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding}" Style="{DynamicResource Settings.Hint}" FontFamily="Cascadia Mono, Consolas"
+                           AutomationProperties.Name="{Binding}" />
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <TextBlock Text="{Binding StatusText}" Style="{DynamicResource Settings.Hint}" Margin="0,8,0,0"
+                 AutomationProperties.LiveSetting="Polite" />
+      <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+        <Button Style="{StaticResource script.accentButton}" Content="{loc:T script.editor.approve}" Command="{Binding ApproveCommand}"
+                AutomationProperties.HelpText="{loc:T script.editor.review}" />
+        <Button Style="{StaticResource script.button}" Margin="8,0,0,0" Content="{loc:T script.editor.remove}" Command="{Binding RemoveCommand}"
+                AutomationProperties.HelpText="{loc:T script.program}" />
+      </StackPanel>
+      <TextBlock Text="{loc:T script.editor.unsaved}" Style="{DynamicResource Settings.Hint}" />
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- What the settings form shows for the program setting. -->
+  <DataTemplate x:Key="script.editor">
+    <ContentPresenter Content="{Binding Converter={StaticResource script.editorFor}}"
+                      ContentTemplate="{StaticResource script.editorView}"
+                      AutomationProperties.Name="{loc:T script.program}" />
+  </DataTemplate>
+
+</ResourceDictionary>

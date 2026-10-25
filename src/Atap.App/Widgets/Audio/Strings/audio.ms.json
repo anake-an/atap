@@ -1,0 +1,16 @@
+{
+  "audio.output.name": "Output bunyi",
+  "audio.output.description": "Tukar antara pembesar suara dan fon kepala anda dari notch.",
+  "audio.output.none": "Tiada pembesar suara atau fon kepala ditemui.",
+  "audio.output.failed": "Windows tidak dapat menukar di sini, jadi tetapan Bunyi dibuka.",
+  "audio.output.accessible": "Output bunyi. {name}",
+  "audio.mixer.name": "Pengadun kelantangan",
+  "audio.mixer.description": "Kelantangan setiap aplikasi yang sedang berbunyi. Hanya disemak semasa anda membukanya.",
+  "audio.mixer.none": "Tiada aplikasi yang sedang berbunyi.",
+  "audio.mixer.quieter": "Perlahankan",
+  "audio.mixer.louder": "Kuatkan",
+  "audio.mixer.mute": "Senyapkan {app}",
+  "audio.mixer.unmute": "Nyahsenyap {app}",
+  "audio.mixer.muted": "Disenyapkan",
+  "audio.mixer.accessible": "Pengadun kelantangan. {count} aplikasi"
+}

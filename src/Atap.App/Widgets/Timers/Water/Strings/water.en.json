@@ -1,0 +1,20 @@
+{
+  "water.name": "Water",
+  "water.description": "A gentle reminder to drink water, and a count of glasses for the day. It waits while the PC is locked.",
+  "water.interval": "Remind me every",
+  "water.minutes": "min",
+  "water.from": "From",
+  "water.until": "Until",
+  "water.hoursHint": "Reminders come only between these times.",
+  "water.goal": "Glasses a day",
+  "water.glasses": "glasses",
+  "water.count": "{count} of {goal}",
+  "water.glassesToday": "glasses today",
+  "water.drink": "Add a glass",
+  "water.undo": "Take back a glass",
+  "water.next": "Next reminder at {time}",
+  "water.paused": "Paused while the PC is locked",
+  "water.alert": "Time for some water",
+  "water.alertCount": "{count} of {goal} glasses today",
+  "water.accessible": "Water. {count} glasses. {next}"
+}

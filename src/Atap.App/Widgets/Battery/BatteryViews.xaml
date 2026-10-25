@@ -1,0 +1,74 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a battery instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="battery.visible" />
+
+  <!-- Compact, left of the camera: a bolt and "Charging", just after the plug goes in. -->
+  <DataTemplate x:Key="battery.Compact.Left">
+    <StackPanel DataContext="{Binding ViewModel}"
+                AutomationProperties.Name="{Binding AccessibleSummary}"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Margin="4,0">
+      <controls:StrokeIcon Data="{DynamicResource icon.batteryCharging}"
+                           Foreground="{DynamicResource SystemAccentBrush}"
+                           Width="16"
+                           Height="16"
+                           VerticalAlignment="Center"
+                           Margin="0,0,6,0" />
+      <TextBlock Text="{Binding CompactText}"
+                 Foreground="{DynamicResource PrimaryTextBrush}"
+                 FontSize="13"
+                 FontWeight="SemiBold"
+                 VerticalAlignment="Center" />
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- Compact, right of the camera: "64%". -->
+  <DataTemplate x:Key="battery.Compact.Right">
+    <TextBlock DataContext="{Binding ViewModel}"
+               AutomationProperties.Name="{Binding AccessibleSummary}"
+               Text="{Binding PercentText}"
+               Foreground="{DynamicResource PrimaryTextBrush}"
+               FontSize="13"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center"
+               Margin="4,0" />
+  </DataTemplate>
+
+  <!-- The percent, what the power is doing, and a bar that turns amber and rose when low. -->
+  <DataTemplate x:Key="battery.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T battery.name}"
+                         Icon="{DynamicResource icon.battery}"
+                         Accent="{DynamicResource SystemAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Grid>
+        <StackPanel Visibility="{Binding HasBattery, Converter={StaticResource battery.visible}}">
+          <TextBlock Text="{Binding PercentText}" Foreground="{DynamicResource TextBrush}" FontSize="24" FontWeight="SemiBold"
+                     Typography.NumeralAlignment="Tabular" />
+          <TextBlock Text="{Binding StatusText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+          <controls:ProgressPill Value="{Binding Percent, Mode=OneWay}" Maximum="100" Level="{Binding Level, Mode=OneWay}"
+                                 Accent="{DynamicResource SystemAccentBrush}" Margin="0,8,0,0"
+                                 AutomationProperties.Name="{loc:T battery.name}" />
+          <TextBlock Text="{Binding SaverText}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,6,0,0"
+                     Visibility="{Binding SaverOn, Converter={StaticResource battery.visible}}" />
+        </StackPanel>
+        <TextBlock Text="{loc:T battery.none}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"
+                   Visibility="{Binding HasNoBattery, Converter={StaticResource battery.visible}}" />
+      </Grid>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="battery.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource battery.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

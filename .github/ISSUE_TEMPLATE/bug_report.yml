@@ -1,0 +1,75 @@
+name: Bug report
+description: Something in Atap does not work as expected.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please do not use this form for security problems. Use a private security advisory instead, as described in SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Atap version
+      description: Shown at the top of the right-click menu, and on the About page in Settings.
+      placeholder: "1.0.0"
+    validations:
+      required: true
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version and build
+      description: Press Win+R and run winver. For example Windows 11 24H2, build 26100.
+    validations:
+      required: true
+  - type: dropdown
+    id: install
+    attributes:
+      label: Install type
+      options:
+        - Setup (installer)
+        - Portable zip
+        - Microsoft Store
+        - Built from source
+    validations:
+      required: true
+  - type: dropdown
+    id: arch
+    attributes:
+      label: PC type
+      options:
+        - x64
+        - Arm64
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: monitors
+    attributes:
+      label: Monitor setup and scaling
+      description: How many monitors, which one is primary, and the display scale of each (for example 100% or 150%). Needed for placement and display bugs.
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: Logs are in %APPDATA%\Atap\logs, one file a day. Paste the relevant lines or attach the newest file. Check it for anything private first.

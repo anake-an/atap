@@ -1,0 +1,27 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:logs="clr-namespace:Atap.Settings.Cards.Advanced.ProblemLog"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Merged into the settings window only while it is open. Loaded on its own, so the settings styles
+       are DynamicResource: they come from the window. -->
+  <BooleanToVisibilityConverter x:Key="Card.BoolToVisibility" />
+
+  <DataTemplate DataType="{x:Type logs:LogsCardViewModel}">
+    <Border Style="{DynamicResource Settings.Card}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+          <TextBlock Text="{loc:T logs.hint}" Style="{DynamicResource Settings.Label}" />
+          <TextBlock Text="{loc:T logs.none}" Style="{DynamicResource Settings.Hint}"
+                     Visibility="{Binding NoLog, Converter={StaticResource Card.BoolToVisibility}}" />
+        </StackPanel>
+        <Button Grid.Column="1" Style="{DynamicResource Settings.Button}" Content="{loc:T logs.open}" Command="{Binding OpenCommand}" />
+      </Grid>
+    </Border>
+  </DataTemplate>
+
+</ResourceDictionary>

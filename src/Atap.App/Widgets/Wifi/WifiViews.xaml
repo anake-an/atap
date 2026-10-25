@@ -1,0 +1,39 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a Wi-Fi instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="wifi.visible" />
+
+  <DataTemplate x:Key="wifi.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T wifi.name}"
+                         Icon="{DynamicResource icon.wifi}"
+                         Accent="{DynamicResource SystemAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <TextBlock Text="{Binding Title}" Foreground="{DynamicResource TextBrush}" FontSize="16" FontWeight="SemiBold"
+                   TextTrimming="CharacterEllipsis" ToolTip="{Binding Title}" />
+        <TextBlock Text="{Binding SignalText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"
+                   Visibility="{Binding HasBars, Converter={StaticResource wifi.visible}}" />
+        <controls:ProgressPill Value="{Binding Bars, Mode=OneWay}" Maximum="5" Accent="{DynamicResource SystemAccentBrush}"
+                               Margin="0,8,0,0" AutomationProperties.Name="{Binding SignalText}"
+                               Visibility="{Binding HasBars, Converter={StaticResource wifi.visible}}" />
+        <TextBlock Text="{loc:T wifi.metered}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,6,0,0" TextWrapping="Wrap"
+                   Visibility="{Binding IsMetered, Converter={StaticResource wifi.visible}}" />
+        <TextBlock Text="{Binding NameNote}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,6,0,0"
+                   TextWrapping="Wrap" Visibility="{Binding HasNameNote, Converter={StaticResource wifi.visible}}" />
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="wifi.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource wifi.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

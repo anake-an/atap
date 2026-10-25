@@ -1,0 +1,10 @@
+{
+  "sysmon.name": "System monitor",
+  "sysmon.description": "How busy the processor is, how much memory is used, and the free space on your system drive. Only checked while you have it open.",
+  "sysmon.cpu": "Processor",
+  "sysmon.memory": "Memory",
+  "sysmon.disk": "Drive {drive}",
+  "sysmon.of": "{used} of {total}",
+  "sysmon.free": "{free} free",
+  "sysmon.accessible": "System monitor. {rows}"
+}

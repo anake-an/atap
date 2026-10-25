@@ -1,0 +1,21 @@
+{
+  "studentcard.title": "Kelas dan tugasan",
+  "studentcard.timetable": "Jadual waktu anda",
+  "studentcard.timetableHint": "Widget Kelas seterusnya menggunakan ini. Tambah setiap kelas sekali dengan hari dan masanya.",
+  "studentcard.day": "Hari",
+  "studentcard.start": "Mula",
+  "studentcard.end": "Tamat",
+  "studentcard.code": "Kod kursus",
+  "studentcard.className": "Nama kelas",
+  "studentcard.room": "Bilik",
+  "studentcard.addClass": "Tambah kelas",
+  "studentcard.classInvalid": "Kelas perlu ada kod atau nama, dan mesti tamat selepas ia bermula.",
+  "studentcard.assignments": "Tugasan anda",
+  "studentcard.assignmentsHint": "Widget Tugasan mengira hari ke setiap tugasan. Tarikh akhir pada 11:59 malam hari itu.",
+  "studentcard.assignmentTitle": "Tugasan",
+  "studentcard.course": "Kursus",
+  "studentcard.due": "Tarikh akhir",
+  "studentcard.addAssignment": "Tambah tugasan",
+  "studentcard.assignmentInvalid": "Tugasan perlu ada nama.",
+  "studentcard.remove": "Buang"
+}

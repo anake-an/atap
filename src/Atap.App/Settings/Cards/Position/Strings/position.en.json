@@ -1,0 +1,13 @@
+{
+  "position.title": "Where it sits",
+  "position.hint": "Pick a spot. The notch moves there right away.",
+  "position.anchors": "Notch position",
+  "position.screen": "Which screen",
+  "position.screenHint": "The screen that shows the notch.",
+  "position.screen.primary": "Main screen",
+  "position.screen.all": "Every screen",
+  "position.screen.notConnected": "{name} (not connected)",
+  "position.editLayout": "Edit layout",
+  "position.editLayoutHint": "Choose what shows on the notch, and where.",
+  "position.notSaved": "The notch moved, but the change could not be saved. It goes back when Atap restarts."
+}

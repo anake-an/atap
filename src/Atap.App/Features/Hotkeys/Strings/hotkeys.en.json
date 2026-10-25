@@ -1,0 +1,6 @@
+{
+  "hotkeys.panel": "Show the panel",
+  "hotkeys.panelHint": "Tap to open or close the panel. Hold to peek at the notch until you let go.",
+  "hotkeys.commandBar": "Open the command bar",
+  "hotkeys.commandBarHint": "Type to run any Atap action, do quick sums or open an app."
+}

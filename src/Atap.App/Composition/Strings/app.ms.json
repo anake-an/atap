@@ -1,0 +1,19 @@
+{
+  "app.safeMode.title": "Atap dimulakan dalam mod selamat",
+  "app.safeMode.subtitle": "Atap tertutup kerana ralat. Hanya jam yang berfungsi. Mulakan semula Atap untuk menghidupkan semuanya semula.",
+  "app.command.quit": "Keluar dari Atap",
+  "app.command.checkUpdates": "Semak kemas kini",
+  "app.section.general": "Umum",
+  "app.section.appearance": "Penampilan",
+  "app.section.position": "Kedudukan",
+  "app.section.widgets": "Widget",
+  "app.section.layout": "Susun atur",
+  "app.section.profiles": "Profil",
+  "app.section.malaysia": "Malaysia",
+  "app.section.behavior": "Tingkah laku",
+  "app.section.advanced": "Lanjutan",
+  "app.section.accessibility": "Kebolehcapaian",
+  "app.section.privacy": "Privasi",
+  "app.section.updates": "Kemas kini",
+  "app.section.about": "Perihal"
+}

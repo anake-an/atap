@@ -1,0 +1,310 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:system="clr-namespace:System;assembly=System.Runtime"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:custom="clr-namespace:Atap.Core.Custom;assembly=Atap.Core"
+                    xmlns:text="clr-namespace:Atap.Core.Localization;assembly=Atap.Core"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Views for a custom widget's value (Atap.Core.Custom.ValueView), keyed "value.<Kind>": Number, Text, Progress,
+       List and StatusDot. Show one with
+       <ContentPresenter Content="{Binding Value}" ContentTemplateSelector="{DynamicResource value.selector}" />.
+       Each shows the value, or a plain sentence when there is none, and "Out of date" on a stale view.
+       Levels: Normal is the text colour, Warning amber and Critical rose, with a status dot so colour is not the only cue.
+       Merged through Ui/Theme/Cards.xaml. Theme keys use DynamicResource, as in Controls.xaml. -->
+
+  <controls:ValueTemplateSelector x:Key="value.selector" />
+  <controls:ValueSpeech x:Key="value.Speech" Part="View" />
+  <controls:ValueSpeech x:Key="value.ItemSpeech" Part="Item" />
+  <controls:ValueSpeech x:Key="value.MoreText" Part="More" />
+
+  <!-- Plain value text. -->
+  <Style x:Key="value.TextStyle" TargetType="TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsHigh, Source={x:Static controls:Contrast.Current}}" Value="True">
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <Style x:Key="value.SecondaryStyle" TargetType="TextBlock" BasedOn="{StaticResource value.TextStyle}">
+    <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+    <Setter Property="FontSize" Value="12" />
+  </Style>
+
+  <!-- Value text coloured by the Level of its data context, a ValueView or a ValueListItem. -->
+  <Style x:Key="value.LevelStyle" TargetType="TextBlock" BasedOn="{StaticResource value.TextStyle}">
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding Level}" Value="{x:Static custom:ValueLevel.Unknown}">
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Level}" Value="{x:Static custom:ValueLevel.Warning}">
+        <Setter Property="Foreground" Value="{DynamicResource ProductivityAccentBrush}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Level}" Value="{x:Static custom:ValueLevel.Critical}">
+        <Setter Property="Foreground" Value="{DynamicResource SystemAccentBrush}" />
+      </DataTrigger>
+      <!-- Last, so it wins over the level colours. -->
+      <DataTrigger Binding="{Binding IsHigh, Source={x:Static controls:Contrast.Current}}" Value="True">
+        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- Why there is no value, in plain words. Shown only when the view has none. -->
+  <Style x:Key="value.ProblemStyle" TargetType="TextBlock" BasedOn="{StaticResource value.SecondaryStyle}">
+    <Setter Property="Visibility" Value="Collapsed" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="TextTrimming" Value="None" />
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding HasValue}" Value="False">
+        <Setter Property="Visibility" Value="Visible" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Problem}" Value="{x:Static custom:ValueProblem.NoValue}">
+        <Setter Property="Text" Value="{loc:T controls.problem.NoValue}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Problem}" Value="{x:Static custom:ValueProblem.NotFound}">
+        <Setter Property="Text" Value="{loc:T controls.problem.NotFound}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Problem}" Value="{x:Static custom:ValueProblem.NotANumber}">
+        <Setter Property="Text" Value="{loc:T controls.problem.NotANumber}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Problem}" Value="{x:Static custom:ValueProblem.NotText}">
+        <Setter Property="Text" Value="{loc:T controls.problem.NotText}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Problem}" Value="{x:Static custom:ValueProblem.NotAList}">
+        <Setter Property="Text" Value="{loc:T controls.problem.NotAList}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Problem}" Value="{x:Static custom:ValueProblem.BadMaximum}">
+        <Setter Property="Text" Value="{loc:T controls.problem.BadMaximum}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Problem}" Value="{x:Static custom:ValueProblem.InvalidJson}">
+        <Setter Property="Text" Value="{loc:T controls.problem.InvalidJson}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Problem}" Value="{x:Static custom:ValueProblem.InvalidText}">
+        <Setter Property="Text" Value="{loc:T controls.problem.InvalidText}" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Problem}" Value="{x:Static custom:ValueProblem.TooLarge}">
+        <Setter Property="Text" Value="{loc:T controls.problem.TooLarge}" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- "Out of date" under the last good value after a refresh failed. -->
+  <Style x:Key="value.StaleStyle" TargetType="TextBlock" BasedOn="{StaticResource value.SecondaryStyle}">
+    <Setter Property="Visibility" Value="Collapsed" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="Text" Value="{loc:T controls.stale}" />
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding Stale}" Value="True">
+        <Setter Property="Visibility" Value="Visible" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- Number: "72.5%" large, with a dot at Warning and Critical. -->
+  <DataTemplate x:Key="value.Number" DataType="{x:Type custom:ValueView}">
+    <StackPanel x:Name="Root">
+      <AutomationProperties.Name>
+        <MultiBinding Converter="{StaticResource value.Speech}">
+          <Binding />
+          <Binding Path="Language" Source="{x:Static text:Localizer.Instance}" />
+        </MultiBinding>
+      </AutomationProperties.Name>
+      <StackPanel x:Name="ValueRow" Orientation="Horizontal">
+        <controls:StatusDot x:Name="AlertDot" Level="{Binding Level}" Visibility="Collapsed" VerticalAlignment="Center" Margin="0,0,6,0" />
+        <TextBlock x:Name="Main" Style="{StaticResource value.LevelStyle}" Text="{Binding DisplayText}" FontSize="20" FontWeight="SemiBold" />
+      </StackPanel>
+      <TextBlock x:Name="Problem" Style="{StaticResource value.ProblemStyle}" />
+      <TextBlock x:Name="Stale" Style="{StaticResource value.StaleStyle}" />
+    </StackPanel>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding HasValue}" Value="False">
+        <Setter TargetName="ValueRow" Property="Visibility" Value="Collapsed" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding IsAlerting}" Value="True">
+        <Setter TargetName="AlertDot" Property="Visibility" Value="Visible" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Stale}" Value="True">
+        <Setter TargetName="ValueRow" Property="Opacity" Value="0.6" />
+      </DataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
+
+  <!-- Text: one line, cut with an ellipsis. -->
+  <DataTemplate x:Key="value.Text" DataType="{x:Type custom:ValueView}">
+    <StackPanel x:Name="Root">
+      <AutomationProperties.Name>
+        <MultiBinding Converter="{StaticResource value.Speech}">
+          <Binding />
+          <Binding Path="Language" Source="{x:Static text:Localizer.Instance}" />
+        </MultiBinding>
+      </AutomationProperties.Name>
+      <StackPanel x:Name="ValueRow" Orientation="Horizontal">
+        <controls:StatusDot x:Name="AlertDot" Level="{Binding Level}" Visibility="Collapsed" VerticalAlignment="Center" Margin="0,0,6,0" />
+        <TextBlock x:Name="Main" Style="{StaticResource value.LevelStyle}" Text="{Binding DisplayText}" FontSize="14" />
+      </StackPanel>
+      <TextBlock x:Name="Problem" Style="{StaticResource value.ProblemStyle}" />
+      <TextBlock x:Name="Stale" Style="{StaticResource value.StaleStyle}" />
+    </StackPanel>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding HasValue}" Value="False">
+        <Setter TargetName="ValueRow" Property="Visibility" Value="Collapsed" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding IsAlerting}" Value="True">
+        <Setter TargetName="AlertDot" Property="Visibility" Value="Visible" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Stale}" Value="True">
+        <Setter TargetName="ValueRow" Property="Opacity" Value="0.6" />
+      </DataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
+
+  <!-- Progress: the percentage and "36.2 / 50 GB" over a bar coloured by level. -->
+  <DataTemplate x:Key="value.Progress" DataType="{x:Type custom:ValueView}">
+    <StackPanel x:Name="Root">
+      <AutomationProperties.Name>
+        <MultiBinding Converter="{StaticResource value.Speech}">
+          <Binding />
+          <Binding Path="Language" Source="{x:Static text:Localizer.Instance}" />
+        </MultiBinding>
+      </AutomationProperties.Name>
+      <Grid x:Name="ValueRow">
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock x:Name="Main" Style="{StaticResource value.LevelStyle}" Text="{Binding DisplayText}" FontSize="14" FontWeight="SemiBold" />
+        <TextBlock x:Name="Detail"
+                   Grid.Column="1"
+                   Style="{StaticResource value.SecondaryStyle}"
+                   Text="{Binding Detail}"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Bottom"
+                   Margin="8,0,0,0" />
+        <controls:ProgressPill x:Name="Bar"
+                               Grid.Row="1"
+                               Grid.ColumnSpan="2"
+                               Margin="0,6,0,0"
+                               Minimum="0"
+                               Maximum="1"
+                               Value="{Binding Fraction, TargetNullValue=0, Mode=OneWay}"
+                               Level="{Binding Level}"
+                               Accent="{DynamicResource CustomAccentBrush}" />
+      </Grid>
+      <TextBlock x:Name="Problem" Style="{StaticResource value.ProblemStyle}" />
+      <TextBlock x:Name="Stale" Style="{StaticResource value.StaleStyle}" />
+    </StackPanel>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding HasValue}" Value="False">
+        <Setter TargetName="ValueRow" Property="Visibility" Value="Collapsed" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Stale}" Value="True">
+        <Setter TargetName="ValueRow" Property="Opacity" Value="0.6" />
+      </DataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
+
+  <!-- List: one row per item, a dot for items with a value, and "3 more" when only the first items fit. -->
+  <DataTemplate x:Key="value.List" DataType="{x:Type custom:ValueView}">
+    <StackPanel x:Name="Root">
+      <AutomationProperties.Name>
+        <MultiBinding Converter="{StaticResource value.Speech}">
+          <Binding />
+          <Binding Path="Language" Source="{x:Static text:Localizer.Instance}" />
+        </MultiBinding>
+      </AutomationProperties.Name>
+      <StackPanel x:Name="ValueRow">
+        <ItemsControl x:Name="Items" ItemsSource="{Binding Items}" Focusable="False">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="{x:Type custom:ValueListItem}">
+              <Grid x:Name="Row" Margin="0,2">
+                <AutomationProperties.Name>
+                  <MultiBinding Converter="{StaticResource value.ItemSpeech}">
+                    <Binding />
+                    <Binding Path="Language" Source="{x:Static text:Localizer.Instance}" />
+                  </MultiBinding>
+                </AutomationProperties.Name>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto" />
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <controls:StatusDot x:Name="Dot" Level="{Binding Level}" Width="6" Height="6" VerticalAlignment="Center" Margin="0,0,6,0" />
+                <TextBlock x:Name="Label" Grid.Column="1" Style="{StaticResource value.TextStyle}" Text="{Binding Label}" FontSize="12" />
+                <TextBlock x:Name="ItemValue" Grid.Column="2" Style="{StaticResource value.LevelStyle}" Text="{Binding Value}" FontSize="12" Margin="8,0,0,0" />
+              </Grid>
+              <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Value}" Value="{x:Null}">
+                  <Setter TargetName="Dot" Property="Visibility" Value="Collapsed" />
+                  <Setter TargetName="ItemValue" Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </DataTemplate.Triggers>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock x:Name="More" Margin="0,2,0,0">
+          <TextBlock.Text>
+            <MultiBinding Converter="{StaticResource value.MoreText}">
+              <Binding />
+              <Binding Path="Language" Source="{x:Static text:Localizer.Instance}" />
+            </MultiBinding>
+          </TextBlock.Text>
+          <TextBlock.Style>
+            <Style TargetType="TextBlock" BasedOn="{StaticResource value.SecondaryStyle}">
+              <Style.Triggers>
+                <Trigger Property="Text" Value="{x:Static system:String.Empty}">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </Trigger>
+              </Style.Triggers>
+            </Style>
+          </TextBlock.Style>
+        </TextBlock>
+      </StackPanel>
+      <TextBlock x:Name="Problem" Style="{StaticResource value.ProblemStyle}" />
+      <TextBlock x:Name="Stale" Style="{StaticResource value.StaleStyle}" />
+    </StackPanel>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding HasValue}" Value="False">
+        <Setter TargetName="ValueRow" Property="Visibility" Value="Collapsed" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Stale}" Value="True">
+        <Setter TargetName="ValueRow" Property="Opacity" Value="0.6" />
+      </DataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
+
+  <!-- Status dot: the dot and the status word. -->
+  <DataTemplate x:Key="value.StatusDot" DataType="{x:Type custom:ValueView}">
+    <StackPanel x:Name="Root">
+      <AutomationProperties.Name>
+        <MultiBinding Converter="{StaticResource value.Speech}">
+          <Binding />
+          <Binding Path="Language" Source="{x:Static text:Localizer.Instance}" />
+        </MultiBinding>
+      </AutomationProperties.Name>
+      <StackPanel x:Name="ValueRow" Orientation="Horizontal">
+        <controls:StatusDot x:Name="Dot" Level="{Binding Level}" Width="10" Height="10" VerticalAlignment="Center" Margin="0,0,8,0" />
+        <TextBlock x:Name="Main" Style="{StaticResource value.TextStyle}" Text="{Binding DisplayText}" FontSize="14" />
+      </StackPanel>
+      <TextBlock x:Name="Problem" Style="{StaticResource value.ProblemStyle}" />
+      <TextBlock x:Name="Stale" Style="{StaticResource value.StaleStyle}" />
+    </StackPanel>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding HasValue}" Value="False">
+        <Setter TargetName="ValueRow" Property="Visibility" Value="Collapsed" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding Stale}" Value="True">
+        <Setter TargetName="ValueRow" Property="Opacity" Value="0.6" />
+      </DataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
+
+</ResourceDictionary>

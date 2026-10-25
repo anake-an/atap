@@ -1,0 +1,163 @@
+<Window x:Class="Atap.Features.Onboarding.OnboardingWindow"
+        x:ClassModifier="internal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:Atap.Ui.Localization"
+        Title="{loc:T onboarding.title}"
+        Icon="/Atap;component/Assets/atap.ico"
+        Width="640" Height="580" MinWidth="520" MinHeight="480"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanMinimize"
+        Background="{DynamicResource WindowBrush}"
+        Foreground="{DynamicResource InkBrush}"
+        FontFamily="{StaticResource TextFont}"
+        FontSize="14"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+
+  <!-- Shown once, on a new install. Language and position change at once, so the notch shows the result. -->
+  <Window.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Atap;component/Ui/Theme/Settings.xaml" />
+        <ResourceDictionary Source="/Atap;component/Settings/Cards/Malaysia/PrayerArea/PrayerAreaViews.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <!-- A preset: a card that shows it is picked with an accent border. -->
+      <DataTemplate x:Key="Onboarding.Preset">
+        <Button Command="{Binding PickCommand}" Cursor="Hand" Margin="0,0,0,8" HorizontalContentAlignment="Stretch"
+                FocusVisualStyle="{StaticResource Settings.FocusVisual}" AutomationProperties.Name="{Binding Name}">
+          <Button.Template>
+            <ControlTemplate TargetType="Button">
+              <Border x:Name="Chrome" Style="{StaticResource Settings.Card}" Margin="0" BorderThickness="2">
+                <ContentPresenter />
+              </Border>
+              <ControlTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                  <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource ToggleOnBrush}" />
+                </DataTrigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Button.Template>
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Right" Text="{Binding Network}" Style="{StaticResource Settings.Hint}" VerticalAlignment="Top" />
+            <StackPanel>
+              <TextBlock Text="{Binding Name}" Style="{StaticResource Settings.Label}" />
+              <TextBlock Text="{Binding Description}" Style="{StaticResource Settings.Hint}" TextWrapping="Wrap" />
+            </StackPanel>
+          </DockPanel>
+        </Button>
+      </DataTemplate>
+    </ResourceDictionary>
+  </Window.Resources>
+
+  <Grid Margin="28,22,28,20">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <StackPanel>
+      <Image Source="{StaticResource Brand.Logo}" Width="40" Height="40" HorizontalAlignment="Left" Margin="0,0,0,10" />
+      <TextBlock Text="{Binding StepText}" Style="{StaticResource Settings.Hint}" />
+    </StackPanel>
+
+    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Focusable="False" Margin="0,8,0,0">
+      <Grid>
+        <!-- 1. Language -->
+        <StackPanel Visibility="{Binding IsLanguage, Converter={StaticResource Settings.BoolToVisibility}}">
+          <TextBlock Text="{loc:T onboarding.language.title}" Style="{StaticResource Settings.PageTitle}" AutomationProperties.HeadingLevel="Level1" />
+          <TextBlock Text="{loc:T onboarding.language.hint}" Style="{StaticResource Settings.Hint}" Margin="0,4,0,16" TextWrapping="Wrap" />
+          <ListBox Style="{StaticResource Settings.Segmented}" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage}"
+                   HorizontalAlignment="Left" AutomationProperties.Name="{loc:T onboarding.language.title}" />
+        </StackPanel>
+
+        <!-- OneDrive, only when it is on this PC -->
+        <StackPanel Visibility="{Binding IsSync, Converter={StaticResource Settings.BoolToVisibility}}">
+          <!-- OneDrive already has settings from another PC. -->
+          <StackPanel Visibility="{Binding SyncHasFile, Converter={StaticResource Settings.BoolToVisibility}}">
+            <TextBlock Text="{loc:T onboarding.sync.useTitle}" Style="{StaticResource Settings.PageTitle}" AutomationProperties.HeadingLevel="Level1" />
+            <TextBlock Text="{loc:T onboarding.sync.useHint}" Style="{StaticResource Settings.Hint}" Margin="0,4,0,16" TextWrapping="Wrap" />
+            <StackPanel Orientation="Horizontal" Visibility="{Binding SyncAsking, Converter={StaticResource Settings.BoolToVisibility}}">
+              <Button Style="{StaticResource Settings.AccentButton}" Content="{loc:T onboarding.sync.use}" Command="{Binding UseOneDriveSettingsCommand}" Margin="0,0,6,0" />
+              <Button Style="{StaticResource Settings.Button}" Content="{loc:T onboarding.sync.notNow}" Command="{Binding NotNowCommand}" />
+            </StackPanel>
+            <TextBlock Text="{Binding SyncMessage}" Style="{StaticResource Settings.Hint}" Margin="0,12,0,0" TextWrapping="Wrap"
+                       Visibility="{Binding HasSyncMessage, Converter={StaticResource Settings.BoolToVisibility}}" />
+          </StackPanel>
+
+          <!-- OneDrive has no settings yet. -->
+          <StackPanel Visibility="{Binding SyncOffer, Converter={StaticResource Settings.BoolToVisibility}}">
+            <TextBlock Text="{loc:T onboarding.sync.offerTitle}" Style="{StaticResource Settings.PageTitle}" AutomationProperties.HeadingLevel="Level1" />
+            <Border Style="{StaticResource Settings.Card}" Margin="0,16,0,0">
+              <DockPanel>
+                <CheckBox DockPanel.Dock="Right" Style="{StaticResource Settings.Toggle}" IsChecked="{Binding KeepInSync}"
+                          VerticalAlignment="Center" AutomationProperties.Name="{loc:T onboarding.sync.offerLabel}" />
+                <StackPanel Margin="0,0,16,0">
+                  <TextBlock Text="{loc:T onboarding.sync.offerLabel}" Style="{StaticResource Settings.Label}" />
+                  <TextBlock Text="{loc:T onboarding.sync.offerHint}" Style="{StaticResource Settings.Hint}" TextWrapping="Wrap" />
+                </StackPanel>
+              </DockPanel>
+            </Border>
+          </StackPanel>
+        </StackPanel>
+
+        <!-- 2. Position -->
+        <StackPanel Visibility="{Binding IsPosition, Converter={StaticResource Settings.BoolToVisibility}}">
+          <TextBlock Text="{loc:T onboarding.position.title}" Style="{StaticResource Settings.PageTitle}" AutomationProperties.HeadingLevel="Level1" />
+          <TextBlock Text="{loc:T onboarding.position.hint}" Style="{StaticResource Settings.Hint}" Margin="0,4,0,16" TextWrapping="Wrap" />
+          <ListBox Style="{StaticResource Settings.Segmented}" ItemsSource="{Binding Anchors}" SelectedItem="{Binding SelectedAnchor}"
+                   HorizontalAlignment="Left" AutomationProperties.Name="{loc:T onboarding.position.title}" />
+        </StackPanel>
+
+        <!-- 3. Preset -->
+        <StackPanel Visibility="{Binding IsPreset, Converter={StaticResource Settings.BoolToVisibility}}">
+          <TextBlock Text="{loc:T onboarding.preset.title}" Style="{StaticResource Settings.PageTitle}" AutomationProperties.HeadingLevel="Level1" />
+          <TextBlock Text="{loc:T onboarding.preset.hint}" Style="{StaticResource Settings.Hint}" Margin="0,4,0,16" TextWrapping="Wrap" />
+          <ItemsControl ItemsSource="{Binding Presets}" ItemTemplate="{StaticResource Onboarding.Preset}" Focusable="False" />
+        </StackPanel>
+
+        <!-- 4. Area, for the Malaysia preset -->
+        <StackPanel Visibility="{Binding IsArea, Converter={StaticResource Settings.BoolToVisibility}}">
+          <TextBlock Text="{loc:T onboarding.area.title}" Style="{StaticResource Settings.PageTitle}" AutomationProperties.HeadingLevel="Level1" />
+          <TextBlock Text="{loc:T onboarding.area.hint}" Style="{StaticResource Settings.Hint}" Margin="0,4,0,16" TextWrapping="Wrap" />
+          <ContentControl Content="{Binding Area}" Focusable="False" />
+        </StackPanel>
+
+        <!-- 5. Start with Windows -->
+        <StackPanel Visibility="{Binding IsStartup, Converter={StaticResource Settings.BoolToVisibility}}">
+          <TextBlock Text="{loc:T onboarding.startup.title}" Style="{StaticResource Settings.PageTitle}" AutomationProperties.HeadingLevel="Level1" />
+          <Border Style="{StaticResource Settings.Card}" Margin="0,16,0,0">
+            <DockPanel>
+              <CheckBox DockPanel.Dock="Right" Style="{StaticResource Settings.Toggle}" IsChecked="{Binding StartWithWindows}"
+                        VerticalAlignment="Center" AutomationProperties.Name="{loc:T onboarding.startup.label}" />
+              <StackPanel Margin="0,0,16,0">
+                <TextBlock Text="{loc:T onboarding.startup.label}" Style="{StaticResource Settings.Label}" />
+                <TextBlock Text="{loc:T onboarding.startup.hint}" Style="{StaticResource Settings.Hint}" TextWrapping="Wrap" />
+              </StackPanel>
+            </DockPanel>
+          </Border>
+        </StackPanel>
+
+        <!-- 6. Done -->
+        <StackPanel Visibility="{Binding IsDone, Converter={StaticResource Settings.BoolToVisibility}}">
+          <TextBlock Text="{loc:T onboarding.done.title}" Style="{StaticResource Settings.PageTitle}" AutomationProperties.HeadingLevel="Level1" />
+          <TextBlock Text="{loc:T onboarding.done.hint}" Style="{StaticResource Settings.Hint}" Margin="0,4,0,0" TextWrapping="Wrap" />
+        </StackPanel>
+      </Grid>
+    </ScrollViewer>
+
+    <DockPanel Grid.Row="2" Margin="0,16,0,0">
+      <Button DockPanel.Dock="Left" Style="{StaticResource Settings.Button}" Content="{loc:T onboarding.skip}" Command="{Binding SkipCommand}" />
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+        <Button Style="{StaticResource Settings.Button}" Content="{loc:T onboarding.back}" Command="{Binding BackCommand}"
+                Visibility="{Binding CanGoBack, Converter={StaticResource Settings.BoolToVisibility}}" Margin="0,0,6,0" />
+        <Button Style="{StaticResource Settings.AccentButton}" Content="{loc:T onboarding.next}" Command="{Binding NextCommand}"
+                Visibility="{Binding ShowNext, Converter={StaticResource Settings.BoolToVisibility}}" />
+        <Button Style="{StaticResource Settings.AccentButton}" Content="{loc:T onboarding.finish}" Command="{Binding FinishCommand}"
+                Visibility="{Binding IsDone, Converter={StaticResource Settings.BoolToVisibility}}" />
+      </StackPanel>
+    </DockPanel>
+  </Grid>
+</Window>

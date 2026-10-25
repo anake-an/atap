@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Every notch surface, merged once in App.xaml. Each surface template is "surface.<Name>" and gets the
+       window's NotchViewModel. A surface owner edits only its own folder, never this file.
+       Surfaces reach keys from SurfaceParts and the theme with DynamicResource: these files are parsed on
+       their own, so a StaticResource in a template cannot see the other dictionaries. -->
+
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="SurfaceParts.xaml" />
+    <ResourceDictionary Source="Idle/IdleSurface.xaml" />
+    <ResourceDictionary Source="Compact/CompactSurface.xaml" />
+    <ResourceDictionary Source="Expanded/ExpandedSurface.xaml" />
+    <ResourceDictionary Source="Panel/PanelSurface.xaml" />
+    <ResourceDictionary Source="Slim/SlimSurface.xaml" />
+    <ResourceDictionary Source="Alert/AlertSurface.xaml" />
+    <ResourceDictionary Source="Edit/EditSurface.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+</ResourceDictionary>

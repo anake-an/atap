@@ -1,0 +1,5 @@
+{
+  "brightnessoverlay.enabled": "Show the brightness on the notch",
+  "brightnessoverlay.enabledHint": "When the screen gets brighter or dimmer, the notch shows the new level. Works on laptop and tablet screens. Most desktop monitors do not report it.",
+  "brightnessoverlay.title": "Brightness"
+}

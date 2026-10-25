@@ -1,0 +1,6 @@
+{
+  "network.offline": "Mod luar talian",
+  "network.offlineHint": "Atap berhenti menggunakan internet serta-merta. Notch terus menunjukkan apa yang disimpan kali terakhir. Semakan kemas kini tidak terjejas.",
+  "network.wifiName": "Guna nama Wi-Fi",
+  "network.wifiNameHint": "Membolehkan Atap mengetahui Wi-Fi yang anda gunakan, supaya ia boleh menunjukkan perkara berbeza di rumah dan di tempat kerja. Peraturan untuk setiap rangkaian akan tersedia dalam kemas kini akan datang. Nama itu kekal pada PC ini. Windows mungkin meminta izin untuk menggunakan lokasi anda, kerana nama Wi-Fi boleh menunjukkan di mana anda berada."
+}

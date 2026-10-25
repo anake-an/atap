@@ -1,0 +1,6 @@
+{
+  "settingswindow.command.open": "Settings",
+  "settingswindow.command.keywords": "settings options preferences setup",
+  "settingswindow.showAtap": "Show Atap",
+  "settingswindow.showAtapHint": "Turn this off to hide the notch. To get back here, open Atap again from the Start menu."
+}

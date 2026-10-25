@@ -1,0 +1,43 @@
+name: Widget request
+description: Ask for a new widget on the notch.
+labels: ["enhancement", "widget"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the widget you want. If you plan to build it yourself, read CONTRIBUTING.md first.
+  - type: input
+    id: name
+    attributes:
+      label: Widget name
+      placeholder: "For example: Pomodoro stats"
+    validations:
+      required: true
+  - type: textarea
+    id: purpose
+    attributes:
+      label: What should it show or do?
+    validations:
+      required: true
+  - type: dropdown
+    id: states
+    attributes:
+      label: Where would you want to see it?
+      multiple: true
+      options:
+        - Idle notch
+        - Compact notch
+        - Expanded notch
+        - Panel
+  - type: textarea
+    id: data
+    attributes:
+      label: Where does the data come from?
+      description: Windows, a website or API, a file, or something you type in. If it uses the internet, name the service.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Helpful details
+      options:
+        - label: It can work without polling, using events or a slow timer.
+        - label: I would like to build this myself.

@@ -1,0 +1,46 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a rain alerts instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="rain-alerts.visible" />
+
+  <DataTemplate x:Key="rain-alerts.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T rain.name}"
+                         Icon="{DynamicResource icon.droplet}"
+                         Accent="{DynamicResource MalaysiaAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Grid>
+        <ItemsControl ItemsSource="{Binding Warnings}" Focusable="False"
+                      Visibility="{Binding HasWarnings, Converter={StaticResource rain-alerts.visible}}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Margin="0,0,0,8" AutomationProperties.Name="{Binding Title}">
+                <StackPanel Orientation="Horizontal">
+                  <controls:StatusDot Level="Warning" VerticalAlignment="Center" Margin="0,0,6,0" />
+                  <TextBlock Text="{Binding Title}" Foreground="{DynamicResource TextBrush}" FontSize="13" FontWeight="SemiBold"
+                             TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <TextBlock Text="{Binding Text}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
+                           TextWrapping="Wrap" MaxHeight="48" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+                <TextBlock Text="{Binding Until}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Text="{Binding Message}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+                   Visibility="{Binding HasMessage, Converter={StaticResource rain-alerts.visible}}" />
+      </Grid>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="rain-alerts.Panel">
+    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource rain-alerts.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SignPath artifact configuration "installers". Paste it into the SignPath project with that slug.
+
+  The release workflow sends the two installers after vpk pack, one folder per Velopack channel.
+  Signing adds a signature to the end of Setup.exe and leaves the bundled package as it is.
+
+  Setup.exe is the Velopack setup program with Atap's package inside. Ask SignPath Foundation whether
+  it may be signed with the Atap certificate before this configuration is used.
+-->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <zip-file>
+    <directory path="win">
+      <pe-file path="Atap-win-Setup.exe">
+        <authenticode-sign />
+      </pe-file>
+    </directory>
+    <directory path="win-arm64">
+      <pe-file path="Atap-win-arm64-Setup.exe">
+        <authenticode-sign />
+      </pe-file>
+    </directory>
+  </zip-file>
+</artifact-configuration>

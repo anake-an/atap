@@ -1,0 +1,12 @@
+{
+  "cleardata.title": "Saved data",
+  "cleardata.hint": "Atap keeps a copy of what it downloads, so the notch still shows something when you are offline. Clearing it is safe. Atap downloads again when it needs to.",
+  "cleardata.size": "Using {size} on this PC.",
+  "cleardata.empty": "Nothing is saved right now.",
+  "cleardata.clear": "Clear saved data",
+  "cleardata.freed": "Done. {size} freed.",
+  "cleardata.nothing": "There was nothing to clear.",
+  "cleardata.someLeft": "{size} freed. A few files are in use, so they were left. Try again later.",
+  "cleardata.kb": "{value} KB",
+  "cleardata.mb": "{value} MB"
+}

@@ -1,0 +1,7 @@
+{
+  "hijri.name": "Tarikh Hijrah",
+  "hijri.description": "Tarikh Hijrah hari ini, seperti yang diterbitkan JAKIM untuk kawasan anda.",
+  "hijri.privacy": "Menghantar kod zon JAKIM anda ke e-Solat untuk tarikh rasmi, hanya jika anda memilih kawasan. Jika tidak, tiada apa-apa keluar dari PC anda.",
+  "hijri.estimate": "Dikira oleh Atap. Mungkin berbeza sehari daripada tarikh rasmi.",
+  "hijri.accessible": "Tarikh Hijrah. {date}. {gregorian}"
+}

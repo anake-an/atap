@@ -1,0 +1,13 @@
+{
+  "holidays.name": "Public holidays",
+  "holidays.description": "The next public holidays in your state, from the government's official lists. Nothing is fetched.",
+  "holidays.today": "today",
+  "holidays.mayChange": "The date may change.",
+  "holidays.starNote": "* The date may change.",
+  "holidays.forState": "For {state}.",
+  "holidays.nationwideOnly": "Nationwide holidays only. Pick your area in Settings to add your state's.",
+  "holidays.dataEnds": "Update Atap to see next year's holidays.",
+  "holidays.noData": "No holiday list covers today's date. Check the date on this PC.",
+  "holidays.accessible": "Public holidays. Next: {name}, {date}, {until}",
+  "holidays.accessibleMessage": "Public holidays. {message}"
+}

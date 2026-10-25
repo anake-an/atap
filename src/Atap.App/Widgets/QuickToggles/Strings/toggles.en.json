@@ -1,0 +1,10 @@
+{
+  "toggles.name": "Quick toggles",
+  "toggles.description": "Dark mode, Bluetooth, microphone mute and the slim notch, one click each. Toggles your PC does not have are hidden.",
+  "toggles.darkMode": "Dark mode",
+  "toggles.bluetooth": "Bluetooth",
+  "toggles.micMute": "Mute mic",
+  "toggles.slim": "Slim notch",
+  "toggles.failed": "Windows did not take that change. Try it in Windows Settings.",
+  "toggles.accessible": "Quick toggles. On: {on}"
+}

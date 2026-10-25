@@ -1,0 +1,16 @@
+{
+  "battery.name": "Bateri",
+  "battery.description": "Baki bateri, dan \"Mengecas\" pada notch seketika apabila anda memasang palam.",
+  "battery.lowAlert": "Makluman apabila bateri lemah",
+  "battery.lowAt": "Lemah pada",
+  "battery.percent": "%",
+  "battery.charging": "Mengecas",
+  "battery.full": "Palam dipasang, penuh",
+  "battery.onBattery": "Menggunakan bateri",
+  "battery.none": "PC ini tiada bateri.",
+  "battery.saver": "Penjimat tenaga dihidupkan",
+  "battery.lowTitle": "Bateri lemah, {percent}",
+  "battery.lowSubtitle": "Cas bateri segera.",
+  "battery.accessible": "Bateri. {percent}, {status}",
+  "battery.accessibleNone": "Bateri. PC ini tiada bateri"
+}

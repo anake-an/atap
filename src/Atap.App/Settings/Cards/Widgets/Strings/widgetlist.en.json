@@ -1,0 +1,15 @@
+{
+  "widgetlist.title": "On your notch",
+  "widgetlist.empty": "Nothing is on your notch yet.",
+  "widgetlist.named": "{name} ({instance})",
+  "widgetlist.status.running": "Working",
+  "widgetlist.status.needsSetup": "Needs setting up",
+  "widgetlist.status.needsApproval": "Waiting for your OK",
+  "widgetlist.status.offline": "Offline",
+  "widgetlist.status.failed": "Stopped after a problem",
+  "widgetlist.status.stopped": "Not running",
+  "widgetlist.restart": "Restart",
+  "widgetlist.restartName": "Restart {name}",
+  "widgetlist.settingsShort": "Settings",
+  "widgetlist.settings": "Settings for {name}"
+}

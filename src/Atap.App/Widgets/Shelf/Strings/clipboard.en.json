@@ -1,0 +1,13 @@
+{
+  "clipboard.name": "Clipboard",
+  "clipboard.description": "The last 25 things you copied. Click one to copy it again. Gone when Atap closes, unless you choose to keep it.",
+  "clipboard.privacy": "Atap reads what you copy while this widget is on. It skips copies that password managers mark as private and never sends them. It keeps them in memory only, unless you turn on Keep my history. Then they are saved on this PC only, locked to your Windows account.",
+  "clipboard.keep": "Keep my history",
+  "clipboard.keepHint": "Remembers what you copied after Atap closes. It stays on this PC only, locked to your Windows account, and never syncs. Turn it off to delete it.",
+  "clipboard.empty": "Copy some text and it shows here.",
+  "clipboard.clear": "Clear all",
+  "clipboard.copyHint": "Copy again",
+  "clipboard.copyItem": "Copy {item} again",
+  "clipboard.removeItem": "Remove {item}",
+  "clipboard.accessible": "Clipboard. {count} items"
+}

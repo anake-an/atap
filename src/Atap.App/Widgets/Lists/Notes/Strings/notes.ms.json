@@ -1,0 +1,15 @@
+{
+  "notes.name": "Nota",
+  "notes.description": "Nota ringkas yang anda boleh tulis dalam panel notch. Ia disimpan semasa anda menaip.",
+  "notes.empty": "Belum ada nota. Tekan + untuk mula.",
+  "notes.new": "Nota baharu",
+  "notes.delete": "Padam nota ini",
+  "notes.pin": "Sematkan di atas",
+  "notes.unpin": "Nyahsemat",
+  "notes.previous": "Nota sebelumnya",
+  "notes.next": "Nota seterusnya",
+  "notes.editor": "Teks nota",
+  "notes.position": "{number} daripada {count}",
+  "notes.accessible": "Nota. {title}",
+  "notes.accessibleEmpty": "Nota. Belum ada nota"
+}

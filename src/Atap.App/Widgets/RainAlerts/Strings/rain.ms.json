@@ -1,0 +1,12 @@
+{
+  "rain.name": "Amaran hujan",
+  "rain.description": "Amaran ribut petir dan hujan lebat MET Malaysia untuk negeri anda, sebagai makluman pada notch.",
+  "rain.privacy": "Mengambil senarai semua amaran semasa daripada api.data.gov.my setiap 20 minit. Negeri anda tidak dihantar: senarai itu ditapis dalam PC ini.",
+  "rain.needsArea": "Pilih kawasan anda di halaman Waktu solat dalam Tetapan.",
+  "rain.loading": "Menyemak amaran…",
+  "rain.failed": "Amaran tidak dapat disemak. Atap akan cuba lagi sebentar lagi.",
+  "rain.none": "Tiada amaran untuk {state}.",
+  "rain.until": "Hingga {time}",
+  "rain.accessible": "Amaran hujan. {count} amaran. {first}",
+  "rain.accessibleMessage": "Amaran hujan. {message}"
+}

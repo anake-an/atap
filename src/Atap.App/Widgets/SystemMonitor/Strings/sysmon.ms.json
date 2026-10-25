@@ -1,0 +1,10 @@
+{
+  "sysmon.name": "Pemantau sistem",
+  "sysmon.description": "Tahap kesibukan pemproses, penggunaan memori, dan ruang kosong pada pemacu sistem anda. Hanya disemak semasa anda membukanya.",
+  "sysmon.cpu": "Pemproses",
+  "sysmon.memory": "Memori",
+  "sysmon.disk": "Pemacu {drive}",
+  "sysmon.of": "{used} daripada {total}",
+  "sysmon.free": "{free} kosong",
+  "sysmon.accessible": "Pemantau sistem. {rows}"
+}

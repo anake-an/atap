@@ -1,0 +1,16 @@
+{
+  "battery.name": "Battery",
+  "battery.description": "How much battery is left, and \"Charging\" on the notch for a moment when you plug in.",
+  "battery.lowAlert": "Alert when the battery is low",
+  "battery.lowAt": "Low at",
+  "battery.percent": "%",
+  "battery.charging": "Charging",
+  "battery.full": "Plugged in, full",
+  "battery.onBattery": "On battery",
+  "battery.none": "This PC has no battery.",
+  "battery.saver": "Energy saver is on",
+  "battery.lowTitle": "Battery low, {percent}",
+  "battery.lowSubtitle": "Plug in soon.",
+  "battery.accessible": "Battery. {percent}, {status}",
+  "battery.accessibleNone": "Battery. This PC has no battery"
+}

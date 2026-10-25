@@ -1,0 +1,12 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Hovering opens the notch: the Expanded widgets on the 4-column grid, with a new alert above them. -->
+  <DataTemplate x:Key="surface.Expanded">
+    <StackPanel>
+      <ContentPresenter Content="{Binding}" ContentTemplate="{DynamicResource notch.banner}" />
+      <ContentPresenter Content="{Binding}" ContentTemplate="{DynamicResource notch.grid}" />
+    </StackPanel>
+  </DataTemplate>
+
+</ResourceDictionary>

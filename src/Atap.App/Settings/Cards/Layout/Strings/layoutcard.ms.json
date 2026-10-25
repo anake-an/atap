@@ -1,0 +1,10 @@
+{
+  "layoutcard.title": "Susun atur",
+  "layoutcard.edit": "Sunting susun atur",
+  "layoutcard.editHint": "Pilih apa yang dipaparkan pada notch, pada setiap saiz, dan pada setiap halaman panel.",
+  "layoutcard.restore": "Susun atur sebelumnya",
+  "layoutcard.restoreHint": "Mengembalikan susun atur sebelum kali terakhir anda menekan Selesai. Tekan sekali lagi untuk menukarnya semula.",
+  "layoutcard.restoreButton": "Kembalikan",
+  "layoutcard.restored": "Susun atur sebelumnya telah dikembalikan.",
+  "layoutcard.restoreFailed": "Susun atur sebelumnya tidak dapat dikembalikan."
+}

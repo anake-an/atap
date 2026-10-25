@@ -1,0 +1,81 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:area="clr-namespace:Atap.Settings.Cards.Malaysia.PrayerArea"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Merged into the settings window only while it is open. Loaded on its own, so the settings styles
+       are DynamicResource: they come from the window. -->
+  <BooleanToVisibilityConverter x:Key="Card.BoolToVisibility" />
+
+  <DataTemplate DataType="{x:Type area:PrayerAreaViewModel}">
+    <Border Style="{DynamicResource Settings.Card}">
+      <StackPanel>
+        <TextBlock Text="{Binding Summary}" Style="{DynamicResource Settings.Label}" TextWrapping="Wrap"
+                   AutomationProperties.LiveSetting="Polite" />
+
+        <Grid Margin="0,14,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+            <TextBlock Text="{loc:T malaysia.area.state}" Style="{DynamicResource Settings.Label}" />
+          </StackPanel>
+          <ComboBox Grid.Column="1" Style="{DynamicResource Settings.ComboBox}" MinWidth="240"
+                    ItemsSource="{Binding States}" SelectedItem="{Binding SelectedState}"
+                    AutomationProperties.Name="{loc:T malaysia.area.state}" />
+        </Grid>
+
+        <Grid Margin="0,10,0,0" Visibility="{Binding HasState, Converter={StaticResource Card.BoolToVisibility}}">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+            <TextBlock Text="{loc:T malaysia.area.zone}" Style="{DynamicResource Settings.Label}" />
+            <TextBlock Text="{loc:T malaysia.area.zoneHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" />
+          </StackPanel>
+          <ComboBox Grid.Column="1" Style="{DynamicResource Settings.ComboBox}" MinWidth="240" MaxWidth="320"
+                    ItemsSource="{Binding Zones}" SelectedItem="{Binding SelectedZone}"
+                    AutomationProperties.Name="{loc:T malaysia.area.zone}">
+            <ComboBox.ItemTemplate>
+              <DataTemplate>
+                <TextBlock Text="{Binding Label}" TextTrimming="CharacterEllipsis" ToolTip="{Binding Label}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </Grid>
+
+        <Grid Margin="0,14,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+            <TextBlock Text="{loc:T malaysia.area.find}" Style="{DynamicResource Settings.Label}" />
+            <TextBlock Text="{loc:T malaysia.area.findHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" />
+          </StackPanel>
+          <Button Grid.Column="1" Style="{DynamicResource Settings.Button}" Content="{loc:T malaysia.area.find}"
+                  Command="{Binding FindCommand}" VerticalAlignment="Center" />
+        </Grid>
+
+        <Border Margin="0,10,0,0" Padding="12,10" CornerRadius="6" Background="{DynamicResource SettingsNavSelectedBrush}"
+                Visibility="{Binding HasFindStatus, Converter={StaticResource Card.BoolToVisibility}}">
+          <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+              <Button Style="{DynamicResource Settings.AccentButton}" Content="{loc:T malaysia.area.use}"
+                      Command="{Binding UseSuggestionCommand}"
+                      Visibility="{Binding HasSuggestion, Converter={StaticResource Card.BoolToVisibility}}" />
+              <Button Style="{DynamicResource Settings.Button}" Content="{loc:T malaysia.area.openLocation}"
+                      Command="{Binding OpenLocationSettingsCommand}"
+                      Visibility="{Binding LocationIsOff, Converter={StaticResource Card.BoolToVisibility}}" />
+            </StackPanel>
+            <TextBlock Text="{Binding FindStatus}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap"
+                       VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite" />
+          </DockPanel>
+        </Border>
+      </StackPanel>
+    </Border>
+  </DataTemplate>
+
+</ResourceDictionary>

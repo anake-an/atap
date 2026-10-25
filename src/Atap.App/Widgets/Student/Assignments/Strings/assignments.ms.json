@@ -1,0 +1,12 @@
+{
+  "assignments.name": "Tugasan",
+  "assignments.description": "Tarikh akhir tugasan anda, yang terdekat dahulu, dengan baki hari.",
+  "assignments.none": "Tiada tugasan. Tambah tugasan dalam Tetapan, di halaman Apa yang dipaparkan.",
+  "assignments.markDone": "Tandakan sebagai siap",
+  "assignments.noDate": "Tiada tarikh",
+  "assignments.overdue": "Lewat",
+  "assignments.today": "Hari ini, tinggal {left}",
+  "assignments.tomorrow": "Esok",
+  "assignments.accessible": "Tugasan. {count} tugasan. Seterusnya: {first}, {when}",
+  "assignments.accessibleNone": "Tugasan. Tiada tugasan"
+}

@@ -1,0 +1,5 @@
+{
+  "brightnessoverlay.enabled": "Tunjukkan kecerahan pada notch",
+  "brightnessoverlay.enabledHint": "Apabila skrin menjadi lebih cerah atau malap, notch menunjukkan aras baharu. Berfungsi pada skrin komputer riba dan tablet. Kebanyakan monitor desktop tidak melaporkannya.",
+  "brightnessoverlay.title": "Kecerahan"
+}

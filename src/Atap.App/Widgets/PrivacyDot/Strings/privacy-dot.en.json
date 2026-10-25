@@ -1,0 +1,12 @@
+{
+  "privacy-dot.name": "Camera and mic",
+  "privacy-dot.description": "A dot on the notch while an app uses your camera or microphone, and which app it is.",
+  "privacy-dot.camera": "Camera",
+  "privacy-dot.mic": "Microphone",
+  "privacy-dot.cameraShort": "Camera",
+  "privacy-dot.micShort": "Mic",
+  "privacy-dot.both": "Camera and mic",
+  "privacy-dot.none": "No app is using your camera or microphone.",
+  "privacy-dot.cameraUsedBy": "Camera in use by {apps}",
+  "privacy-dot.micUsedBy": "Microphone in use by {apps}"
+}

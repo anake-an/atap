@@ -1,0 +1,157 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a waktu solat instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="waktu-solat.visible" />
+
+  <!-- Compact, left of the camera: a crescent and the prayer's name. -->
+  <DataTemplate x:Key="waktu-solat.Compact.Left">
+    <StackPanel DataContext="{Binding ViewModel}"
+                AutomationProperties.Name="{Binding AccessibleSummary}"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Margin="4,0">
+      <controls:StrokeIcon Data="{DynamicResource icon.moon}"
+                           Foreground="{DynamicResource MalaysiaAccentBrush}"
+                           Width="14"
+                           Height="14"
+                           VerticalAlignment="Center"
+                           Margin="0,0,6,0" />
+      <TextBlock Text="{Binding ShortName}"
+                 Foreground="{DynamicResource PrimaryTextBrush}"
+                 FontSize="13"
+                 FontWeight="SemiBold"
+                 VerticalAlignment="Center" />
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- Compact, right of the camera: "23 min", or "now" in its first five minutes. -->
+  <DataTemplate x:Key="waktu-solat.Compact.Right">
+    <TextBlock DataContext="{Binding ViewModel}"
+               AutomationProperties.Name="{Binding AccessibleSummary}"
+               Text="{Binding Short}"
+               Foreground="{DynamicResource PrimaryTextBrush}"
+               FontSize="13"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center"
+               Margin="4,0" />
+  </DataTemplate>
+
+  <!-- What to do when there are no times: pick an area, wait, or old data. -->
+  <DataTemplate x:Key="waktu-solat.message">
+    <TextBlock Text="{Binding Message}"
+               AutomationProperties.Name="{Binding Message}"
+               Foreground="{DynamicResource TextSecondaryBrush}"
+               FontSize="12"
+               TextWrapping="Wrap" />
+  </DataTemplate>
+
+  <!-- The next prayer, its time and the countdown. During Ramadan, the imsak or berbuka countdown under it. -->
+  <DataTemplate x:Key="waktu-solat.head">
+    <StackPanel AutomationProperties.Name="{Binding AccessibleSummary}">
+      <TextBlock Text="{Binding Headline}"
+                 Foreground="{DynamicResource TextBrush}"
+                 FontSize="18"
+                 FontWeight="SemiBold"
+                 TextTrimming="CharacterEllipsis" />
+      <TextBlock Text="{Binding Detail}"
+                 Foreground="{DynamicResource TextSecondaryBrush}"
+                 FontSize="12"
+                 Margin="0,2,0,0"
+                 TextTrimming="CharacterEllipsis" />
+      <Border Margin="0,8,0,0"
+              Padding="8,4"
+              HorizontalAlignment="Left"
+              CornerRadius="6"
+              Background="{DynamicResource RaisedBrush}"
+              Visibility="{Binding HasFast, Converter={StaticResource waktu-solat.visible}}">
+        <TextBlock Text="{Binding FastText}"
+                   Foreground="{DynamicResource MalaysiaAccentBrush}"
+                   FontSize="12"
+                   FontWeight="SemiBold" />
+      </Border>
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- Small: the next prayer only. -->
+  <DataTemplate x:Key="waktu-solat.Expanded.Small">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T solat.name}"
+                         Icon="{DynamicResource icon.moon}"
+                         Accent="{DynamicResource MalaysiaAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Grid>
+        <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource waktu-solat.head}"
+                          Visibility="{Binding HasTimes, Converter={StaticResource waktu-solat.visible}}" />
+        <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource waktu-solat.message}"
+                          Visibility="{Binding HasMessage, Converter={StaticResource waktu-solat.visible}}" />
+      </Grid>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <!-- Medium: the next prayer and every time today, the next one in the Malaysia accent. -->
+  <DataTemplate x:Key="waktu-solat.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T solat.name}"
+                         Icon="{DynamicResource icon.moon}"
+                         Accent="{DynamicResource MalaysiaAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Grid>
+        <StackPanel Visibility="{Binding HasTimes, Converter={StaticResource waktu-solat.visible}}">
+          <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource waktu-solat.head}" />
+          <ItemsControl ItemsSource="{Binding Rows}" Focusable="False" Margin="0,10,0,0">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <UniformGrid Columns="4" />
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border x:Name="Cell" Margin="0,0,4,4" Padding="6,4" CornerRadius="6" Background="Transparent">
+                  <StackPanel>
+                    <TextBlock x:Name="Name" Text="{Binding Name}" Foreground="{DynamicResource TextSecondaryBrush}"
+                               FontSize="11" TextTrimming="CharacterEllipsis" />
+                    <TextBlock x:Name="Time" Text="{Binding Time}" Foreground="{DynamicResource TextBrush}"
+                               FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                </Border>
+                <DataTemplate.Triggers>
+                  <DataTrigger Binding="{Binding IsNext}" Value="True">
+                    <Setter TargetName="Cell" Property="Background" Value="{DynamicResource RaisedBrush}" />
+                    <Setter TargetName="Name" Property="Foreground" Value="{DynamicResource MalaysiaAccentBrush}" />
+                  </DataTrigger>
+                  <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                    <Setter TargetName="Cell" Property="Background" Value="{DynamicResource RaisedBrush}" />
+                    <Setter TargetName="Name" Property="Foreground" Value="{DynamicResource MalaysiaAccentBrush}" />
+                  </DataTrigger>
+                </DataTemplate.Triggers>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <TextBlock Text="{Binding Areas}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11"
+                     Margin="0,2,0,0" TextTrimming="CharacterEllipsis" ToolTip="{Binding Areas}" />
+        </StackPanel>
+        <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource waktu-solat.message}"
+                          Visibility="{Binding HasMessage, Converter={StaticResource waktu-solat.visible}}" />
+      </Grid>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <!-- The panel shows the same cards as the open notch. -->
+  <DataTemplate x:Key="waktu-solat.Panel.Small">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource waktu-solat.Expanded.Small}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+  <DataTemplate x:Key="waktu-solat.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource waktu-solat.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

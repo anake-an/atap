@@ -1,0 +1,69 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:weather="clr-namespace:Atap.Widgets.Weather"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a quick toggles instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="quick-toggles.visible" />
+  <weather:IconKeyConverter x:Key="quick-toggles.icon" />
+
+  <!-- A tile: icon and name, filled with the accent while on. A rounded rectangle, never an oval. -->
+  <Style x:Key="quick-toggles.tile" TargetType="Button">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.card}" />
+    <Setter Property="Margin" Value="0,0,6,6" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome" CornerRadius="6" Padding="10,8" Background="{DynamicResource RaisedBrush}">
+            <ContentPresenter />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <DataTemplate x:Key="quick-toggles.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}" Header="{loc:T toggles.name}" Icon="{DynamicResource icon.settings}"
+                         Accent="{DynamicResource SystemAccentBrush}" AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <ItemsControl ItemsSource="{Binding Tiles}" Focusable="False">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <UniformGrid Columns="2" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Button x:Name="Tile" Style="{StaticResource quick-toggles.tile}" Command="{Binding Flip}" AutomationProperties.Name="{Binding Label}">
+                <StackPanel Orientation="Horizontal">
+                  <controls:StrokeIcon x:Name="Icon" Data="{Binding IconKey, Converter={StaticResource quick-toggles.icon}}" Width="14" Height="14"
+                                       Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,8,0" VerticalAlignment="Center" />
+                  <TextBlock x:Name="Label" Text="{Binding Label}" Foreground="{DynamicResource TextBrush}" FontSize="12"
+                             VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+              </Button>
+              <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding IsOn}" Value="True">
+                  <Setter TargetName="Icon" Property="Foreground" Value="{DynamicResource SystemAccentBrush}" />
+                  <Setter TargetName="Label" Property="FontWeight" Value="SemiBold" />
+                </DataTrigger>
+              </DataTemplate.Triggers>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Text="{loc:T toggles.failed}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" TextWrapping="Wrap"
+                   Visibility="{Binding HasFailure, Converter={StaticResource quick-toggles.visible}}" />
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="quick-toggles.Panel">
+    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource quick-toggles.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

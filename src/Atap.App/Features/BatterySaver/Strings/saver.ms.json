@@ -1,0 +1,11 @@
+{
+  "saver.mode": "Penjimat bateri",
+  "saver.mode.onBattery": "Semasa guna bateri",
+  "saver.mode.always": "Sentiasa",
+  "saver.mode.never": "Tidak pernah",
+  "saver.mode.belowPercent": "Apabila bateri lemah",
+  "saver.mode.followWindows": "Ikut penjimat tenaga Windows",
+  "saver.modeHint": "Atap kurang kerap menyemak kemas kini, menghentikan animasi dan membenarkan Windows menjalankannya dalam mod cekap. Penggera dan waktu solat tidak akan ditangguhkan.",
+  "saver.percent": "Lemah apabila di bawah",
+  "saver.percentUnit": "%"
+}

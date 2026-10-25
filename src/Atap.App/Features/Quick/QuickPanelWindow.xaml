@@ -1,0 +1,105 @@
+<Window x:Class="Atap.Features.Quick.QuickPanelWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:Atap.Ui.Localization"
+        Title="{loc:T quick.command.open}"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        Topmost="True"
+        ShowInTaskbar="False"
+        SizeToContent="WidthAndHeight"
+        WindowStartupLocation="Manual"
+        Left="-32000"
+        Top="-32000"
+        UseLayoutRounding="True"
+        FontFamily="{StaticResource TextFont}">
+
+  <Window.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Atap;component/Ui/Theme/Settings.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Window.Resources>
+
+  <!-- The margin is room for the shadow. Placement in code takes it into account. -->
+  <Border Margin="12"
+          Width="340"
+          Padding="16,14"
+          CornerRadius="8"
+          Background="{DynamicResource WindowBrush}"
+          BorderBrush="{DynamicResource SettingsCardBorderBrush}"
+          BorderThickness="1">
+    <Border.Effect>
+      <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.22" />
+    </Border.Effect>
+
+    <StackPanel>
+      <TextBlock Text="{loc:T quick.command.open}" Style="{StaticResource Settings.SectionTitle}" Margin="0,0,0,10" />
+
+      <DockPanel>
+        <CheckBox DockPanel.Dock="Right"
+                  Style="{StaticResource Settings.Toggle}"
+                  IsChecked="{Binding IsNotchHidden}"
+                  AutomationProperties.Name="{loc:T quick.hideNotch}" />
+        <TextBlock Text="{loc:T quick.hideNotch}" Style="{StaticResource Settings.Label}" VerticalAlignment="Center" />
+      </DockPanel>
+      <DockPanel Margin="0,10,0,0">
+        <CheckBox DockPanel.Dock="Right"
+                  Style="{StaticResource Settings.Toggle}"
+                  IsChecked="{Binding AreAlertsPaused}"
+                  AutomationProperties.Name="{loc:T quick.command.pauseAlerts}"
+                  AutomationProperties.HelpText="{loc:T quick.pauseHint}" />
+        <StackPanel Margin="0,0,12,0">
+          <TextBlock Text="{loc:T quick.command.pauseAlerts}" Style="{StaticResource Settings.Label}" />
+          <TextBlock Text="{loc:T quick.pauseHint}" Style="{StaticResource Settings.Hint}" TextWrapping="Wrap" />
+        </StackPanel>
+      </DockPanel>
+
+      <TextBlock Text="{loc:T notchsize.size}" Style="{StaticResource Settings.Label}" Margin="0,14,0,6" />
+      <ListBox Style="{StaticResource Settings.Segmented}"
+               ItemsSource="{Binding Sizes}"
+               DisplayMemberPath="Label"
+               SelectedValuePath="Value"
+               SelectedValue="{Binding Size}"
+               AutomationProperties.Name="{loc:T notchsize.size}" />
+
+      <TextBlock Text="{loc:T notch.menu.position}" Style="{StaticResource Settings.Label}" Margin="0,14,0,6" />
+      <ComboBox Style="{StaticResource Settings.ComboBox}"
+                HorizontalAlignment="Stretch"
+                ItemsSource="{Binding Positions}"
+                DisplayMemberPath="Label"
+                SelectedValuePath="Value"
+                SelectedValue="{Binding Position}"
+                AutomationProperties.Name="{loc:T notch.menu.position}" />
+
+      <TextBlock Text="{loc:T language.choice}" Style="{StaticResource Settings.Label}" Margin="0,14,0,6" />
+      <ComboBox Style="{StaticResource Settings.ComboBox}"
+                HorizontalAlignment="Stretch"
+                ItemsSource="{Binding Languages}"
+                DisplayMemberPath="Label"
+                SelectedValuePath="Value"
+                SelectedValue="{Binding Language}"
+                AutomationProperties.Name="{loc:T language.choice}" />
+
+      <Button Style="{StaticResource Settings.Button}"
+              Content="{loc:T alerts.command.stopSound}"
+              Command="{Binding StopSoundCommand}"
+              Margin="0,14,0,0"
+              Visibility="{Binding CanStopSound, Converter={StaticResource Settings.BoolToVisibility}}" />
+
+      <DockPanel Margin="0,18,0,0" LastChildFill="False">
+        <Button DockPanel.Dock="Left"
+                Style="{StaticResource Settings.AccentButton}"
+                Content="{loc:T quick.allSettings}"
+                Command="{Binding OpenSettingsCommand}" />
+        <Button DockPanel.Dock="Right"
+                Style="{StaticResource Settings.Button}"
+                Content="{loc:T quick.menu.quit}"
+                Command="{Binding QuitCommand}" />
+      </DockPanel>
+    </StackPanel>
+  </Border>
+</Window>

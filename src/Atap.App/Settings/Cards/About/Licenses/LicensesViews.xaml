@@ -1,0 +1,24 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:licenses="clr-namespace:Atap.Settings.Cards.About.Licenses"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Merged into the settings window only while it is open. Loaded on its own, so the settings styles
+       are DynamicResource: they come from the window. -->
+  <BooleanToVisibilityConverter x:Key="Card.BoolToVisibility" />
+
+  <DataTemplate DataType="{x:Type licenses:LicensesCardViewModel}">
+    <Border Style="{DynamicResource Settings.Card}">
+      <StackPanel>
+        <TextBlock Text="{loc:T licenses.hint}" Style="{DynamicResource Settings.Label}" />
+        <WrapPanel Margin="0,10,0,0">
+          <Button Style="{DynamicResource Settings.Button}" Content="{loc:T licenses.atap}" Command="{Binding OpenLicenseCommand}" Margin="0,0,8,0" />
+          <Button Style="{DynamicResource Settings.Button}" Content="{loc:T licenses.others}" Command="{Binding OpenNoticesCommand}" />
+        </WrapPanel>
+        <TextBlock Text="{loc:T licenses.missing}" Style="{DynamicResource Settings.Error}"
+                   Visibility="{Binding IsMissing, Converter={StaticResource Card.BoolToVisibility}}" />
+      </StackPanel>
+    </Border>
+  </DataTemplate>
+
+</ResourceDictionary>

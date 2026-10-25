@@ -1,0 +1,6 @@
+<Project>
+
+  <!-- This file replaces the repo-wide Directory.Packages.props. Central package management is off here,
+       so generate.cs pins its own package version in its #:package line. -->
+
+</Project>

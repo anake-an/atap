@@ -1,0 +1,12 @@
+{
+  "stopwatch.name": "Stopwatch",
+  "stopwatch.description": "Count up, with laps. Keeps counting if Atap restarts.",
+  "stopwatch.start": "Start",
+  "stopwatch.stop": "Stop",
+  "stopwatch.resume": "Resume",
+  "stopwatch.lapButton": "Lap",
+  "stopwatch.reset": "Reset",
+  "stopwatch.lap": "Lap {number}",
+  "stopwatch.accessible": "Stopwatch. {time}",
+  "stopwatch.accessibleRunning": "Stopwatch, running. {time}"
+}

@@ -1,0 +1,7 @@
+{
+  "licenses.title": "Licences",
+  "licenses.hint": "Atap is free and open source under the MIT licence. It also uses other open-source software.",
+  "licenses.atap": "Atap licence",
+  "licenses.others": "Other software",
+  "licenses.missing": "That file is missing from this copy of Atap."
+}

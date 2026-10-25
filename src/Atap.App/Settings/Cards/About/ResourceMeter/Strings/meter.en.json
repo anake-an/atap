@@ -1,0 +1,22 @@
+{
+  "meter.title": "What Atap uses",
+  "meter.summary": "Atap is using {mb} MB of memory and {cpu}% of the processor.",
+  "meter.measuring": "Measuring...",
+  "meter.hint": "Measured on this PC every 2 seconds while this page is open. Nothing is sent anywhere.",
+  "meter.details": "Details",
+  "meter.copy": "Copy details",
+  "meter.copied": "Copied",
+  "meter.copyFailed": "Could not copy, try again",
+  "meter.mb": "{mb} MB",
+  "meter.privateBytes": "Memory",
+  "meter.workingSet": "Memory in RAM, shared parts included",
+  "meter.managedHeap": ".NET memory",
+  "meter.cpu": "Processor",
+  "meter.threads": "Threads",
+  "meter.handles": "Windows handles",
+  "meter.timers": "Timers waiting",
+  "meter.wakes": "Wake-ups in the last hour",
+  "meter.widgets": "Widgets running",
+  "meter.shared": "Shared Windows sources",
+  "meter.assemblies": "Code libraries loaded"
+}

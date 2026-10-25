@@ -1,0 +1,20 @@
+{
+  "controls.progress": "Kemajuan",
+  "controls.stale": "Tidak terkini",
+  "controls.items": "{count} item",
+  "controls.more": "{count} lagi",
+  "controls.page": "Halaman {page} daripada {count}",
+  "controls.level.Unknown": "Status tidak diketahui",
+  "controls.level.Normal": "Normal",
+  "controls.level.Warning": "Amaran",
+  "controls.level.Critical": "Kritikal",
+  "controls.problem.NoValue": "Tiada nilai buat masa ini",
+  "controls.problem.NotFound": "Nilai ini tidak dijumpai",
+  "controls.problem.NotANumber": "Nilai ini bukan nombor",
+  "controls.problem.NotText": "Nilai ini tidak boleh dipaparkan sebagai teks",
+  "controls.problem.NotAList": "Nilai ini bukan senarai",
+  "controls.problem.BadMaximum": "Nilai maksimum tiada atau tidak melebihi nilai minimum",
+  "controls.problem.InvalidJson": "Data tidak dapat dibaca",
+  "controls.problem.InvalidText": "Data mengandungi aksara yang tidak dapat dibaca",
+  "controls.problem.TooLarge": "Data terlalu besar"
+}

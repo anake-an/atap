@@ -1,0 +1,18 @@
+{
+  "next-meeting.name": "Mesyuarat seterusnya",
+  "next-meeting.description": "Mesyuarat seterusnya daripada kalendar anda, dengan butang Sertai. Ia muncul pada notch 5 minit sebelum bermula.",
+  "next-meeting.url": "Pautan kalendar",
+  "next-meeting.urlHint": "Pautan iCal atau .ics peribadi daripada Google Calendar, Outlook atau iCloud. Atap menyimpannya dengan selamat pada PC ini dan tidak menunjukkannya lagi.",
+  "next-meeting.privacy": "Atap memuat turun kalendar anda daripada pautan yang anda berikan, setiap 15 minit. Kalendar disimpan dalam memori sahaja dan tidak pernah disimpan ke cakera.",
+  "next-meeting.noLink": "Tambah pautan kalendar anda dalam tetapan widget ini.",
+  "next-meeting.failed": "Kalendar anda tidak dapat dimuatkan. Semak pautan dan sambungan anda.",
+  "next-meeting.loading": "Memuatkan kalendar anda.",
+  "next-meeting.none": "Tiada mesyuarat hari ini atau esok.",
+  "next-meeting.untitled": "Mesyuarat",
+  "next-meeting.now": "Sekarang",
+  "next-meeting.inMinutes": "Dalam {minutes} min",
+  "next-meeting.today": "Hari ini",
+  "next-meeting.tomorrow": "Esok",
+  "next-meeting.join": "Sertai",
+  "next-meeting.accessible": "Mesyuarat seterusnya. {title}. {when}"
+}

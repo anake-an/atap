@@ -1,0 +1,7 @@
+{
+  "keyboardoverlay.enabled": "Show Caps Lock and keyboard language on the notch",
+  "keyboardoverlay.enabledHint": "When you press Caps Lock or switch the keyboard language, the notch shows it for a moment. Atap only notices which key you pressed, never what you type.",
+  "keyboardoverlay.capsOn": "Caps Lock on",
+  "keyboardoverlay.capsOff": "Caps Lock off",
+  "keyboardoverlay.language": "Keyboard language"
+}

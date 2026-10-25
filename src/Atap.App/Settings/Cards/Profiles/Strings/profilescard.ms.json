@@ -1,0 +1,12 @@
+{
+  "profilescard.title": "Profil",
+  "profilescard.usual": "Profil biasa",
+  "profilescard.usualHint": "Profil yang digunakan oleh notch apabila tiada peraturan aplikasi memilih profil lain.",
+  "profilescard.default": "Lalai",
+  "profilescard.list": "Profil anda",
+  "profilescard.listHint": "Profil ialah set widget yang lain, contohnya untuk permainan atau kelas. Profil baharu bermula sama seperti Lalai. Tekan Edit untuk mengubahnya.",
+  "profilescard.name": "Nama profil",
+  "profilescard.add": "Tambah profil",
+  "profilescard.edit": "Edit",
+  "profilescard.remove": "Buang"
+}

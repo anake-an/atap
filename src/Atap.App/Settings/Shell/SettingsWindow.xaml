@@ -1,0 +1,89 @@
+<Window x:Class="Atap.Settings.Shell.SettingsWindow"
+        x:ClassModifier="internal"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:Atap.Settings.Shell"
+        xmlns:loc="clr-namespace:Atap.Ui.Localization"
+        Title="{Binding Title}"
+        Icon="/Atap;component/Assets/atap.ico"
+        Width="1000" Height="720" MinWidth="680" MinHeight="480"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource WindowBrush}"
+        Foreground="{DynamicResource InkBrush}"
+        FontFamily="{StaticResource TextFont}"
+        FontSize="14"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+
+  <!-- Created when Settings opens and closed, never hidden. Card views are merged here only while it is open. -->
+  <Window.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/Atap;component/Settings/Form/SettingsForm.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+
+      <!-- A hand-made card: its title, then the template its own views give for its view model. -->
+      <DataTemplate DataType="{x:Type shell:SettingsCardViewModel}">
+        <StackPanel AutomationProperties.Name="{Binding Title}">
+          <TextBlock Text="{Binding Title}" Style="{StaticResource Settings.SectionTitle}"
+                     AutomationProperties.HeadingLevel="Level2"
+                     Visibility="{Binding HasTitle, Converter={StaticResource Settings.BoolToVisibility}}" />
+          <ContentPresenter Content="{Binding Content}" />
+          <Border Style="{StaticResource Settings.Card}" Visibility="{Binding Failed, Converter={StaticResource Settings.BoolToVisibility}}">
+            <TextBlock Text="{Binding FailedText}" Style="{StaticResource Settings.Hint}" />
+          </Border>
+        </StackPanel>
+      </DataTemplate>
+
+      <DataTemplate DataType="{x:Type shell:SettingsPageViewModel}">
+        <StackPanel AutomationProperties.Name="{Binding Title}">
+          <TextBlock Text="{Binding Title}" Style="{StaticResource Settings.PageTitle}" AutomationProperties.HeadingLevel="Level1" />
+          <TextBlock Text="{Binding Hint}" Style="{StaticResource Settings.PageHint}" />
+          <Border Style="{StaticResource Settings.Card}" Visibility="{Binding IsComingSoon, Converter={StaticResource Settings.BoolToVisibility}}">
+            <TextBlock Text="{Binding ComingSoonText}" Style="{StaticResource Settings.Label}" />
+          </Border>
+          <ItemsControl ItemsSource="{Binding Items}" Focusable="False" IsTabStop="False" />
+          <Expander Style="{StaticResource Settings.Expander}" Header="{Binding MoreTitle}" AutomationProperties.Name="{Binding MoreTitle}"
+                    Visibility="{Binding HasMore, Converter={StaticResource Settings.BoolToVisibility}}">
+            <StackPanel>
+              <TextBlock Text="{Binding MoreHint}" Style="{StaticResource Settings.Hint}" Margin="4,0,0,8" />
+              <ItemsControl ItemsSource="{Binding MoreItems}" Focusable="False" IsTabStop="False" />
+            </StackPanel>
+          </Expander>
+        </StackPanel>
+      </DataTemplate>
+    </ResourceDictionary>
+  </Window.Resources>
+
+  <Grid>
+    <Grid.ColumnDefinitions>
+      <ColumnDefinition Width="264" />
+      <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
+    <DockPanel Margin="12,16,8,16">
+      <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="12,0,0,16">
+        <Image Source="{StaticResource Brand.Logo}" Width="20" Height="20" VerticalAlignment="Center" />
+        <TextBlock Text="{loc:T notch.name}" FontWeight="SemiBold" Margin="10,0,0,0" VerticalAlignment="Center" />
+      </StackPanel>
+      <ListBox x:Name="Nav" Style="{StaticResource Settings.NavList}"
+               ItemsSource="{Binding Pages}" SelectedItem="{Binding SelectedPage}"
+               AutomationProperties.Name="{loc:T settings.nav.name}">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{Binding Glyph}" FontFamily="{StaticResource IconFont}" FontSize="16" Width="30" VerticalAlignment="Center" />
+              <TextBlock Text="{Binding Title}" VerticalAlignment="Center" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
+
+    <ScrollViewer x:Name="Scroller" Grid.Column="1" Focusable="False"
+                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+      <ContentControl Content="{Binding Current}" Focusable="False" IsTabStop="False"
+                      MaxWidth="1000" Margin="28,24,36,36" />
+    </ScrollViewer>
+  </Grid>
+</Window>

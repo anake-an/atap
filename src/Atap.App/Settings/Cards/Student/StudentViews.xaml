@@ -1,0 +1,110 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:student="clr-namespace:Atap.Settings.Cards.Student"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Merged into the settings window only while it is open. Loaded on its own, so the settings styles
+       are DynamicResource: they come from the window. -->
+  <BooleanToVisibilityConverter x:Key="Card.BoolToVisibility" />
+
+  <DataTemplate DataType="{x:Type student:StudentCardViewModel}">
+    <StackPanel>
+      <!-- Timetable -->
+      <Border Style="{DynamicResource Settings.Card}">
+        <StackPanel>
+          <TextBlock Text="{loc:T studentcard.timetable}" Style="{DynamicResource Settings.Label}" />
+          <TextBlock Text="{loc:T studentcard.timetableHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" Margin="0,0,0,10" />
+          <ItemsControl ItemsSource="{Binding Classes}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <DockPanel Margin="0,0,0,6">
+                  <Button DockPanel.Dock="Right" Style="{DynamicResource Settings.Button}" Content="{loc:T studentcard.remove}"
+                          Command="{Binding DataContext.RemoveClassCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                          CommandParameter="{Binding Id}" AutomationProperties.Name="{Binding Name}" />
+                  <TextBlock Text="{Binding Day}" Style="{DynamicResource Settings.Label}" Width="44" VerticalAlignment="Center" />
+                  <TextBlock Text="{Binding Time}" Style="{DynamicResource Settings.Hint}" Width="150" VerticalAlignment="Center" />
+                  <TextBlock Style="{DynamicResource Settings.Label}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
+                    <Run Text="{Binding Name, Mode=OneWay}" />
+                    <Run Text="{Binding Room, Mode=OneWay}" Foreground="{DynamicResource InkSecondaryBrush}" />
+                  </TextBlock>
+                </DockPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <WrapPanel Margin="0,6,0,0">
+            <ComboBox Style="{DynamicResource Settings.ComboBox}" ItemsSource="{Binding Days}" SelectedItem="{Binding Day}" MinWidth="130"
+                      Margin="0,0,6,6" AutomationProperties.Name="{loc:T studentcard.day}" />
+            <ComboBox Style="{DynamicResource Settings.ComboBox}" ItemsSource="{Binding Times}" SelectedItem="{Binding Start}" MinWidth="110"
+                      Margin="0,0,6,6" AutomationProperties.Name="{loc:T studentcard.start}" />
+            <ComboBox Style="{DynamicResource Settings.ComboBox}" ItemsSource="{Binding Times}" SelectedItem="{Binding End}" MinWidth="110"
+                      Margin="0,0,6,6" AutomationProperties.Name="{loc:T studentcard.end}" />
+          </WrapPanel>
+          <WrapPanel>
+            <StackPanel Margin="0,0,6,6">
+              <TextBlock Text="{loc:T studentcard.code}" Style="{DynamicResource Settings.Hint}" />
+              <TextBox Style="{DynamicResource Settings.TextBox}" Text="{Binding Code, UpdateSourceTrigger=PropertyChanged}" Width="110"
+                       AutomationProperties.Name="{loc:T studentcard.code}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,6,6">
+              <TextBlock Text="{loc:T studentcard.className}" Style="{DynamicResource Settings.Hint}" />
+              <TextBox Style="{DynamicResource Settings.TextBox}" Text="{Binding ClassName, UpdateSourceTrigger=PropertyChanged}" Width="200"
+                       AutomationProperties.Name="{loc:T studentcard.className}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,6,6">
+              <TextBlock Text="{loc:T studentcard.room}" Style="{DynamicResource Settings.Hint}" />
+              <TextBox Style="{DynamicResource Settings.TextBox}" Text="{Binding Room, UpdateSourceTrigger=PropertyChanged}" Width="100"
+                       AutomationProperties.Name="{loc:T studentcard.room}" />
+            </StackPanel>
+            <Button Style="{DynamicResource Settings.AccentButton}" Content="{loc:T studentcard.addClass}" Command="{Binding AddClassCommand}"
+                    VerticalAlignment="Bottom" Margin="0,0,0,6" />
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- Assignments -->
+      <Border Style="{DynamicResource Settings.Card}">
+        <StackPanel>
+          <TextBlock Text="{loc:T studentcard.assignments}" Style="{DynamicResource Settings.Label}" />
+          <TextBlock Text="{loc:T studentcard.assignmentsHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" Margin="0,0,0,10" />
+          <ItemsControl ItemsSource="{Binding Assignments}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <DockPanel Margin="0,0,0,6">
+                  <Button DockPanel.Dock="Right" Style="{DynamicResource Settings.Button}" Content="{loc:T studentcard.remove}"
+                          Command="{Binding DataContext.RemoveAssignmentCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                          CommandParameter="{Binding Id}" AutomationProperties.Name="{Binding Title}" />
+                  <TextBlock Text="{Binding Due}" Style="{DynamicResource Settings.Hint}" Width="120" VerticalAlignment="Center" />
+                  <TextBlock Style="{DynamicResource Settings.Label}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis">
+                    <Run Text="{Binding Title, Mode=OneWay}" />
+                    <Run Text="{Binding Course, Mode=OneWay}" Foreground="{DynamicResource InkSecondaryBrush}" />
+                  </TextBlock>
+                </DockPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <WrapPanel Margin="0,6,0,0">
+            <StackPanel Margin="0,0,6,6">
+              <TextBlock Text="{loc:T studentcard.assignmentTitle}" Style="{DynamicResource Settings.Hint}" />
+              <TextBox Style="{DynamicResource Settings.TextBox}" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Width="220"
+                       AutomationProperties.Name="{loc:T studentcard.assignmentTitle}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,6,6">
+              <TextBlock Text="{loc:T studentcard.course}" Style="{DynamicResource Settings.Hint}" />
+              <TextBox Style="{DynamicResource Settings.TextBox}" Text="{Binding Course, UpdateSourceTrigger=PropertyChanged}" Width="110"
+                       AutomationProperties.Name="{loc:T studentcard.course}" />
+            </StackPanel>
+            <StackPanel Margin="0,0,6,6">
+              <TextBlock Text="{loc:T studentcard.due}" Style="{DynamicResource Settings.Hint}" />
+              <ComboBox Style="{DynamicResource Settings.ComboBox}" ItemsSource="{Binding Dates}" SelectedItem="{Binding Due}" MinWidth="170"
+                        AutomationProperties.Name="{loc:T studentcard.due}" />
+            </StackPanel>
+            <Button Style="{DynamicResource Settings.AccentButton}" Content="{loc:T studentcard.addAssignment}" Command="{Binding AddAssignmentCommand}"
+                    VerticalAlignment="Bottom" Margin="0,0,0,6" />
+          </WrapPanel>
+          <TextBlock Text="{Binding Message}" Style="{DynamicResource Settings.Error}" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+  </DataTemplate>
+
+</ResourceDictionary>

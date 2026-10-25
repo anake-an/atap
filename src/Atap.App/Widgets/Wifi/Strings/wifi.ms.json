@@ -1,0 +1,15 @@
+{
+  "wifi.name": "Wi-Fi",
+  "wifi.description": "Status sambungan dan kekuatan isyarat Wi-Fi.",
+  "wifi.showName": "Tunjukkan nama rangkaian",
+  "wifi.showNameHint": "Windows mungkin meminta anda menghidupkan Lokasi untuk ini. Nama itu kekal dalam PC ini.",
+  "wifi.offline": "Tidak bersambung",
+  "wifi.notWifi": "Bersambung, bukan melalui Wi-Fi",
+  "wifi.connected": "Bersambung",
+  "wifi.signal.strong": "Isyarat kuat",
+  "wifi.signal.good": "Isyarat baik",
+  "wifi.signal.weak": "Isyarat lemah",
+  "wifi.metered": "Sambungan bermeter",
+  "wifi.locationOff": "Hidupkan Lokasi Windows untuk melihat nama rangkaian.",
+  "wifi.accessible": "Wi-Fi. {title}. {signal}"
+}

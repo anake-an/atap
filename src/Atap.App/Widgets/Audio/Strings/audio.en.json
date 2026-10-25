@@ -1,0 +1,16 @@
+{
+  "audio.output.name": "Sound output",
+  "audio.output.description": "Switch between your speakers and headphones from the notch.",
+  "audio.output.none": "No speakers or headphones found.",
+  "audio.output.failed": "Windows would not switch here, so Sound settings opened.",
+  "audio.output.accessible": "Sound output. {name}",
+  "audio.mixer.name": "Volume mixer",
+  "audio.mixer.description": "The volume of each app that is making sound. Only checked while you have it open.",
+  "audio.mixer.none": "No apps are making sound.",
+  "audio.mixer.quieter": "Quieter",
+  "audio.mixer.louder": "Louder",
+  "audio.mixer.mute": "Mute {app}",
+  "audio.mixer.unmute": "Unmute {app}",
+  "audio.mixer.muted": "Muted",
+  "audio.mixer.accessible": "Volume mixer. {count} apps"
+}

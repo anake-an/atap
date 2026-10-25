@@ -1,0 +1,15 @@
+{
+  "commandbar.open": "Bar arahan",
+  "commandbar.placeholder": "Taip arahan, kiraan atau aplikasi",
+  "commandbar.results": "Keputusan",
+  "commandbar.copy": "Tekan Enter untuk salin",
+  "commandbar.kind.command": "Atap",
+  "commandbar.kind.app": "Aplikasi",
+  "commandbar.kind.web": "Web",
+  "commandbar.searchWeb": "Cari \"{query}\" di web",
+  "commandbar.search": "Cari di web dengan",
+  "commandbar.search.google": "Google",
+  "commandbar.search.bing": "Bing",
+  "commandbar.search.duckduckgo": "DuckDuckGo",
+  "commandbar.searchHint": "Baris terakhir bar arahan mencari di web. Ia hanya dibuka apabila anda menekan Enter padanya."
+}

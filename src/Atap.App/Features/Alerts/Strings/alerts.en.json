@@ -1,0 +1,21 @@
+{
+  "alerts.sound": "Alert sound",
+  "alerts.sound.windows": "Windows sound",
+  "alerts.sound.file": "My own sound file",
+  "alerts.sound.off": "No sound",
+  "alerts.soundHint": "Plays once for reminders and alarms that make a sound.",
+  "alerts.soundFile": "Sound file",
+  "alerts.soundFileHint": "Pick a sound on this PC, for example an MP3 or WAV file. It plays once, and the Stop button on the alert ends it.",
+  "alerts.followWindows": "Stay quiet during Do not disturb",
+  "alerts.followWindowsHint": "While Windows is on Do not disturb, alerts wait in Missed alerts. Alarms still show.",
+  "alerts.stop": "Stop",
+  "alerts.stopHint": "Stop the sound and close this alert",
+  "alerts.close": "Close",
+  "alerts.closeHint": "Close this alert",
+  "alerts.level": "{level}%",
+  "alerts.accessible": "Alert: {title}",
+  "alerts.accessibleDetail": "Alert: {title}. {detail}",
+  "alerts.accessibleLevel": "Alert: {title}, {level}",
+  "alerts.command.stopSound": "Stop the alert sound",
+  "alerts.command.clearMissed": "Clear missed alerts"
+}

@@ -1,0 +1,7 @@
+{
+  "keyboardoverlay.enabled": "Tunjukkan Caps Lock dan bahasa papan kekunci pada notch",
+  "keyboardoverlay.enabledHint": "Apabila anda menekan Caps Lock atau menukar bahasa papan kekunci, notch menunjukkannya seketika. Atap hanya mengesan kekunci yang ditekan, bukan apa yang anda taip.",
+  "keyboardoverlay.capsOn": "Caps Lock hidup",
+  "keyboardoverlay.capsOff": "Caps Lock mati",
+  "keyboardoverlay.language": "Bahasa papan kekunci"
+}

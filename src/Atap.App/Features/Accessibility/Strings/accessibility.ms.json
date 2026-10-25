@@ -1,0 +1,10 @@
+{
+  "accessibility.textSize": "Saiz teks",
+  "accessibility.textSize.windows": "Ikut Windows",
+  "accessibility.textSize.normal": "Biasa",
+  "accessibility.textSize.large": "Besar",
+  "accessibility.textSize.larger": "Lebih besar",
+  "accessibility.textSizeHint": "Membesarkan semua yang ada pada notch, termasuk ikon. Pilihan Ikut Windows menggunakan tetapan Besarkan teks dalam Tetapan Windows.",
+  "accessibility.lessMotion": "Kurangkan gerakan",
+  "accessibility.lessMotionHint": "Notch bertukar saiz serta-merta, tanpa lantunan dan pudar. Mematikan kesan animasi dalam Windows memberi kesan yang sama."
+}

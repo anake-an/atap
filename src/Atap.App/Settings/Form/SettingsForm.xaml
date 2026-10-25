@@ -1,0 +1,288 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:form="clr-namespace:Atap.Settings.Form"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- The generated settings form: one template per field type. Merged by the window that hosts a form,
+       only while it is open. Every input is named for screen readers by its label. -->
+
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="/Atap;component/Ui/Theme/Settings.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+  <form:InverseVisibilityConverter x:Key="Settings.InverseVisibility" />
+
+  <!-- Label, description and message, shared by every field. -->
+  <DataTemplate x:Key="Settings.FieldHeader">
+    <StackPanel>
+      <TextBlock Text="{Binding Label}" Style="{StaticResource Settings.Label}" />
+      <TextBlock Text="{Binding Description}" Style="{StaticResource Settings.Hint}"
+                 Visibility="{Binding HasDescription, Converter={StaticResource Settings.BoolToVisibility}}" />
+      <TextBlock Text="{Binding Error}" Style="{StaticResource Settings.Error}" AutomationProperties.LiveSetting="Polite"
+                 Visibility="{Binding HasError, Converter={StaticResource Settings.BoolToVisibility}}" />
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- A row with its control on the right. -->
+  <Style x:Key="Settings.FieldRow" TargetType="ContentControl">
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ContentControl">
+          <Border Style="{StaticResource Settings.Card}" AutomationProperties.Name="{Binding Label}"
+                  Visibility="{Binding IsVisible, Converter={StaticResource Settings.BoolToVisibility}}">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource Settings.FieldHeader}"
+                                VerticalAlignment="Center" Margin="0,0,16,0" />
+              <ContentPresenter Grid.Column="1" VerticalAlignment="Center" />
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A row with its control below the label, for text and lists. -->
+  <Style x:Key="Settings.FieldBlock" TargetType="ContentControl">
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ContentControl">
+          <Border Style="{StaticResource Settings.Card}" AutomationProperties.Name="{Binding Label}"
+                  Visibility="{Binding IsVisible, Converter={StaticResource Settings.BoolToVisibility}}">
+            <StackPanel>
+              <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource Settings.FieldHeader}" />
+              <ContentPresenter Margin="0,8,0,0" />
+            </StackPanel>
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <DataTemplate DataType="{x:Type form:ToggleField}">
+    <ContentControl Style="{StaticResource Settings.FieldRow}">
+      <StackPanel Orientation="Horizontal">
+        <TextBlock Text="{Binding StateText}" Style="{StaticResource Settings.Label}" VerticalAlignment="Center" Margin="0,0,10,0" />
+        <CheckBox Style="{StaticResource Settings.Toggle}" IsChecked="{Binding IsOn}"
+                  AutomationProperties.Name="{Binding Label}" AutomationProperties.HelpText="{Binding HelpText}" />
+      </StackPanel>
+    </ContentControl>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type form:NumberField}">
+    <ContentControl Style="{StaticResource Settings.FieldRow}">
+      <StackPanel Orientation="Horizontal">
+        <Slider Style="{StaticResource Settings.Slider}" Margin="0,0,12,0"
+                Visibility="{Binding HasSlider, Converter={StaticResource Settings.BoolToVisibility}}"
+                Minimum="{Binding Minimum}" Maximum="{Binding Maximum}"
+                SmallChange="{Binding Step}" LargeChange="{Binding Step}" TickFrequency="{Binding Step}" IsSnapToTickEnabled="True"
+                Value="{Binding SliderValue, Delay=300}"
+                AutomationProperties.Name="{Binding Label}" AutomationProperties.HelpText="{Binding HelpText}" />
+        <TextBox Style="{StaticResource Settings.TextBox}" Width="88"
+                 Text="{Binding Text, UpdateSourceTrigger=LostFocus}" form:FormInput.CommitOnEnter="True"
+                 AutomationProperties.Name="{Binding Label}" AutomationProperties.HelpText="{Binding HelpText}" />
+        <TextBlock Text="{Binding UnitText}" Style="{StaticResource Settings.Label}" VerticalAlignment="Center" Margin="8,0,0,0"
+                   Visibility="{Binding HasUnit, Converter={StaticResource Settings.BoolToVisibility}}" />
+      </StackPanel>
+    </ContentControl>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type form:ChoiceField}">
+    <ContentControl Style="{StaticResource Settings.FieldRow}">
+      <Grid>
+        <ListBox Style="{StaticResource Settings.Segmented}" ItemsSource="{Binding Options}" SelectedItem="{Binding Selected}"
+                 DisplayMemberPath="Label"
+                 Visibility="{Binding IsSegmented, Converter={StaticResource Settings.BoolToVisibility}}"
+                 AutomationProperties.Name="{Binding Label}" AutomationProperties.HelpText="{Binding HelpText}" />
+        <ComboBox Style="{StaticResource Settings.ComboBox}" ItemsSource="{Binding Options}" SelectedItem="{Binding Selected}"
+                  DisplayMemberPath="Label"
+                  Visibility="{Binding IsSegmented, Converter={StaticResource Settings.InverseVisibility}}"
+                  AutomationProperties.Name="{Binding Label}" AutomationProperties.HelpText="{Binding HelpText}" />
+      </Grid>
+    </ContentControl>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type form:DurationField}">
+    <ContentControl Style="{StaticResource Settings.FieldRow}">
+      <StackPanel Orientation="Horizontal">
+        <TextBox Style="{StaticResource Settings.TextBox}" Width="88"
+                 Text="{Binding Text, UpdateSourceTrigger=LostFocus}" form:FormInput.CommitOnEnter="True"
+                 AutomationProperties.Name="{Binding Label}" AutomationProperties.HelpText="{Binding HelpText}" />
+        <ComboBox Style="{StaticResource Settings.ComboBox}" MinWidth="120" Margin="8,0,0,0"
+                  ItemsSource="{Binding Units}" SelectedItem="{Binding Unit}" DisplayMemberPath="Label"
+                  AutomationProperties.Name="{Binding UnitName}" />
+      </StackPanel>
+    </ContentControl>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type form:HotkeyField}">
+    <ContentControl Style="{StaticResource Settings.FieldRow}">
+      <StackPanel>
+        <StackPanel Orientation="Horizontal">
+          <form:HotkeyBox Style="{StaticResource Settings.TextBox}" MinWidth="160" Text="{Binding DisplayText, Mode=OneWay}"
+                          ToolTip="{Binding Prompt}"
+                          AutomationProperties.Name="{Binding Label}" AutomationProperties.HelpText="{Binding Prompt}" />
+          <Button Style="{StaticResource Settings.Button}" Margin="8,0,0,0" Content="{loc:T settingsform.hotkey.clear}" AutomationProperties.HelpText="{Binding Label}"
+                  Command="{Binding ClearCommand}" />
+        </StackPanel>
+        <TextBlock Text="{Binding UsedElsewhere}" Style="{StaticResource Settings.Error}" Margin="0,4,0,0"
+                   AutomationProperties.LiveSetting="Polite"
+                   Visibility="{Binding IsUsedElsewhere, Converter={StaticResource Settings.BoolToVisibility}}" />
+      </StackPanel>
+    </ContentControl>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type form:TextField}">
+    <ContentControl Style="{StaticResource Settings.FieldBlock}">
+      <StackPanel>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBox Style="{StaticResource Settings.TextBox}" Text="{Binding Text, UpdateSourceTrigger=LostFocus}" MaxLength="{Binding MaxLength}"
+                   form:FormInput.CommitOnEnter="True"
+                   AutomationProperties.Name="{Binding Label}" AutomationProperties.HelpText="{Binding HelpText}" />
+          <Button Grid.Column="1" Style="{StaticResource Settings.Button}" Margin="8,0,0,0"
+                  Content="{loc:T settingsform.browse}" AutomationProperties.HelpText="{Binding Label}"
+                  Command="{Binding BrowseCommand}"
+                  Visibility="{Binding CanBrowse, Converter={StaticResource Settings.BoolToVisibility}}" />
+        </Grid>
+        <TextBlock Text="{Binding Example}" Style="{StaticResource Settings.Hint}"
+                   Visibility="{Binding HasExample, Converter={StaticResource Settings.BoolToVisibility}}" />
+      </StackPanel>
+    </ContentControl>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type form:SecretField}">
+    <ContentControl Style="{StaticResource Settings.FieldBlock}">
+      <StackPanel>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <PasswordBox x:Name="Box" Style="{StaticResource Settings.PasswordBox}" MaxLength="{Binding MaxLength}"
+                       AutomationProperties.Name="{Binding Label}" AutomationProperties.HelpText="{Binding HelpText}">
+            <PasswordBox.InputBindings>
+              <KeyBinding Key="Enter" Command="{Binding SaveCommand}" CommandParameter="{Binding ElementName=Box}" />
+            </PasswordBox.InputBindings>
+          </PasswordBox>
+          <Button Grid.Column="1" Style="{StaticResource Settings.AccentButton}" Margin="8,0,0,0" Content="{loc:T settingsform.secret.save}" AutomationProperties.HelpText="{Binding Label}"
+                  Command="{Binding SaveCommand}" CommandParameter="{Binding ElementName=Box}" />
+          <Button Grid.Column="2" Style="{StaticResource Settings.Button}" Margin="8,0,0,0" Content="{loc:T settingsform.secret.clear}" AutomationProperties.HelpText="{Binding Label}"
+                  Command="{Binding RemoveCommand}" />
+        </Grid>
+        <TextBlock Text="{Binding StatusText}" Style="{StaticResource Settings.Hint}" />
+        <TextBlock Text="{Binding Note}" Style="{StaticResource Settings.Hint}" />
+      </StackPanel>
+    </ContentControl>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type form:TimeZoneField}">
+    <ContentControl Style="{StaticResource Settings.FieldBlock}">
+      <StackPanel>
+        <TextBlock Text="{Binding CurrentName}" Style="{StaticResource Settings.Label}" FontWeight="SemiBold" Margin="0,0,0,8" />
+        <TextBox Style="{StaticResource Settings.TextBox}" Text="{Binding Query, UpdateSourceTrigger=PropertyChanged}"
+                 AutomationProperties.Name="{Binding SearchName}" />
+        <ListBox Height="160" Margin="0,8,0,0" ItemsSource="{Binding Matches}" SelectedItem="{Binding Selected}" DisplayMemberPath="Name"
+                 BorderBrush="{DynamicResource SettingsCardBorderBrush}"
+                 AutomationProperties.Name="{Binding Label}" AutomationProperties.HelpText="{Binding HelpText}" />
+      </StackPanel>
+    </ContentControl>
+  </DataTemplate>
+
+  <DataTemplate DataType="{x:Type form:StringListField}">
+    <ContentControl Style="{StaticResource Settings.FieldBlock}">
+      <StackPanel>
+        <TextBlock Text="{Binding EmptyText}" Style="{StaticResource Settings.Hint}"
+                   Visibility="{Binding IsEmpty, Converter={StaticResource Settings.BoolToVisibility}}" />
+        <ItemsControl ItemsSource="{Binding Items}" Focusable="False" IsTabStop="False"
+                      AutomationProperties.Name="{Binding Label}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Grid Margin="0,0,0,4">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Text}" Style="{StaticResource Settings.Label}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <Button Grid.Column="1" Style="{StaticResource Settings.Button}" Content="{loc:T settingsform.list.remove}"
+                        Command="{Binding Remove}" AutomationProperties.Name="{Binding RemoveName}" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Grid Margin="0,4,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBox x:Name="NewItem" Style="{StaticResource Settings.TextBox}" Text="{Binding NewItem, UpdateSourceTrigger=PropertyChanged}"
+                   MaxLength="{Binding MaxLength}" AutomationProperties.Name="{Binding NewItemName}">
+            <TextBox.InputBindings>
+              <KeyBinding Key="Enter" Command="{Binding AddCommand}" />
+            </TextBox.InputBindings>
+          </TextBox>
+          <Button Grid.Column="1" Style="{StaticResource Settings.Button}" Margin="8,0,0,0" Content="{loc:T settingsform.add}" AutomationProperties.HelpText="{Binding Label}"
+                  Command="{Binding AddCommand}" />
+        </Grid>
+      </StackPanel>
+    </ContentControl>
+  </DataTemplate>
+
+  <DataTemplate x:Key="Settings.CustomMissing">
+    <TextBlock Text="{Binding MissingText}" Style="{StaticResource Settings.Hint}" />
+  </DataTemplate>
+
+  <form:CustomEditorSelector x:Key="Settings.CustomEditor" Missing="{StaticResource Settings.CustomMissing}" />
+
+  <DataTemplate DataType="{x:Type form:CustomField}">
+    <ContentControl Style="{StaticResource Settings.FieldBlock}">
+      <ContentControl Content="{Binding}" ContentTemplateSelector="{StaticResource Settings.CustomEditor}" Focusable="False" IsTabStop="False" />
+    </ContentControl>
+  </DataTemplate>
+
+  <!-- Groups, then "More options" for the fields marked Advanced. -->
+  <DataTemplate x:Key="Settings.Group">
+    <StackPanel AutomationProperties.Name="{Binding Title}">
+      <TextBlock Text="{Binding Title}" Style="{StaticResource Settings.SectionTitle}" AutomationProperties.HeadingLevel="Level2"
+                 Visibility="{Binding HasTitle, Converter={StaticResource Settings.BoolToVisibility}}" />
+      <ItemsControl ItemsSource="{Binding Fields}" Focusable="False" IsTabStop="False" />
+    </StackPanel>
+  </DataTemplate>
+
+  <Style TargetType="form:SettingsForm">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="form:SettingsForm">
+          <StackPanel>
+            <ItemsControl ItemsSource="{Binding Groups}" ItemTemplate="{StaticResource Settings.Group}" Focusable="False" IsTabStop="False" />
+            <Expander Style="{StaticResource Settings.Expander}" Header="{Binding MoreOptions}"
+                      AutomationProperties.Name="{Binding MoreOptions}"
+                      Visibility="{Binding HasAdvanced, Converter={StaticResource Settings.BoolToVisibility}}">
+              <StackPanel>
+                <TextBlock Text="{Binding MoreOptionsHint}" Style="{StaticResource Settings.Hint}" Margin="4,0,0,8" />
+                <ItemsControl ItemsSource="{Binding AdvancedFields}" Focusable="False" IsTabStop="False" />
+              </StackPanel>
+            </Expander>
+          </StackPanel>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A whole form as page content. -->
+  <DataTemplate DataType="{x:Type form:SettingsFormViewModel}">
+    <form:SettingsForm />
+  </DataTemplate>
+
+</ResourceDictionary>

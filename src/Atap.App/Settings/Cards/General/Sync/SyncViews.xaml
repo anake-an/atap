@@ -1,0 +1,68 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sync="clr-namespace:Atap.Settings.Cards.General.Sync"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Merged into the settings window only while it is open. Loaded on its own, so the settings styles
+       are DynamicResource: they come from the window. -->
+  <BooleanToVisibilityConverter x:Key="Card.BoolToVisibility" />
+
+  <DataTemplate DataType="{x:Type sync:SyncCardViewModel}">
+    <StackPanel>
+      <Border Style="{DynamicResource Settings.Card}">
+        <StackPanel>
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+              <TextBlock Text="{loc:T synccard.toggle}" Style="{DynamicResource Settings.Label}" />
+              <TextBlock Text="{loc:T synccard.toggleHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" />
+            </StackPanel>
+            <CheckBox Grid.Column="1" Style="{DynamicResource Settings.Toggle}" IsChecked="{Binding IsOn}" VerticalAlignment="Center"
+                      AutomationProperties.Name="{loc:T synccard.toggle}" />
+          </Grid>
+          <TextBlock Text="{Binding StatusText}" Style="{DynamicResource Settings.Hint}" Margin="0,8,0,0" TextWrapping="Wrap"
+                     AutomationProperties.LiveSetting="Polite"
+                     Visibility="{Binding HasStatus, Converter={StaticResource Card.BoolToVisibility}}" />
+          <TextBlock Text="{Binding Message}" Style="{DynamicResource Settings.Hint}" Margin="0,8,0,0" TextWrapping="Wrap"
+                     AutomationProperties.LiveSetting="Polite"
+                     Visibility="{Binding HasMessage, Converter={StaticResource Card.BoolToVisibility}}" />
+        </StackPanel>
+      </Border>
+
+      <Border Style="{DynamicResource Settings.Card}" Visibility="{Binding IsAsking, Converter={StaticResource Card.BoolToVisibility}}">
+        <StackPanel>
+          <TextBlock Text="{loc:T synccard.askTitle}" Style="{DynamicResource Settings.Label}" TextWrapping="Wrap" />
+          <TextBlock Text="{loc:T synccard.askHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" Margin="0,0,0,10" />
+          <WrapPanel>
+            <Button Style="{DynamicResource Settings.AccentButton}" Content="{loc:T synccard.useOneDrive}"
+                    Command="{Binding UseOneDriveCommand}" Margin="0,0,6,6" />
+            <Button Style="{DynamicResource Settings.Button}" Content="{loc:T synccard.keepThisPc}"
+                    Command="{Binding KeepThisPcCommand}" Margin="0,0,6,6" />
+            <Button Style="{DynamicResource Settings.Button}" Content="{loc:T synccard.cancel}"
+                    Command="{Binding CancelCommand}" Margin="0,0,6,6" />
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+
+      <Border Style="{DynamicResource Settings.Card}">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+            <TextBlock Text="{loc:T synccard.folder}" Style="{DynamicResource Settings.Label}" />
+            <TextBlock Text="{Binding FolderText}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" />
+          </StackPanel>
+          <Button Grid.Column="1" Style="{DynamicResource Settings.Button}" Content="{loc:T synccard.chooseFolder}"
+                  Command="{Binding ChooseFolderCommand}" VerticalAlignment="Center"
+                  Visibility="{Binding CanChooseFolder, Converter={StaticResource Card.BoolToVisibility}}" />
+        </Grid>
+      </Border>
+    </StackPanel>
+  </DataTemplate>
+
+</ResourceDictionary>

@@ -1,0 +1,29 @@
+version: 2
+
+updates:
+  # Directory.Packages.props and the vpk tool in .config/dotnet-tools.json.
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      # The Velopack library and the vpk tool must stay on the same version.
+      velopack:
+        patterns:
+          - Velopack
+          - vpk
+      nuget-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  # SHA-pinned actions in .github/workflows.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions-minor-patch:
+        update-types:
+          - minor
+          - patch

@@ -1,0 +1,14 @@
+<Application x:Class="Atap.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+  <Application.Resources>
+    <ResourceDictionary>
+      <!-- Widget views are not listed here: each widget type's dictionary is merged while it has an instance. -->
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Ui/Theme/Theme.xaml" />
+        <ResourceDictionary Source="Notch/Surfaces/Surfaces.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+</Application>

@@ -1,0 +1,9 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Nothing live: the idle placements (the clock by default). -->
+  <DataTemplate x:Key="surface.Idle">
+    <ContentPresenter Content="{Binding}" ContentTemplate="{DynamicResource notch.slots}" />
+  </DataTemplate>
+
+</ResourceDictionary>

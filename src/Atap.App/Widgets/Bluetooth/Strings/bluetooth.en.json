@@ -1,0 +1,7 @@
+{
+  "bluetooth.name": "Bluetooth",
+  "bluetooth.description": "Your connected Bluetooth devices and their battery, where the device reports it. Only checked while you have it open.",
+  "bluetooth.none": "No Bluetooth devices connected.",
+  "bluetooth.unknown": "Battery unknown",
+  "bluetooth.accessible": "Bluetooth. {devices}"
+}

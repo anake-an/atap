@@ -1,0 +1,20 @@
+{
+  "controls.progress": "Progress",
+  "controls.stale": "Out of date",
+  "controls.items": "{count} items",
+  "controls.more": "{count} more",
+  "controls.page": "Page {page} of {count}",
+  "controls.level.Unknown": "Status unknown",
+  "controls.level.Normal": "Normal",
+  "controls.level.Warning": "Warning",
+  "controls.level.Critical": "Critical",
+  "controls.problem.NoValue": "No value right now",
+  "controls.problem.NotFound": "This value was not found",
+  "controls.problem.NotANumber": "This value is not a number",
+  "controls.problem.NotText": "This value cannot be shown as text",
+  "controls.problem.NotAList": "This value is not a list",
+  "controls.problem.BadMaximum": "The maximum is missing or not above the minimum",
+  "controls.problem.InvalidJson": "The data could not be read",
+  "controls.problem.InvalidText": "The data has characters that cannot be read",
+  "controls.problem.TooLarge": "The data is too large"
+}

@@ -1,0 +1,7 @@
+{
+  "hijri.name": "Hijri date",
+  "hijri.description": "Today's Hijri date, as JAKIM publishes it for your area.",
+  "hijri.privacy": "Sends your JAKIM zone code to e-Solat for the official date, only when you picked an area. Otherwise nothing leaves your PC.",
+  "hijri.estimate": "Calculated. It can be a day off from the official date.",
+  "hijri.accessible": "Hijri date. {date}. {gregorian}"
+}

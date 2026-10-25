@@ -1,0 +1,12 @@
+{
+  "privacy-dot.name": "Kamera dan mikrofon",
+  "privacy-dot.description": "Titik pada notch semasa aplikasi menggunakan kamera atau mikrofon anda, dan aplikasi mana yang menggunakannya.",
+  "privacy-dot.camera": "Kamera",
+  "privacy-dot.mic": "Mikrofon",
+  "privacy-dot.cameraShort": "Kamera",
+  "privacy-dot.micShort": "Mikrofon",
+  "privacy-dot.both": "Kamera dan mikrofon",
+  "privacy-dot.none": "Tiada aplikasi yang menggunakan kamera atau mikrofon anda.",
+  "privacy-dot.cameraUsedBy": "Kamera digunakan oleh {apps}",
+  "privacy-dot.micUsedBy": "Mikrofon digunakan oleh {apps}"
+}

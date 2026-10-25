@@ -1,0 +1,44 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a lyrics instance exists. Lines change without animation. -->
+
+  <BooleanToVisibilityConverter x:Key="lyrics.visible" />
+
+  <!-- The line playing now, large, with the next line under it. Plain lyrics scroll. -->
+  <DataTemplate x:Key="lyrics.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T lyrics.name}"
+                         Icon="{DynamicResource icon.music}"
+                         Accent="{DynamicResource MediaAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Grid>
+        <StackPanel Visibility="{Binding IsSynced, Converter={StaticResource lyrics.visible}}" AutomationProperties.LiveSetting="Polite">
+          <TextBlock Text="{Binding CurrentLine}" Foreground="{DynamicResource TextBrush}" FontSize="17" FontWeight="SemiBold"
+                     TextWrapping="Wrap" />
+          <TextBlock Text="{Binding Romanized}" Foreground="{DynamicResource MediaAccentBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,0"
+                     Visibility="{Binding HasRomanized, Converter={StaticResource lyrics.visible}}" />
+          <TextBlock Text="{Binding Translation}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap" Margin="0,2,0,0"
+                     Visibility="{Binding HasTranslation, Converter={StaticResource lyrics.visible}}" />
+          <TextBlock Text="{Binding NextLine}" Foreground="{DynamicResource TextMutedBrush}" FontSize="13" TextWrapping="Wrap" Margin="0,8,0,0" />
+        </StackPanel>
+        <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto" Focusable="False"
+                      Visibility="{Binding IsPlain, Converter={StaticResource lyrics.visible}}">
+          <TextBlock Text="{Binding PlainText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+        </ScrollViewer>
+        <TextBlock Text="{Binding Message}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+                   Visibility="{Binding HasMessage, Converter={StaticResource lyrics.visible}}" />
+      </Grid>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="lyrics.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource lyrics.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

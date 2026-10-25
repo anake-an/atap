@@ -1,0 +1,445 @@
+name: Release
+
+# Runs when a version tag is pushed, for example v1.0.0 or v1.0.0-preview.1.
+# Builds, tests and packs Atap with Velopack for x64 and Arm64, then uploads one DRAFT GitHub release.
+# The maintainer checks the draft and publishes it by hand.
+# A stable release also gets a Microsoft Store bundle as a workflow artifact, for upload in Partner Center.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions: {}
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  REPO_URL: https://github.com/anake-an/atap
+  PACK_ID: Atap
+  MAIN_EXE: Atap.exe
+  PACK_ICON: src/Atap.App/Assets/atap.ico
+
+jobs:
+  build:
+    name: Build and pack
+    runs-on: windows-latest
+    timeout-minutes: 60 # leaves time to approve the two optional signing requests
+    permissions:
+      contents: read
+      actions: read # lets SignPath fetch the unsigned files of this run. Unused while signing is off.
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    env:
+      PUBLISH_DIR: ${{ github.workspace }}\publish
+      RELEASES_DIR: ${{ github.workspace }}\Releases
+      SIGNED_DIR: ${{ github.workspace }}\signed
+      # "true" once the SIGNPATH_API_TOKEN secret exists. Only this flag is put in the environment, not the token.
+      SIGNPATH_ENABLED: ${{ secrets.SIGNPATH_API_TOKEN != '' }}
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # MinVer needs the tags and history
+          persist-credentials: false
+
+      - name: Read version from tag
+        id: version
+        shell: pwsh
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          $semver = '^v(?<version>(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?)$'
+          if ($env:TAG -notmatch $semver) {
+            Write-Output "::error::Tag '$env:TAG' is not vX.Y.Z or vX.Y.Z-prerelease."
+            exit 1
+          }
+          $version = $Matches.version
+          $prerelease = if ($version.Contains('-')) { 'true' } else { 'false' }
+
+          git merge-base --is-ancestor HEAD origin/main
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "::error::Tag '$env:TAG' points to a commit that is not on main."
+            exit 1
+          }
+
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "prerelease=$prerelease" >> $env:GITHUB_OUTPUT
+          Write-Output "Version $version (prerelease: $prerelease)"
+
+      - name: Extract release notes from CHANGELOG.md
+        id: notes
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $path = 'CHANGELOG.md'
+          $expected = "## [$env:VERSION] - YYYY-MM-DD"
+          if (-not (Test-Path -LiteralPath $path)) {
+            Write-Output "::error::CHANGELOG.md is missing. Add a '$expected' section before tagging."
+            exit 1
+          }
+
+          $lines = @(Get-Content -LiteralPath $path -Encoding utf8)
+          $heading = '^##\s+\[' + [regex]::Escape($env:VERSION) + '\]\s+-\s+\d{4}-\d{2}-\d{2}\s*$'
+          $start = -1
+          for ($i = 0; $i -lt $lines.Count; $i++) {
+            if ($lines[$i] -match $heading) { $start = $i; break }
+          }
+          if ($start -lt 0) {
+            Write-Output "::error file=CHANGELOG.md::No '$expected' section found. Move the Unreleased items into it, commit, then tag again."
+            exit 1
+          }
+
+          $body = [System.Collections.Generic.List[string]]::new()
+          for ($i = $start + 1; $i -lt $lines.Count; $i++) {
+            if ($lines[$i] -match '^##\s') { break }                # next version section
+            if ($lines[$i] -match '^\[[^\]]+\]:\s*\S') { continue } # link definitions at the bottom
+            $body.Add($lines[$i])
+          }
+          $text = ($body -join "`n").Trim()
+          if (-not $text) {
+            Write-Output "::error file=CHANGELOG.md::The '## [$env:VERSION]' section is empty."
+            exit 1
+          }
+
+          $file = Join-Path $env:RUNNER_TEMP 'release-notes.md'
+          Set-Content -LiteralPath $file -Value $text -Encoding utf8
+          "file=$file" >> $env:GITHUB_OUTPUT
+          Write-Output $text
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      # No NuGet cache here on purpose: the cache is shared with other workflow runs, so a
+      # release always restores fresh from nuget.org and checks the lock files.
+      - name: Restore tools
+        run: dotnet tool restore
+
+      - name: Restore
+        run: dotnet restore Atap.sln --locked-mode
+
+      - name: Build
+        run: dotnet build Atap.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test Atap.sln --configuration Release --no-build
+
+      # Arm64 is built on this x64 runner, because the workflow does not use Arm runners.
+      - name: Publish win-x64 and win-arm64
+        shell: pwsh
+        run: |
+          foreach ($rid in 'win-x64', 'win-arm64') {
+            dotnet publish src/Atap.App/Atap.App.csproj --configuration Release --runtime $rid --self-contained --output (Join-Path $env:PUBLISH_DIR $rid)
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            # atap.exe goes in a cli subfolder: atap.exe and Atap.exe are one name to Windows.
+            # Locked mode is off because NativeAOT adds the SDK's own ILCompiler package.
+            dotnet publish src/Atap.Cli/Atap.Cli.csproj --configuration Release --runtime $rid -p:AtapAot=true -p:RestoreLockedMode=false --output (Join-Path $env:PUBLISH_DIR "$rid\cli")
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Check the built version matches the tag
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          foreach ($rid in 'win-x64', 'win-arm64') {
+            $built = (Get-Item -LiteralPath (Join-Path $env:PUBLISH_DIR "$rid\Atap.dll")).VersionInfo.ProductVersion
+            $built = ($built -split '\+')[0]
+            if ($built -ne $env:VERSION) {
+              Write-Output "::error::MinVer built version '$built' for $rid, but the tag says '$env:VERSION'."
+              exit 1
+            }
+            Write-Output "Built version $built for $rid"
+          }
+
+      # Optional code signing with SignPath. These steps run only when the SIGNPATH_API_TOKEN secret exists.
+      # Velopack needs two signing points: Atap's own files before vpk pack, and the installers after it.
+      # Each one is a signing request that an approver accepts in SignPath. See docs/RELEASING.md.
+      # The repository variables and the artifact configuration slugs are placeholders until SignPath is set up.
+      - name: Keep the unsigned app files for signing
+        id: unsigned-app
+        if: env.SIGNPATH_ENABLED == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: unsigned-app
+          path: publish/
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Sign the app files with SignPath
+        if: env.SIGNPATH_ENABLED == 'true'
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: app-files # packaging/signpath/app-files.xml
+          github-artifact-id: ${{ steps.unsigned-app.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 1200
+          output-artifact-directory: signed/app
+
+      - name: Use the signed app files
+        if: env.SIGNPATH_ENABLED == 'true'
+        shell: pwsh
+        run: |
+          $signed = Join-Path $env:SIGNED_DIR 'app'
+          foreach ($rid in 'win-x64', 'win-arm64') {
+            $exe = Join-Path $signed "$rid\$env:MAIN_EXE"
+            $status = (Get-AuthenticodeSignature -LiteralPath $exe).Status
+            if ($status -ne 'Valid') {
+              Write-Output "::error::The signed $rid\$env:MAIN_EXE has signature status '$status'."
+              exit 1
+            }
+          }
+          Remove-Item -LiteralPath $env:PUBLISH_DIR -Recurse -Force
+          Move-Item -LiteralPath $signed -Destination $env:PUBLISH_DIR
+
+      # One release feed per channel. A channel with no earlier release only logs a warning, and its
+      # first package then has no delta.
+      - name: Download previous releases (for delta updates)
+        shell: pwsh
+        env:
+          VPK_TOKEN: ${{ github.token }}
+          PRERELEASE: ${{ steps.version.outputs.prerelease }}
+        run: |
+          foreach ($channel in 'win', 'win-arm64') {
+            $vpkArgs = @(
+              'download', 'github',
+              '--repoUrl', $env:REPO_URL,
+              '--channel', $channel,
+              '--outputDir', (Join-Path $env:RELEASES_DIR $channel)
+            )
+            if ($env:PRERELEASE -eq 'true') { $vpkArgs += '--pre' }
+            dotnet vpk @vpkArgs
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Pack with Velopack
+        shell: pwsh
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          NOTES_FILE: ${{ steps.notes.outputs.file }}
+        run: |
+          # Runtime and its Velopack channel. x64 stays on the default channel "win" for good.
+          # That keeps its installer named Atap-win-Setup.exe, which the website and the README link to.
+          $targets = [ordered]@{ 'win-x64' = 'win'; 'win-arm64' = 'win-arm64' }
+          foreach ($rid in $targets.Keys) {
+            $channel = $targets[$rid]
+            dotnet vpk pack `
+              --packId $env:PACK_ID `
+              --packVersion $env:VERSION `
+              --packDir (Join-Path $env:PUBLISH_DIR $rid) `
+              --mainExe $env:MAIN_EXE `
+              --icon $env:PACK_ICON `
+              --packTitle 'Atap' `
+              --packAuthors 'Aniq Najmuddin' `
+              --runtime $rid `
+              --channel $channel `
+              --releaseNotes $env:NOTES_FILE `
+              --outputDir (Join-Path $env:RELEASES_DIR $channel)
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Keep the unsigned installers for signing
+        id: unsigned-installers
+        if: env.SIGNPATH_ENABLED == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: unsigned-installers
+          path: Releases/*/*-Setup.exe
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: Sign the installers with SignPath
+        if: env.SIGNPATH_ENABLED == 'true'
+        uses: signpath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3.0
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          artifact-configuration-slug: installers # packaging/signpath/installers.xml
+          github-artifact-id: ${{ steps.unsigned-installers.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 1200
+          output-artifact-directory: signed/installers
+
+      - name: Use the signed installers
+        if: env.SIGNPATH_ENABLED == 'true'
+        shell: pwsh
+        run: |
+          # The release feeds list the packages, not the installers, so they stay valid.
+          foreach ($channel in 'win', 'win-arm64') {
+            $name = "$env:PACK_ID-$channel-Setup.exe"
+            $signed = Join-Path $env:SIGNED_DIR "installers\$channel\$name"
+            $status = (Get-AuthenticodeSignature -LiteralPath $signed).Status
+            if ($status -ne 'Valid') {
+              Write-Output "::error::The signed $name has signature status '$status'."
+              exit 1
+            }
+            Copy-Item -LiteralPath $signed -Destination (Join-Path $env:RELEASES_DIR "$channel\$name") -Force
+          }
+
+      # The website, the README and Scoop link to these exact names, and both builds must carry atap.exe.
+      # A release without one of them never reaches the draft.
+      - name: Check the release assets
+        shell: pwsh
+        run: |
+          $missing = @()
+          foreach ($channel in 'win', 'win-arm64') {
+            $setup = Join-Path $env:RELEASES_DIR "$channel\$env:PACK_ID-$channel-Setup.exe"
+            if (-not (Test-Path -LiteralPath $setup)) { $missing += $setup }
+            if (-not (Get-ChildItem -LiteralPath (Join-Path $env:RELEASES_DIR $channel) -Filter '*-full.nupkg' -ErrorAction SilentlyContinue)) {
+              $missing += "a full package in $channel"
+            }
+          }
+          foreach ($rid in 'win-x64', 'win-arm64') {
+            $cli = Join-Path $env:PUBLISH_DIR "$rid\cli\atap.exe"
+            if (-not (Test-Path -LiteralPath $cli)) { $missing += $cli }
+          }
+          if ($missing.Count -gt 0) {
+            $missing | ForEach-Object { Write-Output "::error::Missing release asset: $_" }
+            exit 1
+          }
+          Write-Output "Both installers, both full packages and both atap.exe are present."
+
+      - name: Keep the packed release
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: velopack-releases
+          path: Releases/
+          if-no-files-found: error
+          retention-days: 7
+
+  draft-release:
+    name: Upload draft release
+    needs: build
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write # create the draft release and upload its files
+    env:
+      RELEASES_DIR: ${{ github.workspace }}\Releases
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Restore vpk
+        run: dotnet tool restore
+
+      - name: Get the packed release
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: velopack-releases
+          path: Releases
+
+      - name: Upload draft to GitHub Releases
+        shell: pwsh
+        env:
+          VPK_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+          PRERELEASE: ${{ needs.build.outputs.prerelease }}
+        run: |
+          # No --publish: vpk leaves the release as a draft for the maintainer to check.
+          # "win" goes first and creates the draft. It fails if the tag already has a release.
+          # --merge then adds the other channel to that same draft. Each channel has its own feed file.
+          foreach ($channel in 'win', 'win-arm64') {
+            $vpkArgs = @(
+              'upload', 'github',
+              '--repoUrl', $env:REPO_URL,
+              '--channel', $channel,
+              '--outputDir', (Join-Path $env:RELEASES_DIR $channel),
+              '--tag', "v$env:VERSION",
+              '--releaseName', "Atap $env:VERSION"
+            )
+            if ($env:PRERELEASE -eq 'true') { $vpkArgs += '--pre' }
+            if ($channel -ne 'win') { $vpkArgs += '--merge' }
+            dotnet vpk @vpkArgs
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+  store:
+    name: Store package
+    needs: build
+    # Stable releases only. MSIX versions have no prerelease part, and every Store submission needs a
+    # higher version. A failure here does not stop the draft release.
+    if: needs.build.outputs.prerelease == 'false'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    env:
+      STORE_PUBLISH_DIR: ${{ github.workspace }}\store-publish
+      STORE_DIR: ${{ github.workspace }}\store
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # MinVer needs the tags and history
+          persist-credentials: false
+
+      - name: Check the Store identity is filled in
+        id: identity
+        shell: pwsh
+        run: |
+          $manifest = Get-Content -LiteralPath packaging/msix/AppxManifest.xml -Raw
+          if ($manifest -match '\[(PACKAGE-IDENTITY-NAME|PUBLISHER-CN|PUBLISHER-DISPLAY-NAME)\]') {
+            Write-Output "::notice file=packaging/msix/AppxManifest.xml::The Store identity is not filled in yet, so no Store package is built. See docs/RELEASING.md."
+            'ready=false' >> $env:GITHUB_OUTPUT
+          } else {
+            'ready=true' >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Set up .NET
+        if: steps.identity.outputs.ready == 'true'
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      # The Store channel has no Velopack and restores from its own lock file, packages.store.lock.json.
+      - name: Publish the Store build for win-x64 and win-arm64
+        if: steps.identity.outputs.ready == 'true'
+        shell: pwsh
+        run: |
+          foreach ($rid in 'win-x64', 'win-arm64') {
+            dotnet publish src/Atap.App/Atap.App.csproj --configuration Release --runtime $rid --self-contained -p:AtapChannel=Store --output (Join-Path $env:STORE_PUBLISH_DIR $rid)
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Pack the MSIX bundle
+        if: steps.identity.outputs.ready == 'true'
+        shell: pwsh
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: ./packaging/msix/build.ps1 -Version $env:VERSION -PublishRoot $env:STORE_PUBLISH_DIR -OutputDir $env:STORE_DIR
+
+      # Not attached to the GitHub release. Download it from the run page and upload it in Partner Center.
+      - name: Keep the Store bundle
+        if: steps.identity.outputs.ready == 'true'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: store-package
+          path: store/*.msixbundle
+          if-no-files-found: error
+          retention-days: 30

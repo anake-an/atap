@@ -1,0 +1,46 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a water instance exists. Nothing in it animates. -->
+
+  <!-- Glasses today against the goal, when the next reminder comes, and a button for each glass. -->
+  <DataTemplate x:Key="water.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T water.name}"
+                         Icon="{DynamicResource icon.droplet}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel VerticalAlignment="Center">
+            <TextBlock Text="{Binding CountText}" Foreground="{DynamicResource TextBrush}" FontSize="20" FontWeight="SemiBold"
+                       Typography.NumeralAlignment="Tabular" />
+            <TextBlock Text="{loc:T water.glassesToday}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" />
+          </StackPanel>
+          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+            <controls:IconButton Icon="{DynamicResource icon.minus}" Label="{loc:T water.undo}" Command="{Binding UndoCommand}" Margin="0,0,4,0" />
+            <controls:IconButton Icon="{DynamicResource icon.plus}" Label="{loc:T water.drink}" Command="{Binding DrinkCommand}" />
+          </StackPanel>
+        </Grid>
+        <controls:ProgressPill Value="{Binding Count, Mode=OneWay}" Maximum="{Binding Goal, Mode=OneWay}" Margin="0,8,0,0"
+                               Accent="{DynamicResource ProductivityAccentBrush}" AutomationProperties.Name="{Binding CountText}" />
+        <TextBlock Text="{Binding NextText}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,6,0,0"
+                   TextTrimming="CharacterEllipsis" />
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="water.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource water.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

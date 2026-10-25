@@ -1,0 +1,13 @@
+{
+  "apprulescard.title": "Apabila aplikasi di hadapan",
+  "apprulescard.list": "Peraturan aplikasi",
+  "apprulescard.listHint": "Ubah notch semasa sesuatu aplikasi di hadapan, contohnya notch nipis untuk permainan. Perubahan menunggu seketika, jadi menukar tetingkap dengan cepat tidak menukarnya berulang kali.",
+  "apprulescard.app": "Aplikasi, contohnya valorant.exe",
+  "apprulescard.add": "Tambah aplikasi",
+  "apprulescard.remove": "Buang",
+  "apprulescard.profile": "Profil",
+  "apprulescard.keepProfile": "Tiada perubahan",
+  "apprulescard.slim": "Notch nipis",
+  "apprulescard.quiet": "Senyapkan amaran",
+  "apprulescard.hide": "Sembunyikan notch"
+}

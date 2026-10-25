@@ -1,0 +1,97 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a clipboard instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="clipboard.visible" />
+
+  <Style x:Key="clipboard.button" TargetType="Button">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="Background" Value="{DynamicResource RaisedBrush}" />
+    <Setter Property="Padding" Value="12,5" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome" CornerRadius="6" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.FontSize="12"
+                              TextElement.FontWeight="SemiBold" RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.85" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A row: click to copy again, the cross removes it. -->
+  <Style x:Key="clipboard.row" TargetType="Button">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.card}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome" CornerRadius="6" Padding="6,4" Background="Transparent">
+            <ContentPresenter />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource RaisedBrush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <DataTemplate x:Key="clipboard.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T clipboard.name}"
+                         Icon="{DynamicResource icon.clipboard}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto" Focusable="False"
+                      Visibility="{Binding HasItems, Converter={StaticResource clipboard.visible}}">
+          <ItemsControl ItemsSource="{Binding Rows}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <DockPanel Margin="0,0,0,2" AutomationProperties.Name="{Binding Preview}">
+                  <controls:IconButton DockPanel.Dock="Right" Icon="{DynamicResource icon.close}" Label="{Binding RemoveName}"
+                                       Command="{Binding Remove}" VerticalAlignment="Center" />
+                  <Button Style="{StaticResource clipboard.row}" Command="{Binding Copy}" AutomationProperties.Name="{Binding CopyName}"
+                          ToolTip="{loc:T clipboard.copyHint}">
+                    <TextBlock Text="{Binding Preview}" Foreground="{DynamicResource TextBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                  </Button>
+                </DockPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+        <Button Style="{StaticResource clipboard.button}" Command="{Binding ClearCommand}" HorizontalAlignment="Left" Margin="0,8,0,0"
+                AutomationProperties.Name="{loc:T clipboard.clear}"
+                Visibility="{Binding HasItems, Converter={StaticResource clipboard.visible}}">
+          <TextBlock Text="{loc:T clipboard.clear}" />
+        </Button>
+        <TextBlock Text="{loc:T clipboard.empty}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+                   Visibility="{Binding IsEmpty, Converter={StaticResource clipboard.visible}}" />
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="clipboard.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource clipboard.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

@@ -1,0 +1,19 @@
+{
+  "app.safeMode.title": "Atap started in safe mode",
+  "app.safeMode.subtitle": "It closed because of an error. Only the clock is on. Restart Atap to turn everything back on.",
+  "app.command.quit": "Quit Atap",
+  "app.command.checkUpdates": "Check for updates",
+  "app.section.general": "General",
+  "app.section.appearance": "Appearance",
+  "app.section.position": "Position",
+  "app.section.widgets": "Widgets",
+  "app.section.layout": "Layout",
+  "app.section.profiles": "Profiles",
+  "app.section.malaysia": "Malaysia",
+  "app.section.behavior": "Behaviour",
+  "app.section.advanced": "Advanced",
+  "app.section.accessibility": "Accessibility",
+  "app.section.privacy": "Privacy",
+  "app.section.updates": "Updates",
+  "app.section.about": "About"
+}

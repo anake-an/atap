@@ -1,0 +1,6 @@
+{
+  "network.offline": "Work offline",
+  "network.offlineHint": "Atap stops using the internet straight away. The notch keeps showing what it saved last time. Checking for updates is not affected.",
+  "network.wifiName": "Use the Wi-Fi name",
+  "network.wifiNameHint": "Lets Atap know which Wi-Fi you are on, so it can show different things at home and at work. Rules for each network come in a later update. The name stays on this PC. Windows may ask to use your location, because a Wi-Fi name can show where you are."
+}

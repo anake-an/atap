@@ -1,0 +1,122 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:core="clr-namespace:Atap.Core;assembly=Atap.Core"
+                    xmlns:notch="clr-namespace:Atap.Notch"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:automation="clr-namespace:Atap.Notch.Automation">
+
+  <!-- Pieces the surfaces share, such as the slots template "notch.slots". Use them with DynamicResource. -->
+
+  <notch:WidgetTemplateSelector x:Key="WidgetTemplateSelector" />
+
+  <ItemsPanelTemplate x:Key="GridPanel">
+    <controls:WidgetGrid />
+  </ItemsPanelTemplate>
+
+  <!-- Each grid item tells the grid its size, so it takes 1, 2 or 4 columns. -->
+  <Style x:Key="GridItem" TargetType="automation:WidgetSlot">
+    <Setter Property="controls:WidgetGrid.Size" Value="{Binding Size}" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource NotchFocusVisual}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="automation:WidgetSlot">
+          <ContentPresenter />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- The Expanded and Panel widgets on the 4-column grid, in layout order. In the panel, Tab moves from
+       widget to widget and the arrow keys move around the grid. -->
+  <DataTemplate x:Key="notch.grid">
+    <automation:WidgetSlots Focusable="False"
+                            HorizontalAlignment="Center"
+                            KeyboardNavigation.DirectionalNavigation="Contained"
+                            ItemsSource="{Binding GridItems}"
+                            ItemsPanel="{StaticResource GridPanel}"
+                            ItemContainerStyle="{StaticResource GridItem}"
+                            ItemTemplateSelector="{StaticResource WidgetTemplateSelector}" />
+  </DataTemplate>
+
+  <!-- An alert that came while the notch is open, above the widgets. Gone when there is none. -->
+  <DataTemplate x:Key="notch.banner">
+    <ContentControl Content="{Binding Banner}"
+                    Focusable="False"
+                    IsTabStop="False"
+                    HorizontalAlignment="Center"
+                    Margin="0,0,0,10">
+      <ContentControl.Style>
+        <Style TargetType="ContentControl">
+          <Setter Property="ContentTemplate" Value="{DynamicResource alert.wide}" />
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding IsVertical}" Value="True">
+              <Setter Property="ContentTemplate" Value="{DynamicResource alert.tall}" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding Banner}" Value="{x:Null}">
+              <Setter Property="ContentTemplate" Value="{x:Null}" />
+              <Setter Property="Visibility" Value="Collapsed" />
+              <Setter Property="Margin" Value="0" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </ContentControl.Style>
+    </ContentControl>
+  </DataTemplate>
+
+  <!-- Slot items run along the notch: side by side on the top edge, stacked on a side edge. -->
+  <ItemsPanelTemplate x:Key="SlotPanel">
+    <StackPanel Orientation="{Binding SlotOrientation}" />
+  </ItemsPanelTemplate>
+
+  <!-- The left, centre and right slots, as the Idle, Compact and Expanded surfaces show them. -->
+  <DataTemplate x:Key="notch.slots">
+    <StackPanel Orientation="{Binding SlotOrientation}"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center">
+
+      <ItemsControl Focusable="False"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    ItemsSource="{Binding LeftItems}"
+                    ItemsPanel="{StaticResource SlotPanel}"
+                    ItemTemplateSelector="{StaticResource WidgetTemplateSelector}" />
+
+      <ItemsControl Focusable="False"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    ItemsSource="{Binding CenterItems}"
+                    ItemTemplateSelector="{StaticResource WidgetTemplateSelector}">
+        <ItemsControl.Style>
+          <Style TargetType="ItemsControl">
+            <Style.Triggers>
+              <!-- Keep a gap between the compact left and right slots, like a camera cut-out. -->
+              <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                  <Condition Binding="{Binding State}" Value="{x:Static core:NotchState.Compact}" />
+                  <Condition Binding="{Binding IsVertical}" Value="False" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="MinWidth" Value="96" />
+              </MultiDataTrigger>
+              <!-- On a side edge the slots stack, so the gap is vertical. -->
+              <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                  <Condition Binding="{Binding State}" Value="{x:Static core:NotchState.Compact}" />
+                  <Condition Binding="{Binding IsVertical}" Value="True" />
+                </MultiDataTrigger.Conditions>
+                <Setter Property="MinHeight" Value="56" />
+              </MultiDataTrigger>
+            </Style.Triggers>
+          </Style>
+        </ItemsControl.Style>
+      </ItemsControl>
+
+      <ItemsControl Focusable="False"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    ItemsSource="{Binding RightItems}"
+                    ItemsPanel="{StaticResource SlotPanel}"
+                    ItemTemplateSelector="{StaticResource WidgetTemplateSelector}" />
+    </StackPanel>
+  </DataTemplate>
+
+</ResourceDictionary>

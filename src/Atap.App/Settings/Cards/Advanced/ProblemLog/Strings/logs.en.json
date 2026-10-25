@@ -1,0 +1,6 @@
+{
+  "logs.title": "Problem log",
+  "logs.hint": "Atap keeps a short log on this PC to help fix problems. It never leaves your PC unless you send it.",
+  "logs.open": "Open log folder",
+  "logs.none": "There is no log yet."
+}

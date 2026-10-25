@@ -1,0 +1,7 @@
+{
+  "bluetooth.name": "Bluetooth",
+  "bluetooth.description": "Peranti Bluetooth yang bersambung dan baki bateri, jika peranti melaporkannya. Hanya disemak semasa anda membukanya.",
+  "bluetooth.none": "Tiada peranti Bluetooth bersambung.",
+  "bluetooth.unknown": "Bateri tidak diketahui",
+  "bluetooth.accessible": "Bluetooth. {devices}"
+}

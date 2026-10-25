@@ -1,0 +1,13 @@
+{
+  "clipboard.name": "Papan keratan",
+  "clipboard.description": "25 perkara terakhir yang anda salin. Klik satu untuk menyalinnya semula. Hilang apabila Atap ditutup, melainkan anda memilih untuk menyimpannya.",
+  "clipboard.privacy": "Atap membaca apa yang anda salin semasa widget ini hidup. Ia melangkau salinan yang ditandakan peribadi oleh pengurus kata laluan dan tidak pernah menghantarnya. Ia menyimpannya dalam memori sahaja, melainkan anda menghidupkan Simpan sejarah saya. Kemudian ia disimpan pada PC ini sahaja, dikunci pada akaun Windows anda.",
+  "clipboard.keep": "Simpan sejarah saya",
+  "clipboard.keepHint": "Mengingati apa yang anda salin selepas Atap ditutup. Ia kekal pada PC ini sahaja, dikunci pada akaun Windows anda, dan tidak pernah disegerakkan. Matikan untuk memadamnya.",
+  "clipboard.empty": "Salin sebarang teks dan ia akan muncul di sini.",
+  "clipboard.clear": "Kosongkan semua",
+  "clipboard.copyHint": "Salin semula",
+  "clipboard.copyItem": "Salin {item} semula",
+  "clipboard.removeItem": "Buang {item}",
+  "clipboard.accessible": "Papan keratan. {count} item"
+}

@@ -1,0 +1,14 @@
+{
+  "localapi.enabled": "Benarkan program pada PC ini menunjukkan kemajuan",
+  "localapi.enabledHint": "Skrip dan alat pada PC ini boleh menunjukkan kemajuan dan makluman pada notch dengan atap push. Tiada apa-apa di luar PC ini yang boleh mencapainya.",
+  "localapi.onPath": "Tambah atap ke PATH",
+  "localapi.onPathHint": "Supaya terminal baharu boleh menjalankan atap tanpa laluan penuhnya. Ia dibuang apabila anda mematikannya atau menyahpasang Atap.",
+  "localapi.card.title": "API tempatan",
+  "localapi.card.off": "Dimatikan. Hidupkan di atas untuk membenarkan program pada PC ini menggunakannya.",
+  "localapi.card.running": "Dihidupkan. Program pada PC ini boleh menunjukkan kemajuan pada notch.",
+  "localapi.card.couldNotStart": "Tidak dapat dimulakan kerana program lain sedang menggunakan namanya. Mulakan semula Atap untuk mencuba lagi.",
+  "localapi.card.example": "Cuba dalam terminal:",
+  "localapi.card.pushWidget": "Hantaran hanya ditunjukkan semasa widget Push dihidupkan.",
+  "localapi.card.copy": "Salin contoh",
+  "localapi.card.copied": "Disalin"
+}

@@ -1,0 +1,12 @@
+{
+  "mediacommands.playPause": "Main atau jeda muzik",
+  "mediacommands.next": "Lagu seterusnya",
+  "mediacommands.previous": "Lagu sebelumnya",
+  "mediacommands.volumeUp": "Naikkan kelantangan",
+  "mediacommands.volumeDown": "Turunkan kelantangan",
+  "mediacommands.mute": "Bisu atau nyahbisu",
+  "mediacommands.volume": "Kelantangan",
+  "mediacommands.muted": "Dibisukan",
+  "mediacommands.musicKeywords": "muzik media lagu main jeda langkau seterusnya sebelumnya spotify",
+  "mediacommands.volumeKeywords": "kelantangan bunyi kuat perlahan bisu nyahbisu pembesar suara audio"
+}

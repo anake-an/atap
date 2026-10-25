@@ -1,0 +1,34 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:api="clr-namespace:Atap.Settings.Cards.Advanced.LocalApi"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Merged into the settings window only while it is open. Loaded on its own, so the settings styles
+       are DynamicResource: they come from the window. -->
+  <BooleanToVisibilityConverter x:Key="Card.BoolToVisibility" />
+
+  <DataTemplate DataType="{x:Type api:LocalApiCardViewModel}">
+    <Border Style="{DynamicResource Settings.Card}">
+      <StackPanel>
+        <TextBlock Text="{Binding StatusText}" Style="{DynamicResource Settings.Label}" TextWrapping="Wrap"
+                   AutomationProperties.LiveSetting="Polite" />
+
+        <StackPanel Margin="0,10,0,0" Visibility="{Binding IsRunning, Converter={StaticResource Card.BoolToVisibility}}">
+          <TextBlock Text="{loc:T localapi.card.example}" Style="{DynamicResource Settings.Hint}" />
+          <DockPanel Margin="0,6,0,0" LastChildFill="True">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,0,0">
+              <TextBlock Text="{Binding CopyStatus}" Style="{DynamicResource Settings.Hint}" VerticalAlignment="Center" Margin="0,0,10,0"
+                         AutomationProperties.LiveSetting="Polite" />
+              <Button Style="{DynamicResource Settings.Button}" Content="{loc:T localapi.card.copy}" Command="{Binding CopyCommand}" />
+            </StackPanel>
+            <TextBox Style="{DynamicResource Settings.TextBox}" Text="{Binding ExampleText, Mode=OneWay}" IsReadOnly="True"
+                     FontFamily="Cascadia Mono, Consolas" FontSize="13"
+                     AutomationProperties.Name="{loc:T localapi.card.example}" />
+          </DockPanel>
+          <TextBlock Text="{loc:T localapi.card.pushWidget}" Style="{DynamicResource Settings.Hint}" Margin="0,6,0,0" TextWrapping="Wrap" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+  </DataTemplate>
+
+</ResourceDictionary>

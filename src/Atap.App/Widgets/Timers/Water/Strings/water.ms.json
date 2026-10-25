@@ -1,0 +1,20 @@
+{
+  "water.name": "Air",
+  "water.description": "Peringatan lembut untuk minum air, dan kiraan gelas untuk hari ini. Ia berhenti seketika semasa PC dikunci.",
+  "water.interval": "Ingatkan saya setiap",
+  "water.minutes": "min",
+  "water.from": "Dari",
+  "water.until": "Hingga",
+  "water.hoursHint": "Peringatan hanya datang di antara waktu ini.",
+  "water.goal": "Gelas sehari",
+  "water.glasses": "gelas",
+  "water.count": "{count} daripada {goal}",
+  "water.glassesToday": "gelas hari ini",
+  "water.drink": "Tambah segelas",
+  "water.undo": "Kurangkan segelas",
+  "water.next": "Peringatan seterusnya pada {time}",
+  "water.paused": "Dijeda semasa PC dikunci",
+  "water.alert": "Masa untuk minum air",
+  "water.alertCount": "{count} daripada {goal} gelas hari ini",
+  "water.accessible": "Air. {count} gelas. {next}"
+}

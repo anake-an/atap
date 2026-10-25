@@ -1,0 +1,44 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a Hijri instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="hijri.visible" />
+
+  <DataTemplate x:Key="hijri.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T hijri.name}"
+                         Icon="{DynamicResource icon.calendar}"
+                         Accent="{DynamicResource MalaysiaAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <TextBlock Text="{Binding DateText}"
+                   Foreground="{DynamicResource TextBrush}"
+                   FontSize="16"
+                   FontWeight="SemiBold"
+                   TextWrapping="Wrap" />
+        <TextBlock Text="{Binding GregorianText}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
+                   FontSize="12"
+                   Margin="0,2,0,0"
+                   TextTrimming="CharacterEllipsis" />
+        <TextBlock Text="{loc:T hijri.estimate}"
+                   Foreground="{DynamicResource TextMutedBrush}"
+                   FontSize="11"
+                   Margin="0,6,0,0"
+                   TextWrapping="Wrap"
+                   Visibility="{Binding IsEstimate, Converter={StaticResource hijri.visible}}" />
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="hijri.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource hijri.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

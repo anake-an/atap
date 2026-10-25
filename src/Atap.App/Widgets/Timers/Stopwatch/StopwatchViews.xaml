@@ -1,0 +1,126 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a stopwatch instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="stopwatch.visible" />
+
+  <Style x:Key="stopwatch.toggle" TargetType="controls:IconButton" BasedOn="{StaticResource {x:Type controls:IconButton}}">
+    <Setter Property="Icon" Value="{DynamicResource icon.play}" />
+    <Setter Property="Label" Value="{Binding ToggleLabel}" />
+    <Setter Property="Command" Value="{Binding ToggleCommand}" />
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsRunning}" Value="True">
+        <Setter Property="Icon" Value="{DynamicResource icon.pause}" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <DataTemplate x:Key="stopwatch.Compact.Left">
+    <StackPanel DataContext="{Binding ViewModel}"
+                AutomationProperties.Name="{Binding AccessibleSummary}"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Margin="4,0">
+      <controls:StrokeIcon Data="{DynamicResource icon.clock}"
+                           Foreground="{DynamicResource ProductivityAccentBrush}"
+                           Width="14"
+                           Height="14"
+                           VerticalAlignment="Center"
+                           Margin="0,0,6,0" />
+      <TextBlock Text="{loc:T stopwatch.name}"
+                 Foreground="{DynamicResource PrimaryTextBrush}"
+                 FontSize="13"
+                 FontWeight="SemiBold"
+                 VerticalAlignment="Center" />
+    </StackPanel>
+  </DataTemplate>
+
+  <DataTemplate x:Key="stopwatch.Compact.Right">
+    <TextBlock DataContext="{Binding ViewModel}"
+               AutomationProperties.Name="{Binding AccessibleSummary}"
+               Text="{Binding ShortText}"
+               Foreground="{DynamicResource PrimaryTextBrush}"
+               FontSize="13"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center"
+               Margin="4,0" />
+  </DataTemplate>
+
+  <DataTemplate x:Key="stopwatch.Expanded.Small">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T stopwatch.name}"
+                         Icon="{DynamicResource icon.clock}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <TextBlock Text="{Binding TimeText}" Foreground="{DynamicResource TextBrush}" FontSize="24" FontWeight="SemiBold"
+                   Typography.NumeralAlignment="Tabular" VerticalAlignment="Center" />
+        <controls:IconButton Grid.Column="1" Style="{StaticResource stopwatch.toggle}" VerticalAlignment="Center" />
+      </Grid>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="stopwatch.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T stopwatch.name}"
+                         Icon="{DynamicResource icon.clock}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Text="{Binding TimeText}" Foreground="{DynamicResource TextBrush}" FontSize="30" FontWeight="SemiBold"
+                     Typography.NumeralAlignment="Tabular" VerticalAlignment="Center" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+            <controls:IconButton Style="{StaticResource stopwatch.toggle}" Margin="0,0,4,0" />
+            <controls:IconButton Icon="{DynamicResource icon.list}" Label="{loc:T stopwatch.lapButton}" Command="{Binding LapCommand}" Margin="0,0,4,0" />
+            <controls:IconButton Icon="{DynamicResource icon.refresh}" Label="{loc:T stopwatch.reset}" Command="{Binding ResetCommand}" />
+          </StackPanel>
+        </Grid>
+        <ItemsControl ItemsSource="{Binding Laps}" Focusable="False" Margin="0,6,0,0"
+                      Visibility="{Binding HasLaps, Converter={StaticResource stopwatch.visible}}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Grid Margin="0,2" AutomationProperties.Name="{Binding Name}">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                  <ColumnDefinition Width="70" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                <TextBlock Grid.Column="1" Text="{Binding Split}" Foreground="{DynamicResource TextBrush}" FontSize="12"
+                           FontWeight="SemiBold" Typography.NumeralAlignment="Tabular" />
+                <TextBlock Grid.Column="2" Text="{Binding Total}" Foreground="{DynamicResource TextMutedBrush}" FontSize="12"
+                           Typography.NumeralAlignment="Tabular" TextAlignment="Right" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="stopwatch.Panel.Small">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource stopwatch.Expanded.Small}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+  <DataTemplate x:Key="stopwatch.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource stopwatch.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

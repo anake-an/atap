@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Slim and tucked away: the window gives the pill its thin size, so the template only draws a short
+       accent line while something is live, such as music, so the bar shows that something is going on. -->
+  <DataTemplate x:Key="surface.Slim">
+    <Border x:Name="Accent" Width="28" Height="2" CornerRadius="1" Background="{DynamicResource AccentBrush}"
+            HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding HasLiveOwner}" Value="True">
+        <Setter TargetName="Accent" Property="Visibility" Value="Visible" />
+      </DataTrigger>
+      <DataTrigger Binding="{Binding IsVertical}" Value="True">
+        <Setter TargetName="Accent" Property="Width" Value="2" />
+        <Setter TargetName="Accent" Property="Height" Value="28" />
+      </DataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
+
+</ResourceDictionary>

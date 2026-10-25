@@ -1,0 +1,10 @@
+{
+  "accessibility.textSize": "Text size",
+  "accessibility.textSize.windows": "Match Windows",
+  "accessibility.textSize.normal": "Normal",
+  "accessibility.textSize.large": "Large",
+  "accessibility.textSize.larger": "Larger",
+  "accessibility.textSizeHint": "Makes everything in the notch bigger, icons too. Match Windows follows Make text bigger in Windows Settings.",
+  "accessibility.lessMotion": "Less motion",
+  "accessibility.lessMotionHint": "The notch changes size at once, without the spring and the fade. Turning off animation effects in Windows does the same."
+}

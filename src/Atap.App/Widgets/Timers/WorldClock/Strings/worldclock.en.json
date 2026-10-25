@@ -1,0 +1,13 @@
+{
+  "worldclock.name": "World clock",
+  "worldclock.description": "The time in up to three places, next to yours.",
+  "worldclock.city1": "First place",
+  "worldclock.city2": "Second place",
+  "worldclock.city3": "Third place",
+  "worldclock.tomorrow": "tomorrow",
+  "worldclock.yesterday": "yesterday",
+  "worldclock.sameTime": "Same time",
+  "worldclock.hours": "h",
+  "worldclock.none": "Pick places in the widget settings.",
+  "worldclock.accessible": "World clock. {clocks}"
+}

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  SignPath artifact configuration "app-files". Paste it into the SignPath project with that slug.
+
+  The release workflow sends the publish folder before vpk pack, with one folder per runtime.
+  Only Atap's own files are signed. The .NET runtime files are already signed by Microsoft, and other
+  packages stay as their authors ship them.
+
+  Placeholder: SignPath Foundation also asks for a product version restriction. Agree the exact form with
+  SignPath when the project is set up. Atap.dll reports versions like 0.1.0+<commit>.
+-->
+<artifact-configuration xmlns="http://signpath.io/artifact-configuration/v1">
+  <zip-file>
+    <directory path="win-x64">
+      <pe-file path="Atap.exe" product-name="Atap">
+        <authenticode-sign />
+      </pe-file>
+      <pe-file path="Atap.dll" product-name="Atap">
+        <authenticode-sign />
+      </pe-file>
+      <pe-file path="Atap.Core.dll" product-name="Atap">
+        <authenticode-sign />
+      </pe-file>
+      <directory path="cli">
+        <pe-file path="atap.exe" product-name="Atap">
+          <authenticode-sign />
+        </pe-file>
+      </directory>
+    </directory>
+    <directory path="win-arm64">
+      <pe-file path="Atap.exe" product-name="Atap">
+        <authenticode-sign />
+      </pe-file>
+      <pe-file path="Atap.dll" product-name="Atap">
+        <authenticode-sign />
+      </pe-file>
+      <pe-file path="Atap.Core.dll" product-name="Atap">
+        <authenticode-sign />
+      </pe-file>
+      <directory path="cli">
+        <pe-file path="atap.exe" product-name="Atap">
+          <authenticode-sign />
+        </pe-file>
+      </directory>
+    </directory>
+  </zip-file>
+</artifact-configuration>

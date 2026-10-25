@@ -1,0 +1,10 @@
+{
+  "push.name": "Push",
+  "push.description": "Shows progress that programs and scripts on this PC send with atap push, such as a build or a backup.",
+  "push.empty": "Nothing pushed",
+  "push.from": "from {source}",
+  "push.state.running": "Running",
+  "push.state.done": "Done",
+  "push.state.failed": "Failed",
+  "push.accessible": "{title}: {status}"
+}

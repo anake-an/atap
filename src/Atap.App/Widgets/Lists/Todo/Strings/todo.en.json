@@ -1,0 +1,18 @@
+{
+  "todo.name": "To-do",
+  "todo.description": "A simple to-do list. Add tasks in the notch panel, and get a reminder on the day they are due.",
+  "todo.addHint": "Add a task and press Enter",
+  "todo.empty": "Nothing to do. Type a task above.",
+  "todo.allDone": "All done",
+  "todo.count": "{open} to do",
+  "todo.countOverdue": "{open} to do, {overdue} overdue",
+  "todo.today": "Today",
+  "todo.tomorrow": "Tomorrow",
+  "todo.overdue": "Overdue",
+  "todo.noDate": "No date",
+  "todo.remove": "Remove",
+  "todo.clearDone": "Clear done",
+  "todo.alert.due": "Due today",
+  "todo.alert.missed": "{count} task reminders came while Atap was closed",
+  "todo.accessible": "To-do. {count}"
+}

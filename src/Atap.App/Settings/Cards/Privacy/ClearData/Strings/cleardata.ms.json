@@ -1,0 +1,12 @@
+{
+  "cleardata.title": "Data yang disimpan",
+  "cleardata.hint": "Atap menyimpan salinan apa yang dimuat turun, supaya notch masih menunjukkan sesuatu semasa anda di luar talian. Data ini selamat untuk dikosongkan. Atap akan memuat turun semula apabila perlu.",
+  "cleardata.size": "Menggunakan {size} pada PC ini.",
+  "cleardata.empty": "Tiada apa-apa yang disimpan buat masa ini.",
+  "cleardata.clear": "Kosongkan data simpanan",
+  "cleardata.freed": "Siap. {size} telah dikosongkan.",
+  "cleardata.nothing": "Tiada apa-apa untuk dikosongkan.",
+  "cleardata.someLeft": "{size} telah dikosongkan. Beberapa fail sedang digunakan, jadi fail itu dibiarkan. Cuba lagi nanti.",
+  "cleardata.kb": "{value} KB",
+  "cleardata.mb": "{value} MB"
+}

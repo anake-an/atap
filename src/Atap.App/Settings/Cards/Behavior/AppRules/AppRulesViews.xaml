@@ -1,0 +1,64 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:rules="clr-namespace:Atap.Settings.Cards.Behavior.AppRules"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Merged into the settings window only while it is open. Loaded on its own, so the settings styles
+       are DynamicResource: they come from the window. -->
+  <BooleanToVisibilityConverter x:Key="Card.BoolToVisibility" />
+
+  <DataTemplate DataType="{x:Type rules:AppRulesCardViewModel}">
+    <Border Style="{DynamicResource Settings.Card}">
+      <StackPanel>
+        <TextBlock Text="{loc:T apprulescard.list}" Style="{DynamicResource Settings.Label}" />
+        <TextBlock Text="{loc:T apprulescard.listHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" Margin="0,0,0,10" />
+        <ItemsControl ItemsSource="{Binding Rows}" Focusable="False" Visibility="{Binding HasRows, Converter={StaticResource Card.BoolToVisibility}}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Border Padding="0,8" BorderBrush="{DynamicResource DividerBrush}" BorderThickness="0,0,0,1" AutomationProperties.Name="{Binding Apps}">
+                <StackPanel>
+                  <DockPanel>
+                    <Button DockPanel.Dock="Right" Style="{DynamicResource Settings.Button}" Content="{loc:T apprulescard.remove}"
+                            Command="{Binding DataContext.RemoveCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                            CommandParameter="{Binding}" AutomationProperties.Name="{Binding Apps}" />
+                    <TextBlock Text="{Binding Apps}" Style="{DynamicResource Settings.Label}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  </DockPanel>
+                  <WrapPanel Margin="0,8,0,0">
+                    <StackPanel Margin="0,0,16,6">
+                      <TextBlock Text="{loc:T apprulescard.profile}" Style="{DynamicResource Settings.Hint}" />
+                      <ComboBox Style="{DynamicResource Settings.ComboBox}" MinWidth="170" ItemsSource="{Binding Choices}"
+                                SelectedItem="{Binding Profile}" DisplayMemberPath="Name"
+                                AutomationProperties.Name="{loc:T apprulescard.profile}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,16,6">
+                      <TextBlock Text="{loc:T apprulescard.slim}" Style="{DynamicResource Settings.Hint}" />
+                      <CheckBox Style="{DynamicResource Settings.Toggle}" IsChecked="{Binding Slim}" AutomationProperties.Name="{loc:T apprulescard.slim}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,16,6">
+                      <TextBlock Text="{loc:T apprulescard.quiet}" Style="{DynamicResource Settings.Hint}" />
+                      <CheckBox Style="{DynamicResource Settings.Toggle}" IsChecked="{Binding Quiet}" AutomationProperties.Name="{loc:T apprulescard.quiet}" />
+                    </StackPanel>
+                    <StackPanel Margin="0,0,16,6">
+                      <TextBlock Text="{loc:T apprulescard.hide}" Style="{DynamicResource Settings.Hint}" />
+                      <CheckBox Style="{DynamicResource Settings.Toggle}" IsChecked="{Binding Hide}" AutomationProperties.Name="{loc:T apprulescard.hide}" />
+                    </StackPanel>
+                  </WrapPanel>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <DockPanel Margin="0,10,0,0">
+          <Button DockPanel.Dock="Right" Style="{DynamicResource Settings.AccentButton}" Content="{loc:T apprulescard.add}"
+                  Command="{Binding AddCommand}" Margin="6,0,0,0" VerticalAlignment="Bottom" />
+          <StackPanel>
+            <TextBlock Text="{loc:T apprulescard.app}" Style="{DynamicResource Settings.Hint}" />
+            <TextBox Style="{DynamicResource Settings.TextBox}" Text="{Binding NewApp, UpdateSourceTrigger=PropertyChanged}"
+                     AutomationProperties.Name="{loc:T apprulescard.app}" />
+          </StackPanel>
+        </DockPanel>
+      </StackPanel>
+    </Border>
+  </DataTemplate>
+
+</ResourceDictionary>

@@ -1,0 +1,250 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while an alarm instance exists. Nothing in it animates. The notch takes no typed text,
+       so the editor uses steppers for the time and chips for the days. -->
+
+  <BooleanToVisibilityConverter x:Key="alarm.visible" />
+
+  <!-- On and off for one alarm: a dark pill switch with a round knob. -->
+  <Style x:Key="alarm.switch" TargetType="CheckBox">
+    <Setter Property="Focusable" Value="True" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="CheckBox">
+          <Border x:Name="Track" Width="36" Height="20" CornerRadius="10" Background="{DynamicResource RaisedBrush}"
+                  BorderBrush="{DynamicResource TextSecondaryBrush}" BorderThickness="1" SnapsToDevicePixels="True">
+            <Ellipse x:Name="Knob" Width="12" Height="12" Margin="4,0" HorizontalAlignment="Left"
+                     Fill="{DynamicResource TextSecondaryBrush}" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Track" Property="Background" Value="{DynamicResource ProductivityAccentBrush}" />
+              <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource ProductivityAccentBrush}" />
+              <Setter TargetName="Knob" Property="HorizontalAlignment" Value="Right" />
+              <Setter TargetName="Knob" Property="Fill" Value="{DynamicResource NotchSurfaceBrush}" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Track" Property="BorderBrush" Value="{DynamicResource TextBrush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A day in the editor: a round chip, filled when the alarm repeats on that day. -->
+  <Style x:Key="alarm.day" TargetType="ToggleButton">
+    <Setter Property="Width" Value="30" />
+    <Setter Property="Height" Value="30" />
+    <Setter Property="Margin" Value="0,0,4,0" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ToggleButton">
+          <Border x:Name="Chip" CornerRadius="15" Background="{DynamicResource RaisedBrush}" SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.FontSize="12"
+                              TextElement.FontWeight="SemiBold" RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Chip" Property="Background" Value="{DynamicResource ProductivityAccentBrush}" />
+              <Setter Property="Foreground" Value="{DynamicResource NotchSurfaceBrush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A button with words, for Add, Save, Delete and Cancel: a rounded rectangle, as in Windows 11. -->
+  <Style x:Key="alarm.button" TargetType="Button">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="Background" Value="{DynamicResource RaisedBrush}" />
+    <Setter Property="Padding" Value="12,5" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome" CornerRadius="6" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.FontSize="12"
+                              TextElement.FontWeight="SemiBold" RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.85" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.4" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="alarm.accentButton" TargetType="Button" BasedOn="{StaticResource alarm.button}">
+    <Setter Property="Background" Value="{DynamicResource ProductivityAccentBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource NotchSurfaceBrush}" />
+  </Style>
+
+  <!-- One alarm: its time and days open the editor, the switch turns it on or off. -->
+  <DataTemplate x:Key="alarm.row">
+    <Grid Margin="0,2" AutomationProperties.Name="{Binding AccessibleName}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <Button Command="{Binding EditCommand}" Cursor="Hand" FocusVisualStyle="{DynamicResource focus.card}"
+              HorizontalContentAlignment="Stretch" AutomationProperties.Name="{Binding AccessibleName}">
+        <Button.Template>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="Chrome" CornerRadius="8" Padding="6,4" Background="Transparent">
+              <ContentPresenter />
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource RaisedBrush}" />
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Button.Template>
+        <StackPanel>
+          <TextBlock Text="{Binding Time}" Foreground="{DynamicResource TextBrush}" FontSize="18" FontWeight="SemiBold"
+                     Typography.NumeralAlignment="Tabular" />
+          <TextBlock Text="{Binding Detail}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11"
+                     TextTrimming="CharacterEllipsis" />
+        </StackPanel>
+      </Button>
+      <CheckBox Grid.Column="1" Style="{StaticResource alarm.switch}" IsChecked="{Binding IsOn}" VerticalAlignment="Center"
+                Margin="8,0,2,0" AutomationProperties.Name="{Binding AccessibleName}" />
+    </Grid>
+  </DataTemplate>
+
+  <!-- The list, with Snooze while an alarm has just rung. -->
+  <DataTemplate x:Key="alarm.list">
+    <StackPanel AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Border Margin="0,0,0,6" Padding="10,6" CornerRadius="8" Background="{DynamicResource RaisedBrush}"
+              Visibility="{Binding CanSnooze, Converter={StaticResource alarm.visible}}">
+        <DockPanel>
+          <Button DockPanel.Dock="Right" Style="{StaticResource alarm.accentButton}" Content="{loc:T alarm.snooze}"
+                  Command="{Binding SnoozeCommand}" />
+          <TextBlock Text="{loc:T alarm.justRang}" Foreground="{DynamicResource TextBrush}" FontSize="12"
+                     VerticalAlignment="Center" />
+        </DockPanel>
+      </Border>
+      <ItemsControl ItemsSource="{Binding Rows}" ItemTemplate="{StaticResource alarm.row}" Focusable="False"
+                    Visibility="{Binding HasAlarms, Converter={StaticResource alarm.visible}}" />
+      <TextBlock Text="{loc:T alarm.empty}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" Margin="0,0,0,6"
+                 Visibility="{Binding HasNoAlarms, Converter={StaticResource alarm.visible}}" />
+      <Button Style="{StaticResource alarm.button}" HorizontalAlignment="Left" Margin="0,6,0,0" Command="{Binding AddCommand}"
+              AutomationProperties.Name="{loc:T alarm.add}">
+        <StackPanel Orientation="Horizontal">
+          <controls:StrokeIcon Data="{DynamicResource icon.plus}" Width="12" Height="12" Margin="0,0,6,0"
+                               Foreground="{DynamicResource TextBrush}" VerticalAlignment="Center" />
+          <TextBlock Text="{loc:T alarm.add}" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- The editor: hour and minute steppers around the time, the days, then the actions. -->
+  <DataTemplate x:Key="alarm.editor">
+    <StackPanel AutomationProperties.Name="{loc:T alarm.editing}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="Auto" />
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel>
+          <controls:IconButton Icon="{DynamicResource icon.chevronUp}" Label="{loc:T alarm.hourUp}" Command="{Binding HourUpCommand}" />
+          <TextBlock Text="{loc:T alarm.hour}" Foreground="{DynamicResource TextMutedBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <controls:IconButton Icon="{DynamicResource icon.chevronDown}" Label="{loc:T alarm.hourDown}" Command="{Binding HourDownCommand}" />
+        </StackPanel>
+        <TextBlock Grid.Column="1" Text="{Binding EditTimeText}" Foreground="{DynamicResource TextBrush}" FontSize="28"
+                   FontWeight="SemiBold" Typography.NumeralAlignment="Tabular" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   AutomationProperties.LiveSetting="Polite" />
+        <StackPanel Grid.Column="2">
+          <controls:IconButton Icon="{DynamicResource icon.chevronUp}" Label="{loc:T alarm.minuteUp}" Command="{Binding MinuteUpCommand}" />
+          <TextBlock Text="{loc:T alarm.minute}" Foreground="{DynamicResource TextMutedBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <controls:IconButton Icon="{DynamicResource icon.chevronDown}" Label="{loc:T alarm.minuteDown}" Command="{Binding MinuteDownCommand}" />
+        </StackPanel>
+      </Grid>
+      <TextBlock Text="{loc:T alarm.repeat}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" Margin="0,8,0,4" />
+      <ItemsControl ItemsSource="{Binding Days}" Focusable="False">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Orientation="Horizontal" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate>
+            <ToggleButton Style="{StaticResource alarm.day}" Content="{Binding Label}" IsChecked="{Binding IsOn}"
+                          AutomationProperties.Name="{Binding Name}" ToolTip="{Binding Name}" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <TextBlock Text="{loc:T alarm.repeatHint}" Foreground="{DynamicResource TextMutedBrush}" FontSize="11" Margin="0,4,0,0" />
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+        <Button Style="{StaticResource alarm.button}" Content="{loc:T alarm.delete}" Command="{Binding DeleteEditCommand}" Margin="0,0,6,0"
+                Visibility="{Binding CanDelete, Converter={StaticResource alarm.visible}}" />
+        <Button Style="{StaticResource alarm.button}" Content="{loc:T alarm.cancel}" Command="{Binding CancelEditCommand}" Margin="0,0,6,0" />
+        <Button Style="{StaticResource alarm.accentButton}" Content="{loc:T alarm.save}" Command="{Binding SaveEditCommand}" />
+      </StackPanel>
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- Small: the next alarm only. -->
+  <DataTemplate x:Key="alarm.Expanded.Small">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T alarm.name}"
+                         Icon="{DynamicResource icon.alarm}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <TextBlock Text="{Binding NextTime}" Foreground="{DynamicResource TextBrush}" FontSize="24" FontWeight="SemiBold"
+                   Typography.NumeralAlignment="Tabular" />
+        <TextBlock Text="{Binding NextText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap" />
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <!-- Medium: every alarm, and the editor in place of the list while one is being set. -->
+  <DataTemplate x:Key="alarm.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T alarm.name}"
+                         Icon="{DynamicResource icon.alarm}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Grid>
+        <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource alarm.list}"
+                          Visibility="{Binding IsListing, Converter={StaticResource alarm.visible}}" />
+        <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource alarm.editor}"
+                          Visibility="{Binding IsEditing, Converter={StaticResource alarm.visible}}" />
+      </Grid>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="alarm.Panel.Small">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource alarm.Expanded.Small}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+  <DataTemplate x:Key="alarm.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource alarm.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

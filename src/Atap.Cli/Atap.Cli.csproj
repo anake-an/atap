@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- The atap command-line tool. It talks to a running Atap over the local API pipe and has no
+       reference to Atap.Core, so the native binary stays small. Published to cli\atap.exe, because
+       atap.exe and Atap.exe would clash in one folder. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Atap.Cli</RootNamespace>
+    <AssemblyName>atap</AssemblyName>
+    <!-- NativeAOT is switched on only when publishing (-p:AtapAot=true). Setting it always would pin
+         the SDK's bundled ILCompiler version in packages.lock.json and break locked restore on newer SDKs. -->
+    <PublishAot Condition="'$(AtapAot)' == 'true'">true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Atap.Core.Tests" />
+  </ItemGroup>
+
+</Project>

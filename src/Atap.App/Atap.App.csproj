@@ -1,0 +1,86 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- Windows SDK version in the TFM gives access to WinRT APIs (media sessions). -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>Atap</RootNamespace>
+    <AssemblyName>Atap</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Made from assets/brand by tools/brand/generate.cs. Regenerate it there, do not edit by hand. -->
+    <ApplicationIcon>Assets\atap.ico</ApplicationIcon>
+    <!-- Program.Main runs Velopack and the single-instance guard before WPF starts. -->
+    <StartupObject>Atap.Program</StartupObject>
+    <!-- Releases publish both. Listing them puts them in packages.lock.json, so publish can restore in locked mode. -->
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <!-- Runtime tuning, measured on the self-contained win-x64 publish (median start to first window, memory after 10 s).
+       Default: 1.13 s, 182 MB working set, 117 MB private.
+       ConcurrentGarbageCollection=false and GCConserveMemory=5 changed nothing outside noise, so both stay off.
+       PublishReadyToRun saved about 70 ms and 2 MB of working set, but added 5 MB private memory and 36 MB on disk,
+       so it stays off too. The .NET and WPF assemblies in the publish are already precompiled. -->
+
+
+  <!-- Microsoft Store (MSIX) builds: dotnet build -p:AtapChannel=Store. The Store handles updates, so no Velopack. -->
+  <PropertyGroup Condition="'$(AtapChannel)' == 'Store'">
+    <DefineConstants>$(DefineConstants);STORE</DefineConstants>
+    <!-- Without Velopack the package set differs, so the Store build has its own lock file. -->
+    <NuGetLockFilePath>packages.store.lock.json</NuGetLockFilePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Velopack" Condition="'$(AtapChannel)' != 'Store'" />
+    <!-- Each one is used only inside the widget or feature that needs it, so it loads only while that is on. -->
+    <PackageReference Include="MQTTnet" />
+    <PackageReference Include="NAudio.Wasapi" />
+    <PackageReference Include="System.Management" />
+    <!-- Windows data protection (DPAPI) for secrets comes with the Windows desktop framework, so it needs no package. -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Atap.Core\Atap.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The same icon as a WPF resource, for Window.Icon. -->
+    <Resource Include="Assets\atap.ico" />
+  </ItemGroup>
+
+  <!-- Licences ship next to Atap.exe, so the installer, the portable zip and the Store package all carry them.
+       The package licences require their copyright and licence text to go with the binaries. -->
+  <ItemGroup>
+    <None Include="..\..\LICENSE" Link="LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\licenses\*.txt" Link="licenses\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- UI text: every owner folder has Strings/<area>.en.json and Strings/<area>.ms.json.
+       They are embedded as Atap.Strings.<area>.<lang>.json, so two areas with the same name fail the build. -->
+  <ItemGroup>
+    <None Remove="**\Strings\*.json" />
+    <AtapEmbedded Include="**\Strings\*.json" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" LogicalName="Atap.Strings.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- Bundled data, such as holiday tables: any file in a Data folder, embedded as Atap.Data.<file>. -->
+  <ItemGroup>
+    <None Remove="**\Data\**" />
+    <AtapEmbedded Include="**\Data\**\*" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" LogicalName="Atap.Data.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <!-- Added after MSBuild assigns cultures: as plain EmbeddedResource items, "clock.en.json" would be read as
+       the culture "en" and moved to a satellite assembly. Here they stay in Atap.dll with their logical names. -->
+  <Target Name="AtapEmbedStringsAndData" AfterTargets="SplitResourcesByCulture">
+    <ItemGroup>
+      <EmbeddedResource Include="@(AtapEmbedded)" WithCulture="false" Type="Non-Resx" />
+    </ItemGroup>
+  </Target>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Atap.App.Tests" />
+  </ItemGroup>
+
+</Project>

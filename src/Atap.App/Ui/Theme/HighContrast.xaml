@@ -1,0 +1,52 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- The Windows high contrast colour each theme brush takes while high contrast is on. HighContrastTheme reads
+       this map fresh each time and repaints the brushes in place, so the notch and Settings follow at once.
+       Backgrounds take Window, text and lines WindowText, and accents Highlight. Hover fills go plain. -->
+
+  <!-- Theme.xaml -->
+  <x:Static x:Key="NotchBackgroundBrush" Member="SystemColors.WindowColor" />
+  <x:Static x:Key="PrimaryTextBrush" Member="SystemColors.WindowTextColor" />
+  <x:Static x:Key="SecondaryTextBrush" Member="SystemColors.WindowTextColor" />
+  <x:Static x:Key="PlaceholderBrush" Member="SystemColors.WindowColor" />
+  <x:Static x:Key="AccentBrush" Member="SystemColors.HighlightColor" />
+  <x:Static x:Key="ButtonHoverBrush" Member="SystemColors.WindowColor" />
+
+  <!-- Tokens.xaml: surfaces and text -->
+  <x:Static x:Key="NotchSurfaceBrush" Member="SystemColors.WindowColor" />
+  <x:Static x:Key="CardBrush" Member="SystemColors.WindowColor" />
+  <x:Static x:Key="RaisedBrush" Member="SystemColors.WindowColor" />
+  <x:Static x:Key="DividerBrush" Member="SystemColors.WindowTextColor" />
+  <x:Static x:Key="TextBrush" Member="SystemColors.WindowTextColor" />
+  <x:Static x:Key="TextSecondaryBrush" Member="SystemColors.WindowTextColor" />
+  <x:Static x:Key="TextMutedBrush" Member="SystemColors.WindowTextColor" />
+
+  <!-- Tokens.xaml: group accents and tints -->
+  <x:Static x:Key="MediaAccentBrush" Member="SystemColors.HighlightColor" />
+  <x:Static x:Key="ProductivityAccentBrush" Member="SystemColors.HighlightColor" />
+  <x:Static x:Key="SystemAccentBrush" Member="SystemColors.HighlightColor" />
+  <x:Static x:Key="CustomAccentBrush" Member="SystemColors.HighlightColor" />
+  <x:Static x:Key="MalaysiaAccentBrush" Member="SystemColors.HighlightColor" />
+  <x:Static x:Key="MediaAccentLightBrush" Member="SystemColors.HighlightColor" />
+  <x:Static x:Key="ProductivityAccentLightBrush" Member="SystemColors.HighlightColor" />
+  <x:Static x:Key="SystemAccentLightBrush" Member="SystemColors.HighlightColor" />
+  <x:Static x:Key="CustomAccentLightBrush" Member="SystemColors.HighlightColor" />
+  <x:Static x:Key="MalaysiaAccentLightBrush" Member="SystemColors.HighlightColor" />
+  <x:Static x:Key="MediaTintBrush" Member="SystemColors.WindowColor" />
+  <x:Static x:Key="ProductivityTintBrush" Member="SystemColors.WindowColor" />
+  <x:Static x:Key="SystemTintBrush" Member="SystemColors.WindowColor" />
+  <x:Static x:Key="CustomTintBrush" Member="SystemColors.WindowColor" />
+  <x:Static x:Key="MalaysiaTintBrush" Member="SystemColors.WindowColor" />
+
+  <!-- Tokens.xaml: the Settings window -->
+  <x:Static x:Key="WindowBrush" Member="SystemColors.WindowColor" />
+  <x:Static x:Key="SettingsCardBrush" Member="SystemColors.WindowColor" />
+  <x:Static x:Key="SettingsCardBorderBrush" Member="SystemColors.WindowTextColor" />
+  <x:Static x:Key="SettingsNavSelectedBrush" Member="SystemColors.WindowColor" />
+  <x:Static x:Key="InkBrush" Member="SystemColors.WindowTextColor" />
+  <x:Static x:Key="InkSecondaryBrush" Member="SystemColors.WindowTextColor" />
+  <x:Static x:Key="InkMutedBrush" Member="SystemColors.WindowTextColor" />
+  <x:Static x:Key="ToggleOnBrush" Member="SystemColors.HighlightColor" />
+
+</ResourceDictionary>

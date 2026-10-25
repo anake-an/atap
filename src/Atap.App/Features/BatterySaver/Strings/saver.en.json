@@ -1,0 +1,11 @@
+{
+  "saver.mode": "Battery saver",
+  "saver.mode.onBattery": "When on battery",
+  "saver.mode.always": "Always",
+  "saver.mode.never": "Never",
+  "saver.mode.belowPercent": "When the battery is low",
+  "saver.mode.followWindows": "With Windows energy saver",
+  "saver.modeHint": "Atap checks for updates less often, stops animating and lets Windows run it in efficiency mode. Alarms and prayer times are never delayed.",
+  "saver.percent": "Low means below",
+  "saver.percentUnit": "%"
+}

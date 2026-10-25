@@ -1,0 +1,15 @@
+{
+  "notes.name": "Notes",
+  "notes.description": "Quick notes you can write in the notch panel. They save as you type.",
+  "notes.empty": "No notes yet. Press + to start one.",
+  "notes.new": "New note",
+  "notes.delete": "Delete this note",
+  "notes.pin": "Pin to the top",
+  "notes.unpin": "Unpin",
+  "notes.previous": "Previous note",
+  "notes.next": "Next note",
+  "notes.editor": "Note text",
+  "notes.position": "{number} of {count}",
+  "notes.accessible": "Notes. {title}",
+  "notes.accessibleEmpty": "Notes. No notes yet"
+}

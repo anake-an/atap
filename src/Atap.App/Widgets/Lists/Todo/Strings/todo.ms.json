@@ -1,0 +1,18 @@
+{
+  "todo.name": "Senarai tugas",
+  "todo.description": "Senarai tugas yang ringkas. Tambah tugas dalam panel notch, dan dapatkan peringatan pada hari tugas itu perlu disiapkan.",
+  "todo.addHint": "Tambah tugas dan tekan Enter",
+  "todo.empty": "Tiada tugas. Taip satu tugas di atas.",
+  "todo.allDone": "Semua sudah siap",
+  "todo.count": "{open} tugas",
+  "todo.countOverdue": "{open} tugas, {overdue} lewat",
+  "todo.today": "Hari ini",
+  "todo.tomorrow": "Esok",
+  "todo.overdue": "Lewat",
+  "todo.noDate": "Tiada tarikh",
+  "todo.remove": "Buang",
+  "todo.clearDone": "Buang yang siap",
+  "todo.alert.due": "Perlu disiapkan hari ini",
+  "todo.alert.missed": "{count} peringatan tugas datang semasa Atap ditutup",
+  "todo.accessible": "Senarai tugas. {count}"
+}

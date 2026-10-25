@@ -1,0 +1,17 @@
+{
+  "settings.window.title": "Tetapan Atap",
+  "settings.nav.name": "Halaman tetapan",
+  "settings.page.home": "Utama",
+  "settings.page.homeHint": "Tunjuk atau sembunyikan Atap, pilih bahasa anda dan tentukan kedudukan notch.",
+  "settings.page.shows": "Apa yang dipaparkan",
+  "settings.page.showsHint": "Perkara pada notch anda dan keadaan setiap satu.",
+  "settings.page.prayer": "Waktu solat",
+  "settings.page.prayerHint": "Waktu solat untuk kawasan anda di Malaysia.",
+  "settings.page.privacy": "Privasi",
+  "settings.page.privacyHint": "Apa yang Atap hantar melalui internet, dan data anda pada PC ini.",
+  "settings.page.about": "Perihal",
+  "settings.page.aboutHint": "Versi Atap anda, kemas kini dan lesen.",
+  "settings.comingSoon.generic": "Lebih banyak tetapan akan tersedia dalam kemas kini akan datang.",
+  "settings.comingSoon.prayer": "Waktu solat akan tersedia dalam kemas kini akan datang.",
+  "settings.card.failed": "Bahagian Tetapan ini tidak dapat dipaparkan."
+}

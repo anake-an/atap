@@ -1,0 +1,12 @@
+{
+  "missed-alerts.name": "Missed alerts",
+  "missed-alerts.description": "Shows the alerts that came while Atap was quiet or hidden, for example during a game or Do not disturb.",
+  "missed-alerts.title": "Missed",
+  "missed-alerts.empty": "Nothing missed",
+  "missed-alerts.clear": "Clear",
+  "missed-alerts.clearHint": "Clear the missed alerts",
+  "missed-alerts.accessible": "Missed alerts, {count}",
+  "missed-alerts.accessibleEmpty": "Missed alerts, nothing missed",
+  "missed-alerts.item": "{title}, at {time}",
+  "missed-alerts.indicator": "You have missed alerts"
+}

@@ -1,0 +1,91 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a push instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="push.visible" />
+
+  <!-- Compact, left of the camera: the newest activity's icon in its accent. -->
+  <DataTemplate x:Key="push.Compact.Left">
+    <TextBlock DataContext="{Binding ViewModel}"
+               AutomationProperties.Name="{Binding AccessibleSummary}"
+               Text="{Binding Latest.Glyph}"
+               Foreground="{Binding Latest.Accent}"
+               FontFamily="{DynamicResource IconFont}"
+               FontSize="16"
+               VerticalAlignment="Center"
+               Margin="4,0" />
+  </DataTemplate>
+
+  <!-- Compact, right of the camera: "40%" or the state. -->
+  <DataTemplate x:Key="push.Compact.Right">
+    <TextBlock DataContext="{Binding ViewModel}"
+               AutomationProperties.Name="{Binding AccessibleSummary}"
+               Text="{Binding Latest.Short}"
+               Foreground="{DynamicResource PrimaryTextBrush}"
+               FontSize="13"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center"
+               Margin="4,0" />
+  </DataTemplate>
+
+  <!-- One activity: icon, title, detail and progress. -->
+  <DataTemplate x:Key="push.item">
+    <Grid Margin="0,4" AutomationProperties.Name="{Binding Title}">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="Auto" />
+      </Grid.ColumnDefinitions>
+      <TextBlock Text="{Binding Glyph}"
+                 Foreground="{Binding Accent}"
+                 FontFamily="{DynamicResource IconFont}"
+                 FontSize="18"
+                 VerticalAlignment="Center"
+                 Margin="0,0,10,0" />
+      <StackPanel Grid.Column="1" VerticalAlignment="Center">
+        <TextBlock Text="{Binding Title}"
+                   Foreground="{DynamicResource PrimaryTextBrush}"
+                   FontSize="13"
+                   FontWeight="SemiBold"
+                   TextTrimming="CharacterEllipsis" />
+        <TextBlock Text="{Binding Detail}"
+                   Foreground="{DynamicResource SecondaryTextBrush}"
+                   FontSize="11"
+                   TextTrimming="CharacterEllipsis"
+                   Visibility="{Binding HasDetail, Converter={StaticResource push.visible}}" />
+        <controls:ProgressPill Value="{Binding Progress, Mode=OneWay}"
+                               Maximum="100"
+                               Margin="0,5,0,0"
+                               Accent="{Binding Accent}"
+                               AutomationProperties.Name="{Binding Title}"
+                               Visibility="{Binding HasProgress, Converter={StaticResource push.visible}}" />
+      </StackPanel>
+      <TextBlock Grid.Column="2"
+                 Text="{Binding Short}"
+                 Foreground="{DynamicResource SecondaryTextBrush}"
+                 FontSize="12"
+                 VerticalAlignment="Center"
+                 Margin="10,0,0,0" />
+    </Grid>
+  </DataTemplate>
+
+  <!-- The open notch and the panel: every activity, newest first. -->
+  <DataTemplate x:Key="push.Expanded">
+    <ItemsControl DataContext="{Binding ViewModel}"
+                  AutomationProperties.Name="{Binding AccessibleSummary}"
+                  ItemsSource="{Binding Items}"
+                  ItemTemplate="{StaticResource push.item}"
+                  Focusable="False"
+                  Margin="2,2" />
+  </DataTemplate>
+
+  <DataTemplate x:Key="push.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource push.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

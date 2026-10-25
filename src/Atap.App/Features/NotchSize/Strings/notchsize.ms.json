@@ -1,0 +1,15 @@
+{
+  "notchsize.size": "Saiz notch",
+  "notchsize.size.normal": "Biasa",
+  "notchsize.size.slim": "Nipis",
+  "notchsize.size.tucked": "Disorok",
+  "notchsize.sizeHint": "Nipis ialah bar halus yang terbuka apabila anda menghalakan tetikus padanya. Disorok ialah garis di tepi skrin, dan hanya makluman penting yang muncul.",
+  "notchsize.menu.normal": "Saiz biasa",
+  "notchsize.menu.slim": "Nipis",
+  "notchsize.menu.tucked": "Sorok",
+  "notchsize.menu.hideHour": "Sembunyikan selama 1 jam",
+  "notchsize.command.showNow": "Tunjukkan notch semula",
+  "notchsize.sizeKeywords": "kecil kecilkan nipis sorok saiz bar garis",
+  "notchsize.hideKeywords": "sembunyi sorok nanti kecilkan jam",
+  "notchsize.showKeywords": "tunjuk papar semula notch"
+}

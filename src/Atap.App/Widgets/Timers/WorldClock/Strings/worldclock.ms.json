@@ -1,0 +1,13 @@
+{
+  "worldclock.name": "Jam dunia",
+  "worldclock.description": "Waktu di tiga tempat, di sebelah waktu anda.",
+  "worldclock.city1": "Tempat pertama",
+  "worldclock.city2": "Tempat kedua",
+  "worldclock.city3": "Tempat ketiga",
+  "worldclock.tomorrow": "esok",
+  "worldclock.yesterday": "semalam",
+  "worldclock.sameTime": "Waktu yang sama",
+  "worldclock.hours": "j",
+  "worldclock.none": "Pilih tempat dalam tetapan widget.",
+  "worldclock.accessible": "Jam dunia. {clocks}"
+}

@@ -1,0 +1,14 @@
+{
+  "localapi.enabled": "Let programs on this PC show progress",
+  "localapi.enabledHint": "Scripts and tools on this PC can show progress and alerts on the notch with atap push. Nothing outside this PC can reach it.",
+  "localapi.onPath": "Add atap to PATH",
+  "localapi.onPathHint": "So a new terminal can run atap without its full path. Removed again when you turn this off or uninstall Atap.",
+  "localapi.card.title": "Local API",
+  "localapi.card.off": "Off. Turn it on above to let programs on this PC use it.",
+  "localapi.card.running": "On. Programs on this PC can show progress on the notch.",
+  "localapi.card.couldNotStart": "Could not start: another program uses its name. Restart Atap to try again.",
+  "localapi.card.example": "Try it in a terminal:",
+  "localapi.card.pushWidget": "Pushes show only while the Push widget is on.",
+  "localapi.card.copy": "Copy example",
+  "localapi.card.copied": "Copied"
+}

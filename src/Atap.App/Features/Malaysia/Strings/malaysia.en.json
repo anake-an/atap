@@ -1,0 +1,23 @@
+{
+  "malaysia.state": "State",
+  "malaysia.zone": "Area",
+  "malaysia.hijriOffset": "Adjust the Hijri date",
+  "malaysia.hijriOffsetHint": "Moves the Hijri date by up to 2 days. Only used when JAKIM's official date is not available.",
+  "malaysia.days": "days",
+  "malaysia.area.title": "Your area",
+  "malaysia.area.summary": "Prayer times for {areas} ({zone}).",
+  "malaysia.area.none": "Pick your state and area to see prayer times. Nothing is fetched until you do.",
+  "malaysia.area.state": "State",
+  "malaysia.area.zone": "Area",
+  "malaysia.area.zoneHint": "The JAKIM zone your district is in.",
+  "malaysia.area.find": "Find my area",
+  "malaysia.area.findHint": "Uses Windows Location once. Your location stays on this PC.",
+  "malaysia.area.finding": "Looking for your area…",
+  "malaysia.area.found": "Looks like {areas} ({zone}).",
+  "malaysia.area.use": "Use this area",
+  "malaysia.area.locationOff": "Windows Location is off. Turn it on, or pick your area above.",
+  "malaysia.area.openLocation": "Open Location settings",
+  "malaysia.area.notFound": "Could not find your location. Pick your area above.",
+  "malaysia.area.abroad": "You seem to be outside Malaysia. Pick your area above.",
+  "malaysia.area.alreadySet": "This is already your area."
+}

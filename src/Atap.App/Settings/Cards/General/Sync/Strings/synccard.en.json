@@ -1,0 +1,21 @@
+{
+  "synccard.title": "Sync with OneDrive",
+  "synccard.toggle": "Sync my settings",
+  "synccard.toggleHint": "Your settings and layout follow you to your other PCs through your OneDrive folder. Where the notch sits stays on each PC.",
+  "synccard.folder": "Folder",
+  "synccard.noFolder": "OneDrive was not found on this PC. Choose your OneDrive folder to turn on sync.",
+  "synccard.chooseFolder": "Choose folder",
+  "synccard.askTitle": "OneDrive already has settings from another PC",
+  "synccard.askHint": "Choose which settings to keep. A copy of the others is saved first, just in case.",
+  "synccard.useOneDrive": "Use the settings from OneDrive",
+  "synccard.keepThisPc": "Keep this PC's settings",
+  "synccard.cancel": "Cancel",
+  "synccard.backupSaved": "A copy of the old settings is saved in {folder}.",
+  "synccard.backupFailed": "Atap could not save a copy of the old settings, so nothing changed. Try again in a moment.",
+  "synccard.status.working": "Your settings are syncing.",
+  "synccard.status.noFolder": "Waiting for the OneDrive folder.",
+  "synccard.status.waiting": "Waiting for OneDrive to download the latest settings.",
+  "synccard.status.newerFile": "Another PC has a newer Atap. Update Atap on this PC to keep syncing.",
+  "synccard.status.damagedFile": "The sync file in OneDrive cannot be read. Atap leaves it as it is.",
+  "synccard.status.cannotWrite": "Atap could not save to the OneDrive folder. It tries again after your next change."
+}

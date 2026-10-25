@@ -1,0 +1,12 @@
+{
+  "assignments.name": "Assignments",
+  "assignments.description": "Your assignment deadlines, nearest first, with how many days are left.",
+  "assignments.none": "No assignments due. Add them in Settings, on the What it shows page.",
+  "assignments.markDone": "Mark as done",
+  "assignments.noDate": "No date",
+  "assignments.overdue": "Overdue",
+  "assignments.today": "Due today, {left} left",
+  "assignments.tomorrow": "Due tomorrow",
+  "assignments.accessible": "Assignments. {count} due. Next: {first}, {when}",
+  "assignments.accessibleNone": "Assignments. None due"
+}

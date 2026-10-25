@@ -1,0 +1,41 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a Bluetooth instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="bluetooth.visible" />
+
+  <DataTemplate x:Key="bluetooth.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}" Header="{loc:T bluetooth.name}" Icon="{DynamicResource icon.bolt}"
+                         Accent="{DynamicResource SystemAccentBrush}" AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <ItemsControl ItemsSource="{Binding Rows}" Focusable="False">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Margin="0,0,0,8" AutomationProperties.Name="{Binding Name}">
+                <DockPanel>
+                  <TextBlock DockPanel.Dock="Right" Text="{Binding Battery}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                  <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
+                </DockPanel>
+                <controls:ProgressPill Value="{Binding Level, Mode=OneWay}" Maximum="100" Level="{Binding Tone, Mode=OneWay}"
+                                       Accent="{DynamicResource SystemAccentBrush}" Margin="0,4,0,0" AutomationProperties.Name="{Binding Name}"
+                                       Visibility="{Binding HasLevel, Converter={StaticResource bluetooth.visible}}" />
+              </StackPanel>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Text="{loc:T bluetooth.none}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+                   Visibility="{Binding HasNone, Converter={StaticResource bluetooth.visible}}" />
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="bluetooth.Panel">
+    <ContentPresenter Content="{Binding}" ContentTemplate="{StaticResource bluetooth.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

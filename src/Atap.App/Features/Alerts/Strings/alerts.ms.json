@@ -1,0 +1,21 @@
+{
+  "alerts.sound": "Bunyi makluman",
+  "alerts.sound.windows": "Bunyi Windows",
+  "alerts.sound.file": "Fail bunyi saya sendiri",
+  "alerts.sound.off": "Tiada bunyi",
+  "alerts.soundHint": "Berbunyi sekali untuk setiap peringatan dan penggera.",
+  "alerts.soundFile": "Fail bunyi",
+  "alerts.soundFileHint": "Pilih bunyi pada PC ini, contohnya fail MP3 atau WAV. Ia dimainkan sekali, dan butang Henti pada makluman akan menghentikannya.",
+  "alerts.followWindows": "Senyap semasa Jangan ganggu",
+  "alerts.followWindowsHint": "Semasa Windows dalam mod Jangan ganggu, makluman menunggu dalam Makluman terlepas. Penggera tetap dipaparkan.",
+  "alerts.stop": "Henti",
+  "alerts.stopHint": "Hentikan bunyi dan tutup makluman ini",
+  "alerts.close": "Tutup",
+  "alerts.closeHint": "Tutup makluman ini",
+  "alerts.level": "{level}%",
+  "alerts.accessible": "Makluman: {title}",
+  "alerts.accessibleDetail": "Makluman: {title}. {detail}",
+  "alerts.accessibleLevel": "Makluman: {title}, {level}",
+  "alerts.command.stopSound": "Hentikan bunyi makluman",
+  "alerts.command.clearMissed": "Kosongkan makluman terlepas"
+}

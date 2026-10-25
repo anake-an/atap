@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>Atap.Core</RootNamespace>
+    <!-- Publishing Atap.App for a runtime restores this project for it too; see packages.lock.json. -->
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Used only by the calendar code, so it loads only when that code first runs. -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Atap.Core.Tests" />
+  </ItemGroup>
+
+</Project>

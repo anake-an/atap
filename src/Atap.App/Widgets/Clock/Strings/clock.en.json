@@ -1,0 +1,6 @@
+{
+  "clock.name": "Clock",
+  "clock.description": "Shows the time.",
+  "clock.use24Hour": "24-hour time",
+  "clock.accessible": "Clock, {time}"
+}

@@ -1,0 +1,84 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a notes instance exists. Nothing in it animates. Typing works in the Panel. -->
+
+  <BooleanToVisibilityConverter x:Key="notes.visible" />
+
+  <Style x:Key="notes.editor" TargetType="TextBox">
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource TextBrush}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource ProductivityAccentBrush}" />
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="AcceptsReturn" Value="True" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="TextBox">
+          <Border x:Name="Chrome" CornerRadius="8" Background="{DynamicResource RaisedBrush}" BorderThickness="1"
+                  BorderBrush="Transparent" Padding="10,8" SnapsToDevicePixels="True">
+            <ScrollViewer x:Name="PART_ContentHost" Focusable="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+              <Setter TargetName="Chrome" Property="BorderBrush" Value="{DynamicResource ProductivityAccentBrush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- The open notch: the note at the top, read only. -->
+  <DataTemplate x:Key="notes.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T notes.name}"
+                         Icon="{DynamicResource icon.note}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <TextBlock Text="{Binding Preview}" Foreground="{DynamicResource TextBrush}" FontSize="12" TextWrapping="Wrap"
+                 MaxHeight="96" TextTrimming="CharacterEllipsis" />
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <!-- The panel: switch notes, write, pin, delete. -->
+  <DataTemplate x:Key="notes.Panel">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T notes.name}"
+                         Icon="{DynamicResource icon.note}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <DockPanel>
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,6">
+          <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+            <controls:IconButton Icon="{DynamicResource icon.pin}" Label="{Binding PinLabel}" Command="{Binding PinCommand}"
+                                 Visibility="{Binding HasNote, Converter={StaticResource notes.visible}}" Margin="0,0,2,0" />
+            <controls:IconButton Icon="{DynamicResource icon.trash}" Label="{loc:T notes.delete}" Command="{Binding DeleteCommand}"
+                                 Visibility="{Binding HasNote, Converter={StaticResource notes.visible}}" Margin="0,0,2,0" />
+            <controls:IconButton Icon="{DynamicResource icon.plus}" Label="{loc:T notes.new}" Command="{Binding NewCommand}" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+            <controls:IconButton Icon="{DynamicResource icon.chevronLeft}" Label="{loc:T notes.previous}" Command="{Binding PreviousCommand}"
+                                 IsEnabled="{Binding CanGoBack}" />
+            <TextBlock Text="{Binding Position}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" VerticalAlignment="Center" Margin="4,0" />
+            <controls:IconButton Icon="{DynamicResource icon.chevronRight}" Label="{loc:T notes.next}" Command="{Binding NextCommand}"
+                                 IsEnabled="{Binding CanGoForward}" />
+          </StackPanel>
+        </DockPanel>
+        <Grid>
+          <TextBox Style="{StaticResource notes.editor}" Text="{Binding EditText, UpdateSourceTrigger=PropertyChanged}" MinHeight="120" MaxHeight="240"
+                   AutomationProperties.Name="{loc:T notes.editor}"
+                   Visibility="{Binding HasNote, Converter={StaticResource notes.visible}}" />
+          <TextBlock Text="{loc:T notes.empty}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+                     Visibility="{Binding HasNone, Converter={StaticResource notes.visible}}" />
+        </Grid>
+      </DockPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+</ResourceDictionary>

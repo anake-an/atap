@@ -1,0 +1,21 @@
+{
+  "synccard.title": "Segerakkan dengan OneDrive",
+  "synccard.toggle": "Segerakkan tetapan saya",
+  "synccard.toggleHint": "Tetapan dan susun atur anda ikut anda ke PC lain melalui folder OneDrive anda. Kedudukan notch kekal pada setiap PC.",
+  "synccard.folder": "Folder",
+  "synccard.noFolder": "OneDrive tidak ditemui pada PC ini. Pilih folder OneDrive anda untuk menghidupkan segerak.",
+  "synccard.chooseFolder": "Pilih folder",
+  "synccard.askTitle": "OneDrive sudah ada tetapan daripada PC lain",
+  "synccard.askHint": "Pilih tetapan yang hendak disimpan. Salinan tetapan yang satu lagi disimpan dahulu, untuk berjaga-jaga.",
+  "synccard.useOneDrive": "Guna tetapan daripada OneDrive",
+  "synccard.keepThisPc": "Kekalkan tetapan PC ini",
+  "synccard.cancel": "Batal",
+  "synccard.backupSaved": "Salinan tetapan lama disimpan dalam {folder}.",
+  "synccard.backupFailed": "Atap tidak dapat menyimpan salinan tetapan lama, jadi tiada apa yang berubah. Cuba semula sebentar lagi.",
+  "synccard.status.working": "Tetapan anda sedang disegerakkan.",
+  "synccard.status.noFolder": "Menunggu folder OneDrive.",
+  "synccard.status.waiting": "Menunggu OneDrive memuat turun tetapan terkini.",
+  "synccard.status.newerFile": "PC lain menggunakan Atap yang lebih baharu. Kemas kini Atap pada PC ini untuk terus menyegerak.",
+  "synccard.status.damagedFile": "Fail segerak dalam OneDrive tidak dapat dibaca. Atap membiarkannya seperti sedia ada.",
+  "synccard.status.cannotWrite": "Atap tidak dapat menyimpan ke folder OneDrive. Ia akan cuba lagi selepas perubahan anda yang seterusnya."
+}

@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Tests for Atap.App: composition, guards over the shipped views and strings, and platform code.
+       WPF tests run on one shared STA thread (see Sta.cs). The namespace is Atap.Tests, because Atap.App is the app class. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>Atap.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.TimeProvider.Testing" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+    <!-- WPF projects leave System.IO out of the implicit usings. -->
+    <Using Include="System.IO" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Atap.App\Atap.App.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Recorded e-Solat answers, shared with the Core tests. -->
+    <Compile Include="..\Atap.Core.Tests\Malaysia\Fixtures\EsolatFixtures.cs" Link="Malaysia\EsolatFixtures.cs" />
+    <Compile Include="..\Atap.Core.Tests\Malaysia\Fixtures\DataGovFixtures.cs" Link="Malaysia\DataGovFixtures.cs" />
+  </ItemGroup>
+
+</Project>

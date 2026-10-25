@@ -1,0 +1,47 @@
+name: Feature request
+description: Suggest an idea for Atap.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea. For a new widget, use the widget request form instead. For a question, use Discussions.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do that Atap does not let you do?
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idea
+      description: How could Atap solve it? Mention alternatives you considered.
+    validations:
+      required: true
+  - type: dropdown
+    id: group
+    attributes:
+      label: Which group does it belong to?
+      options:
+        - Media
+        - Time and focus
+        - System status
+        - Files and clipboard
+        - Student
+        - Malaysia
+        - Placement and monitors
+        - Layout editor and profiles
+        - Command bar
+        - Local API and CLI
+        - Other
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you submit
+      options:
+        - label: I searched existing issues and the changelog.
+          required: true

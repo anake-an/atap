@@ -1,0 +1,12 @@
+{
+  "rain.name": "Rain alerts",
+  "rain.description": "MET Malaysia thunderstorm and heavy rain warnings for your state, as an alert on the notch.",
+  "rain.privacy": "Fetches the list of all current warnings from api.data.gov.my every 20 minutes. Your state is never sent: the list is filtered on this PC.",
+  "rain.needsArea": "Pick your area on the Prayer times page in Settings.",
+  "rain.loading": "Checking for warnings…",
+  "rain.failed": "Could not check for warnings. Atap will try again soon.",
+  "rain.none": "No warnings for {state}.",
+  "rain.until": "Until {time}",
+  "rain.accessible": "Rain alerts. {count} warnings. {first}",
+  "rain.accessibleMessage": "Rain alerts. {message}"
+}

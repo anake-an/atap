@@ -1,0 +1,13 @@
+{
+  "nextclass.name": "Next class",
+  "nextclass.description": "Your next class from your timetable, on the notch 15 minutes before it starts.",
+  "nextclass.noTimetable": "Add your timetable in Settings, on the What it shows page.",
+  "nextclass.noneSoon": "No classes coming up.",
+  "nextclass.endsIn": "ends in {time}",
+  "nextclass.range": "{start} to {end}",
+  "nextclass.tomorrowAt": "Tomorrow, {time}",
+  "nextclass.laterToday": "Later today",
+  "nextclass.accessible": "Next class. {name}, {room}, {when}",
+  "nextclass.accessibleNow": "Class now. {name}, {room}, {when}",
+  "nextclass.accessibleMessage": "Next class. {message}"
+}

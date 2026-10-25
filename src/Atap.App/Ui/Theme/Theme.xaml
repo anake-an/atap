@@ -1,0 +1,210 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:automation="clr-namespace:Atap.Notch.Automation">
+
+  <!-- The notch theme. Merged once in App.xaml. Views use the brushes as DynamicResource, so high contrast can swap
+       them while Atap runs (see HighContrast.xaml). -->
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="Tokens.xaml" />
+    <ResourceDictionary Source="Icons.xaml" />
+    <ResourceDictionary Source="Brand.xaml" />
+    <ResourceDictionary Source="Cards.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+  <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+  <FontFamily x:Key="TextFont">Segoe UI Variable Text, Segoe UI</FontFamily>
+
+  <!-- The brushes today's widgets use. New code should prefer the token brushes from Tokens.xaml. -->
+  <SolidColorBrush x:Key="NotchBackgroundBrush" Color="Black" />
+  <SolidColorBrush x:Key="PrimaryTextBrush" Color="#FFFFFFFF" />
+  <SolidColorBrush x:Key="SecondaryTextBrush" Color="#99FFFFFF" />
+  <SolidColorBrush x:Key="PlaceholderBrush" Color="#FF2A2A2A" />
+  <SolidColorBrush x:Key="AccentBrush" Color="#FF30D158" />
+  <SolidColorBrush x:Key="ButtonHoverBrush" Color="#26FFFFFF" />
+
+  <!-- The ring around what has keyboard focus in the panel. Windows shows it only after a key press. -->
+  <Style x:Key="NotchFocusVisual">
+    <Setter Property="Control.Template">
+      <Setter.Value>
+        <ControlTemplate>
+          <Border Margin="-2"
+                  CornerRadius="10"
+                  BorderThickness="2"
+                  BorderBrush="{DynamicResource PrimaryTextBrush}"
+                  SnapsToDevicePixels="True" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- Flat round icon button for widget controls. It takes focus only while the panel has the keyboard, so a
+       click on the notch never takes focus from the app in front. -->
+  <Style x:Key="IconButton" TargetType="Button">
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="FocusVisualStyle" Value="{StaticResource NotchFocusVisual}" />
+    <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+    <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Width" Value="32" />
+    <Setter Property="Height" Value="32" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome" Background="Transparent" CornerRadius="16">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource ButtonHoverBrush}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Opacity" Value="0.35" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Style.Triggers>
+      <Trigger Property="automation:KeyboardMode.IsOn" Value="True">
+        <Setter Property="Focusable" Value="True" />
+      </Trigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- Menus: the notch's right-click menu, the tray icon's menu and text box menus. Light Windows 11 menus with
+       rounded corners, a soft shadow, a tick for what is on and a chevron for submenus. They fade in only when
+       Windows' own menu animation setting allows it. -->
+  <Style x:Key="MenuCard" TargetType="Border">
+    <Setter Property="Margin" Value="8" />
+    <Setter Property="Padding" Value="4" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="MinWidth" Value="200" />
+    <Setter Property="Background" Value="{DynamicResource SettingsCardBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource SettingsCardBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Effect">
+      <Setter.Value>
+        <DropShadowEffect BlurRadius="14" ShadowDepth="3" Direction="270" Opacity="0.18" />
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="ContextMenu">
+    <Setter Property="HasDropShadow" Value="False" />
+    <Setter Property="Foreground" Value="{DynamicResource InkBrush}" />
+    <Setter Property="FontFamily" Value="{StaticResource TextFont}" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ContextMenu">
+          <Border Style="{StaticResource MenuCard}">
+            <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" />
+          </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="{x:Static MenuItem.SeparatorStyleKey}" TargetType="Separator">
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Separator">
+          <Border Height="1" Margin="-4,4" Background="{DynamicResource SettingsCardBorderBrush}" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="MenuItem">
+    <Setter Property="Foreground" Value="{DynamicResource InkBrush}" />
+    <Setter Property="FontFamily" Value="{StaticResource TextFont}" />
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="MenuItem">
+          <Border x:Name="Chrome" Background="Transparent" CornerRadius="4" MinHeight="32" Margin="0,1" Padding="8,0,10,0">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="24" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+
+              <Path x:Name="Tick"
+                    Data="M0,4.5 L3.5,8 L10,0"
+                    Stroke="{TemplateBinding Foreground}"
+                    StrokeThickness="1.4"
+                    StrokeStartLineCap="Round"
+                    StrokeEndLineCap="Round"
+                    StrokeLineJoin="Round"
+                    VerticalAlignment="Center"
+                    Visibility="Collapsed" />
+              <ContentPresenter Grid.Column="1"
+                                ContentSource="Header"
+                                RecognizesAccessKey="True"
+                                VerticalAlignment="Center"
+                                Margin="0,6,24,6" />
+              <TextBlock Grid.Column="2"
+                         Text="{TemplateBinding InputGestureText}"
+                         Foreground="{DynamicResource InkSecondaryBrush}"
+                         FontSize="12"
+                         VerticalAlignment="Center"
+                         Margin="0,0,4,0" />
+              <Path x:Name="Chevron"
+                    Grid.Column="3"
+                    Data="M0,0 L4,4 L0,8"
+                    Stroke="{DynamicResource InkSecondaryBrush}"
+                    StrokeThickness="1.3"
+                    StrokeStartLineCap="Round"
+                    StrokeEndLineCap="Round"
+                    StrokeLineJoin="Round"
+                    VerticalAlignment="Center"
+                    Visibility="Collapsed" />
+
+              <Popup x:Name="PART_Popup"
+                     Grid.Column="0"
+                     AllowsTransparency="True"
+                     Focusable="False"
+                     Placement="Right"
+                     HorizontalOffset="-2"
+                     VerticalOffset="-13"
+                     IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                     PopupAnimation="{DynamicResource {x:Static SystemParameters.MenuPopupAnimationKey}}">
+                <Border Style="{StaticResource MenuCard}">
+                  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle" KeyboardNavigation.TabNavigation="Cycle" />
+                  </ScrollViewer>
+                </Border>
+              </Popup>
+            </Grid>
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="Role" Value="SubmenuHeader">
+              <Setter TargetName="Chevron" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Tick" Property="Visibility" Value="Visible" />
+            </Trigger>
+            <Trigger Property="IsHighlighted" Value="True">
+              <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource WindowBrush}" />
+            </Trigger>
+            <Trigger Property="IsSubmenuOpen" Value="True">
+              <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource WindowBrush}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Foreground" Value="{DynamicResource InkMutedBrush}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- Shown when a placement has no matching view; renders nothing. -->
+  <DataTemplate x:Key="widget.missing">
+    <Border Width="0" Height="0" />
+  </DataTemplate>
+
+</ResourceDictionary>

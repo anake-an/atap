@@ -1,0 +1,15 @@
+{
+  "wifi.name": "Wi-Fi",
+  "wifi.description": "Whether you are connected, and how strong the Wi-Fi signal is.",
+  "wifi.showName": "Show the network name",
+  "wifi.showNameHint": "Windows may ask to turn on Location for this. The name stays on this PC.",
+  "wifi.offline": "Not connected",
+  "wifi.notWifi": "Connected, not over Wi-Fi",
+  "wifi.connected": "Connected",
+  "wifi.signal.strong": "Strong signal",
+  "wifi.signal.good": "Good signal",
+  "wifi.signal.weak": "Weak signal",
+  "wifi.metered": "Metered connection",
+  "wifi.locationOff": "Turn on Windows Location to see the network name.",
+  "wifi.accessible": "Wi-Fi. {title}. {signal}"
+}

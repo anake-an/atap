@@ -1,0 +1,110 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization"
+                    xmlns:shelf="clr-namespace:Atap.Widgets.Shelf">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a file shelf instance exists. Nothing in it animates. -->
+
+  <BooleanToVisibilityConverter x:Key="file-shelf.visible" />
+
+  <Style x:Key="file-shelf.button" TargetType="Button">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+    <Setter Property="Background" Value="{DynamicResource RaisedBrush}" />
+    <Setter Property="Padding" Value="12,5" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome" CornerRadius="6" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"
+                  SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.FontSize="12"
+                              TextElement.FontWeight="SemiBold" RecognizesAccessKey="False" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="Opacity" Value="0.85" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- A row: click to open, drag out to use the file elsewhere, the cross removes it. Greyed when missing. -->
+  <Style x:Key="file-shelf.row" TargetType="Button">
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.card}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Button">
+          <Border x:Name="Chrome" CornerRadius="6" Padding="6,4" Background="Transparent">
+            <ContentPresenter />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource RaisedBrush}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+              <Setter Property="Cursor" Value="Arrow" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <DataTemplate x:Key="file-shelf.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         shelf:ShelfDragDrop.DropTarget="{Binding}"
+                         Header="{loc:T file-shelf.name}"
+                         Icon="{DynamicResource icon.folder}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <ScrollViewer MaxHeight="220" VerticalScrollBarVisibility="Auto" Focusable="False"
+                      Visibility="{Binding HasItems, Converter={StaticResource file-shelf.visible}}">
+          <ItemsControl ItemsSource="{Binding Rows}" Focusable="False">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <DockPanel Margin="0,0,0,2" Opacity="{Binding Opacity}" AutomationProperties.Name="{Binding AccessibleName}">
+                  <controls:IconButton DockPanel.Dock="Right" Icon="{DynamicResource icon.close}" Label="{Binding RemoveName}"
+                                       Command="{Binding Remove}" VerticalAlignment="Center" />
+                  <Button Style="{StaticResource file-shelf.row}" Command="{Binding Open}" AutomationProperties.Name="{Binding AccessibleName}"
+                          shelf:ShelfDragDrop.DragPath="{Binding Path}" ToolTip="{Binding Path}">
+                    <StackPanel Orientation="Horizontal">
+                      <controls:StrokeIcon Data="{DynamicResource icon.note}" Foreground="{DynamicResource TextSecondaryBrush}"
+                                           Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,6,0" />
+                      <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextBrush}" FontSize="12" TextTrimming="CharacterEllipsis"
+                                 VerticalAlignment="Center" />
+                    </StackPanel>
+                  </Button>
+                </DockPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+        <Button Style="{StaticResource file-shelf.button}" Command="{Binding ClearCommand}" HorizontalAlignment="Left" Margin="0,8,0,0"
+                AutomationProperties.Name="{loc:T file-shelf.clear}"
+                Visibility="{Binding HasItems, Converter={StaticResource file-shelf.visible}}">
+          <TextBlock Text="{loc:T file-shelf.clear}" />
+        </Button>
+        <Border CornerRadius="6" BorderBrush="{DynamicResource TextMutedBrush}" BorderThickness="1" Padding="12,16"
+                Visibility="{Binding IsEmpty, Converter={StaticResource file-shelf.visible}}">
+          <TextBlock Text="{loc:T file-shelf.empty}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+                     TextAlignment="Center" />
+        </Border>
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <DataTemplate x:Key="file-shelf.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource file-shelf.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

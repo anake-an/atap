@@ -1,0 +1,7 @@
+{
+  "language.choice": "Language",
+  "language.choice.system": "Same as Windows",
+  "language.choice.en": "English",
+  "language.choice.ms": "Bahasa Melayu",
+  "language.choiceHint": "Changes right away. No restart needed."
+}

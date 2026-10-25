@@ -1,0 +1,12 @@
+{
+  "missed-alerts.name": "Makluman terlepas",
+  "missed-alerts.description": "Menunjukkan makluman yang tiba semasa Atap senyap atau tersembunyi, contohnya semasa bermain permainan video atau dalam mod Jangan ganggu.",
+  "missed-alerts.title": "Terlepas",
+  "missed-alerts.empty": "Tiada yang terlepas",
+  "missed-alerts.clear": "Kosongkan",
+  "missed-alerts.clearHint": "Kosongkan makluman terlepas",
+  "missed-alerts.accessible": "Makluman terlepas, {count}",
+  "missed-alerts.accessibleEmpty": "Makluman terlepas, tiada yang terlepas",
+  "missed-alerts.item": "{title}, pada {time}",
+  "missed-alerts.indicator": "Ada makluman yang terlepas"
+}

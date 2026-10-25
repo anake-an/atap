@@ -1,0 +1,11 @@
+{
+  "networkuse.title": "Apa yang menggunakan internet",
+  "networkuse.hint": "Hanya bahagian Atap ini yang menggunakan internet, dan hanya semasa ia dihidupkan.",
+  "networkuse.none": "Tiada apa-apa dalam Atap yang menggunakan internet buat masa ini.",
+  "networkuse.on": "Hidup",
+  "networkuse.off": "Mati",
+  "networkuse.hosts": "Menyambung ke {hosts}.",
+  "networkuse.userUrls": "Menyambung ke alamat yang anda taip.",
+  "networkuse.updates": "Semakan kemas kini",
+  "networkuse.updatesDetail": "Bertanya kepada GitHub sama ada Atap versi baharu sudah keluar."
+}

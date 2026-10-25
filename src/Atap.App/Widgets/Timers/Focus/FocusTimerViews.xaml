@@ -1,0 +1,128 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Templates get a PlacementViewModel. The widget view model is in .ViewModel.
+       Merged only while a focus timer instance exists. Nothing in it animates: the time changes once a second
+       while open, once a minute in the compact notch. -->
+
+  <BooleanToVisibilityConverter x:Key="focus-timer.visible" />
+
+  <!-- One button that starts, pauses and resumes. Its icon follows the state. -->
+  <Style x:Key="focus-timer.toggle" TargetType="controls:IconButton" BasedOn="{StaticResource {x:Type controls:IconButton}}">
+    <Setter Property="Icon" Value="{DynamicResource icon.play}" />
+    <Setter Property="Label" Value="{Binding ToggleLabel}" />
+    <Setter Property="Command" Value="{Binding ToggleCommand}" />
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsRunning}" Value="True">
+        <Setter Property="Icon" Value="{DynamicResource icon.pause}" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
+  <!-- Compact, left of the camera: the timer icon and the phase. -->
+  <DataTemplate x:Key="focus-timer.Compact.Left">
+    <StackPanel DataContext="{Binding ViewModel}"
+                AutomationProperties.Name="{Binding AccessibleSummary}"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Margin="4,0">
+      <controls:StrokeIcon Data="{DynamicResource icon.timer}"
+                           Foreground="{DynamicResource ProductivityAccentBrush}"
+                           Width="14"
+                           Height="14"
+                           VerticalAlignment="Center"
+                           Margin="0,0,6,0" />
+      <TextBlock Text="{Binding PhaseText}"
+                 Foreground="{DynamicResource PrimaryTextBrush}"
+                 FontSize="13"
+                 FontWeight="SemiBold"
+                 VerticalAlignment="Center" />
+    </StackPanel>
+  </DataTemplate>
+
+  <!-- Compact, right of the camera: "25 min" or "Paused". -->
+  <DataTemplate x:Key="focus-timer.Compact.Right">
+    <TextBlock DataContext="{Binding ViewModel}"
+               AutomationProperties.Name="{Binding AccessibleSummary}"
+               Text="{Binding ShortText}"
+               Foreground="{DynamicResource PrimaryTextBrush}"
+               FontSize="13"
+               FontWeight="SemiBold"
+               VerticalAlignment="Center"
+               Margin="4,0" />
+  </DataTemplate>
+
+  <!-- Small: the phase, the time and one button. -->
+  <DataTemplate x:Key="focus-timer.Expanded.Small">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T focus.name}"
+                         Icon="{DynamicResource icon.timer}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*" />
+          <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <StackPanel VerticalAlignment="Center">
+          <TextBlock Text="{Binding PhaseText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+          <TextBlock Text="{Binding TimeText}" Foreground="{DynamicResource TextBrush}" FontSize="24" FontWeight="SemiBold"
+                     Typography.NumeralAlignment="Tabular" />
+        </StackPanel>
+        <controls:IconButton Grid.Column="1" Style="{StaticResource focus-timer.toggle}" VerticalAlignment="Center" />
+      </Grid>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <!-- Medium: the phase and session, the time, progress, and every action. -->
+  <DataTemplate x:Key="focus-timer.Expanded">
+    <controls:WidgetCard DataContext="{Binding ViewModel}"
+                         Header="{loc:T focus.name}"
+                         Icon="{DynamicResource icon.timer}"
+                         Accent="{DynamicResource ProductivityAccentBrush}"
+                         AutomationProperties.Name="{Binding AccessibleSummary}">
+      <StackPanel>
+        <TextBlock Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12">
+          <Run Text="{Binding PhaseText, Mode=OneWay}" />
+          <Run Text="·" />
+          <Run Text="{Binding SessionText, Mode=OneWay}" />
+        </TextBlock>
+        <Grid Margin="0,2,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock Text="{Binding TimeText}" Foreground="{DynamicResource TextBrush}" FontSize="30" FontWeight="SemiBold"
+                     Typography.NumeralAlignment="Tabular" VerticalAlignment="Center" />
+          <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+            <controls:IconButton Style="{StaticResource focus-timer.toggle}" Margin="0,0,4,0" />
+            <controls:IconButton Icon="{DynamicResource icon.plus}" Label="{loc:T focus.addTime}" Command="{Binding AddTimeCommand}" Margin="0,0,4,0" />
+            <controls:IconButton Icon="{DynamicResource icon.next}" Label="{loc:T focus.skip}" Command="{Binding SkipCommand}" Margin="0,0,4,0" />
+            <controls:IconButton Icon="{DynamicResource icon.stop}" Label="{loc:T focus.reset}" Command="{Binding ResetCommand}" />
+          </StackPanel>
+        </Grid>
+        <controls:ProgressPill Value="{Binding Progress, Mode=OneWay}"
+                               Maximum="100"
+                               Margin="0,8,0,0"
+                               Accent="{DynamicResource ProductivityAccentBrush}"
+                               AutomationProperties.Name="{Binding PhaseText}" />
+      </StackPanel>
+    </controls:WidgetCard>
+  </DataTemplate>
+
+  <!-- The panel shows the same cards as the open notch. -->
+  <DataTemplate x:Key="focus-timer.Panel.Small">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource focus-timer.Expanded.Small}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+  <DataTemplate x:Key="focus-timer.Panel">
+    <ContentPresenter Content="{Binding}"
+                      ContentTemplate="{StaticResource focus-timer.Expanded}"
+                      AutomationProperties.Name="{Binding ViewModel.AccessibleSummary}" />
+  </DataTemplate>
+
+</ResourceDictionary>

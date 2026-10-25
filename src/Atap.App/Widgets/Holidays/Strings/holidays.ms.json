@@ -1,0 +1,13 @@
+{
+  "holidays.name": "Cuti umum",
+  "holidays.description": "Cuti umum seterusnya di negeri anda, daripada senarai rasmi kerajaan. Tiada apa-apa diambil dari internet.",
+  "holidays.today": "hari ini",
+  "holidays.mayChange": "Tarikh tertakluk kepada perubahan.",
+  "holidays.starNote": "* Tarikh tertakluk kepada perubahan.",
+  "holidays.forState": "Untuk {state}.",
+  "holidays.nationwideOnly": "Cuti seluruh negara sahaja. Pilih kawasan anda dalam Tetapan untuk menambah cuti negeri anda.",
+  "holidays.dataEnds": "Kemas kini Atap untuk melihat cuti tahun hadapan.",
+  "holidays.noData": "Tiada senarai cuti untuk tarikh hari ini. Semak tarikh pada PC ini.",
+  "holidays.accessible": "Cuti umum. Seterusnya: {name}, {date}, {until}",
+  "holidays.accessibleMessage": "Cuti umum. {message}"
+}

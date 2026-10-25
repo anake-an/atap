@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Microsoft Store package manifest for Atap. packaging/msix/build.ps1 fills in [VERSION] and [ARCH].
+
+  The Store name is "Atap Notch", because "Atap" was taken. The app, Atap.exe and the Velopack pack id stay Atap.
+
+  Identity values from Partner Center > Product management > Product identity (Store ID 9N8WMBX8188D):
+    Novafortress.AtapNotch   Package/Identity/Name
+    CN=E5DA39E3-8B84-4AA4-A3C6-B4CFB4221E11            Package/Identity/Publisher, the full value that starts with CN=
+    Novafortress  Package/Properties/PublisherDisplayName
+  If you ever change them, change them here and in Partner Center together.
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+  <Identity
+    Name="Novafortress.AtapNotch"
+    Publisher="CN=E5DA39E3-8B84-4AA4-A3C6-B4CFB4221E11"
+    Version="[VERSION]"
+    ProcessorArchitecture="[ARCH]" />
+
+  <Properties>
+    <DisplayName>Atap Notch</DisplayName>
+    <PublisherDisplayName>Novafortress</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <!-- Windows 10 2004 (build 19041) and later, the same as SupportedOSPlatformVersion in Atap.App.csproj. -->
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.19041.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <!-- Atap's menu text is in English and Bahasa Melayu. -->
+  <Resources>
+    <Resource Language="en-us" />
+    <Resource Language="ms" />
+  </Resources>
+
+  <Applications>
+    <Application Id="Atap" Executable="Atap.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Atap Notch"
+        Description="The open-source notch for Windows that you build yourself."
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile
+          Wide310x150Logo="Assets\Wide310x150Logo.png"
+          Square71x71Logo="Assets\Square71x71Logo.png"
+          Square310x310Logo="Assets\Square310x310Logo.png" />
+        <uap:SplashScreen Image="Assets\SplashScreen.png" />
+      </uap:VisualElements>
+    </Application>
+  </Applications>
+
+  <!-- Atap is a desktop (Win32) app, so it needs full trust. Partner Center asks why on the first submission. -->
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

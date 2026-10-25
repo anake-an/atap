@@ -1,0 +1,13 @@
+{
+  "version.title": "Version",
+  "version.name": "Atap {version}",
+  "version.check": "Check for updates",
+  "version.status.idle": "Atap checks for updates by itself once a day.",
+  "version.status.checking": "Checking for updates...",
+  "version.status.downloading": "Downloading the update...",
+  "version.status.ready": "An update is ready. It installs when Atap closes.",
+  "version.status.upToDate": "You have the latest version.",
+  "version.status.unsupported": "Updates work in the installed app only.",
+  "version.status.scoop": "Scoop keeps Atap up to date. Run scoop update atap.",
+  "version.status.store": "The Microsoft Store keeps Atap up to date."
+}

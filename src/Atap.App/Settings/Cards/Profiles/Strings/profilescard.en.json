@@ -1,0 +1,12 @@
+{
+  "profilescard.title": "Profiles",
+  "profilescard.usual": "Usual profile",
+  "profilescard.usualHint": "The profile the notch uses when no app rule picks another one.",
+  "profilescard.default": "Default",
+  "profilescard.list": "Your profiles",
+  "profilescard.listHint": "A profile is another set of widgets, such as one for games or for class. A new profile starts as a copy of what Default shows. Press Edit to change it.",
+  "profilescard.name": "Profile name",
+  "profilescard.add": "Add profile",
+  "profilescard.edit": "Edit",
+  "profilescard.remove": "Remove"
+}

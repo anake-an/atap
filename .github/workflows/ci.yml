@@ -1,0 +1,81 @@
+name: CI
+
+# Code scanning: add a CodeQL workflow (github/codeql-action, C#) when the repo goes public at
+# launch. It is left out for now because code scanning on a private repo needs GitHub Advanced Security.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # MinVer needs the tags and history
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('global.json', 'Directory.Packages.props', '**/*.csproj', '**/packages*.lock.json', '.config/dotnet-tools.json') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore Atap.sln --locked-mode
+
+      - name: Build
+        run: dotnet build Atap.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test Atap.sln --configuration Release --no-build --logger trx --results-directory TestResults
+
+      - name: Upload test results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-results
+          path: TestResults/*.trx
+          if-no-files-found: warn
+          retention-days: 14
+
+      # Last, because it restores Atap.App again without Velopack (locked to packages.store.lock.json).
+      - name: Build Store channel
+        run: dotnet build src/Atap.App/Atap.App.csproj --configuration Release -p:AtapChannel=Store
+
+      # The release publishes atap.exe natively for x64 and Arm64. Doing it here for both finds a missing
+      # toolchain on a pull request, not on release day. Locked mode is off because NativeAOT adds the
+      # SDK's own ILCompiler package, which the lock file leaves out on purpose.
+      - name: Publish the atap CLI natively
+        shell: pwsh
+        run: |
+          foreach ($rid in 'win-x64', 'win-arm64') {
+            dotnet publish src/Atap.Cli/Atap.Cli.csproj --configuration Release --runtime $rid -p:AtapAot=true -p:RestoreLockedMode=false --output "cli-$rid"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            if (-not (Test-Path "cli-$rid/atap.exe")) { Write-Output "::error::atap.exe is missing for $rid."; exit 1 }
+          }

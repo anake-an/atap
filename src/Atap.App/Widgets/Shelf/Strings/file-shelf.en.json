@@ -1,0 +1,9 @@
+{
+  "file-shelf.name": "File shelf",
+  "file-shelf.description": "Drop files and folders here to keep them close. Click to open, or drag them out to use them somewhere else.",
+  "file-shelf.empty": "Drop files or folders here.",
+  "file-shelf.clear": "Clear shelf",
+  "file-shelf.missing": "{name}, moved or deleted",
+  "file-shelf.removeItem": "Remove {name} from the shelf",
+  "file-shelf.accessible": "File shelf. {count} items"
+}

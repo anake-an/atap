@@ -1,0 +1,18 @@
+{
+  "next-meeting.name": "Next meeting",
+  "next-meeting.description": "Your next meeting from your calendar, with a Join button. It shows on the notch 5 minutes before it starts.",
+  "next-meeting.url": "Calendar link",
+  "next-meeting.urlHint": "The private iCal or .ics link from Google Calendar, Outlook or iCloud. Atap keeps it locked on this PC and never shows it again.",
+  "next-meeting.privacy": "Atap downloads your calendar from the link you give it, every 15 minutes. The calendar stays in memory and is never saved to disk.",
+  "next-meeting.noLink": "Add your calendar link in this widget's settings.",
+  "next-meeting.failed": "Could not load your calendar. Check the link and your connection.",
+  "next-meeting.loading": "Loading your calendar.",
+  "next-meeting.none": "No meetings today or tomorrow.",
+  "next-meeting.untitled": "Meeting",
+  "next-meeting.now": "Now",
+  "next-meeting.inMinutes": "In {minutes} min",
+  "next-meeting.today": "Today",
+  "next-meeting.tomorrow": "Tomorrow",
+  "next-meeting.join": "Join",
+  "next-meeting.accessible": "Next meeting. {title}. {when}"
+}
