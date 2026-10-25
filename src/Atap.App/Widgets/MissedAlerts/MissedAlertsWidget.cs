@@ -5,9 +5,9 @@ namespace Atap.Widgets.MissedAlerts;
 
 /// <summary>
 /// Lists the Missed alerts and clears them. It reads the list through its alert sink, follows changes
-/// to it, and has no timer. Its indicator is on while something was missed.
+/// to it, and has no timer. Its indicator is on, and its card shows, only while something was missed.
 /// </summary>
-public sealed class MissedAlertsWidget(WidgetContext context) : WidgetBase(context), IIndicator
+public sealed class MissedAlertsWidget(WidgetContext context) : WidgetBase(context), IIndicator, IOptionalContent
 {
     private readonly MissedAlertsViewModel _viewModel = new(context.Text, context.Alerts as IMissedAlerts);
     private readonly IMissedAlerts? _missed = context.Alerts as IMissedAlerts;
@@ -23,6 +23,11 @@ public sealed class MissedAlertsWidget(WidgetContext context) : WidgetBase(conte
     public string IndicatorNameKey => "missed-alerts.indicator";
 
     public event EventHandler? IndicatorChanged;
+
+    /// <summary>Nothing missed means no card: the panel does not give a slot to "Nothing missed".</summary>
+    public bool HasContent => _indicatorOn;
+
+    public event EventHandler? HasContentChanged;
 
     public override Task StartAsync(SettingValues settings, CancellationToken cancellationToken = default)
     {
@@ -62,5 +67,6 @@ public sealed class MissedAlertsWidget(WidgetContext context) : WidgetBase(conte
             return;
         _indicatorOn = on;
         IndicatorChanged?.Invoke(this, EventArgs.Empty);
+        HasContentChanged?.Invoke(this, EventArgs.Empty);
     }
 }

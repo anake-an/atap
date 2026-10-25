@@ -53,6 +53,33 @@ public class LayoutPresetsTests
         Assert.True(document.GetWidgetSettings("media").ContainsKey("x"));
     }
 
+    [Theory]
+    [MemberData(nameof(Presets))]
+    public void EveryPresetPanel_StartsWithTheHoverWidgets_AndEndsWithTheMissedAlertsIfAny(LayoutPreset preset)
+    {
+        var placements = LayoutPresets.PlacementsOf(preset);
+        var hover = placements.Where(p => p.Spot.State == NotchState.Expanded).Select(p => p.TypeId).ToList();
+        var panel = placements.Where(p => p.Spot.State == NotchState.Panel).Select(p => p.TypeId).ToList();
+
+        if (panel.All(id => id == "missed-alerts"))
+            return; // Follows the hover view.
+        Assert.Equal(hover, panel.Take(hover.Count));
+        Assert.DoesNotContain("missed-alerts", panel.SkipLast(1));
+    }
+
+    [Fact]
+    public void Minimal_PanelFollowsTheHoverView()
+    {
+        var document = DefaultLayout.Create();
+
+        LayoutPresets.Apply(document, LayoutPreset.Minimal, Catalog);
+
+        Assert.True(PanelContent.FollowsHover(LayoutResolver.Resolve(document, null).PanelPages));
+        Assert.Contains("missed-alerts", document.EnabledWidgets);
+    }
+
+    public static TheoryData<LayoutPreset> Presets() => new(LayoutPresets.All);
+
     [Fact]
     public void OnlyTheMalaysiaPreset_UsesTheInternet()
     {

@@ -163,13 +163,29 @@ public sealed class PanelTests : IAsyncLifetime
     [Fact]
     public void AnEmptyPanel_SaysSo()
     {
-        _services.Layout.Update(d => d.States.Panel.Pages = [Page("main")]);
+        _services.Layout.Update(d =>
+        {
+            d.States.Panel.Pages = [Page("main")];
+            d.States.Expanded.Placements = [];
+        });
         using var model = Model();
         _feature.Toggle();
 
         Assert.Equal(NotchSurface.Panel, model.Surface);
         Assert.True(model.IsGridEmpty);
         Assert.Equal(0, model.PageCount);
+    }
+
+    [Fact]
+    public void AnUnfilledPanel_ShowsTheHoverWidgets()
+    {
+        _services.Layout.Update(d => d.States.Panel.Pages = [Page("main")]);
+        using var model = Model();
+        _feature.Toggle();
+
+        Assert.Equal(NotchSurface.Panel, model.Surface);
+        Assert.Equal(["alpha"], model.GridItems.Select(i => i.InstanceId));
+        Assert.Equal(1, model.PageCount);
     }
 
     [Fact]
