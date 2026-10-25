@@ -32,7 +32,8 @@ public class EditorDropTests
                 new PreviewRect(0, 0, 156, 72),
                 new PreviewRect(164, 0, 320, 72),
                 new PreviewRect(492, 0, 156, 72),
-                new PreviewRect(0, 80, 320, 72),
+                // The last card widens into the free columns beside it, as the panel does, so no hole is left.
+                new PreviewRect(0, 80, 648, 72),
             ],
             cells);
     }
@@ -192,7 +193,13 @@ public class EditorDropTests
         Assert.Equal("clock", Ids(session, Open)[^1]);
     }
 
-    private static LayoutEditSession NewSession() => new(DefaultLayout.Create(), EffectiveLayout.DefaultProfileId, Catalog);
+    // The panel page starts with music and the missed alerts, so the drag tests have two tiles to move.
+    private static LayoutEditSession NewSession()
+    {
+        var document = DefaultLayout.Create();
+        document.States.Panel.Pages[0].Placements.Insert(0, new WidgetPlacement { WidgetId = DefaultLayout.MediaWidgetId, Size = WidgetSize.Medium });
+        return new(document, EffectiveLayout.DefaultProfileId, Catalog);
+    }
 
     private static List<string> Ids(LayoutEditSession session, EditSpot spot) => session.PlacementsAt(spot).Select(p => p.WidgetId).ToList();
 

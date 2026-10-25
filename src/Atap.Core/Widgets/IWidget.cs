@@ -46,3 +46,15 @@ public interface IIndicator
     /// <summary>Raised on the UI thread.</summary>
     event EventHandler? IndicatorChanged;
 }
+
+/// <summary>
+/// A widget whose card is only worth showing at times, such as the missed alerts while nothing was missed.
+/// The open notch leaves the card out while <see cref="HasContent"/> is false, so it never takes a slot to say "nothing".
+/// </summary>
+public interface IOptionalContent
+{
+    bool HasContent { get; }
+
+    /// <summary>Raised on the UI thread when <see cref="HasContent"/> changes.</summary>
+    event EventHandler? HasContentChanged;
+}

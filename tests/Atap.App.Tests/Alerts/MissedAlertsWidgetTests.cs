@@ -70,6 +70,23 @@ public sealed class MissedAlertsWidgetTests : IDisposable
     }
 
     [Fact]
+    public async Task TheCard_ShowsOnlyWhileSomethingWasMissed()
+    {
+        var widget = Create();
+        var changes = 0;
+        widget.HasContentChanged += (_, _) => changes++;
+        await widget.StartAsync(SettingValues.Empty);
+        Assert.False(widget.HasContent);
+
+        Miss("low", "Battery low");
+        Assert.True(widget.HasContent);
+
+        ((MissedAlertsViewModel)widget.ViewModel).ClearCommand.Execute(null);
+        Assert.False(widget.HasContent);
+        Assert.Equal(2, changes);
+    }
+
+    [Fact]
     public async Task Stopped_ItNoLongerFollowsTheList()
     {
         var widget = Create();

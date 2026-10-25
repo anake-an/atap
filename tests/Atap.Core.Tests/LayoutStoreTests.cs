@@ -393,7 +393,7 @@ public sealed class LayoutStoreTests : IDisposable
     [Fact]
     public void Load_NewerSchemaWithAShapeThisVersionCannotRead_UsesDefaultsAndLeavesTheFile()
     {
-        var json = """{ "schemaVersion": 4, "enabledWidgets": [ { "id": "clock", "pinned": true } ] }""";
+        var json = """{ "schemaVersion": 5, "enabledWidgets": [ { "id": "clock", "pinned": true } ] }""";
         Write(json);
         var store = Store();
 
@@ -580,7 +580,7 @@ public sealed class LayoutStoreTests : IDisposable
     {
         var store = Store();
         store.Load();
-        var newer = """{ "schemaVersion": 4, "enabledWidgets": [ "clock" ], "pins": [ 1 ] }""";
+        var newer = """{ "schemaVersion": 5, "enabledWidgets": [ "clock" ], "pins": [ 1 ] }""";
         File.WriteAllText(LayoutPath, newer);
         _watch.Fire();
         _time.Advance(JsonFileStore.QuietDelay);
@@ -601,7 +601,7 @@ public sealed class LayoutStoreTests : IDisposable
         var store = Store();
         store.Load();
         store.Update(l => l.Placement.Offset = 3);
-        var newer = """{ "schemaVersion": 4, "enabledWidgets": [ "clock" ] }""";
+        var newer = """{ "schemaVersion": 5, "enabledWidgets": [ "clock" ] }""";
         File.WriteAllText(LayoutPath, newer);
 
         _time.Advance(JsonFileStore.FlushDelay);

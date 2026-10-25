@@ -294,6 +294,7 @@ public sealed class LayoutEditorTests : IDisposable
     [Fact]
     public void DragATileOntoAnotherPage_MovesItThere()
     {
+        _services.Layout.Update(d => d.States.Panel.Pages[0].Placements.Insert(0, new WidgetPlacement { WidgetId = "media", Size = WidgetSize.Medium }));
         using var editor = NewEditor();
         editor.Tab = EditorTab.Panel;
         editor.AddPageCommand.Execute(null);

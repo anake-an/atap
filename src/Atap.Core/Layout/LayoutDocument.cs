@@ -15,8 +15,9 @@ public sealed class LayoutDocument
     /// 1: widgets, states, compact priority, settings.
     /// 2: adds <see cref="Placement"/> (missing means top centre on the primary monitor).
     /// 3: adds <see cref="Profiles"/>, and the panel holds pages instead of placements.
+    /// 4: an untouched 1.0 panel page (music and missed alerts) becomes the new default, which follows the hover view.
     /// </summary>
-    public const int CurrentSchemaVersion = 3;
+    public const int CurrentSchemaVersion = 4;
 
     private static readonly IReadOnlyDictionary<string, JsonElement> NoSettings = new Dictionary<string, JsonElement>();
 
