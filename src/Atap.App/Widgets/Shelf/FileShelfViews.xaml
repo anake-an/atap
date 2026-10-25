@@ -70,7 +70,7 @@
                 Visibility="{Binding HasItems, Converter={StaticResource file-shelf.visible}}">
           <TextBlock Text="{loc:T file-shelf.clear}" />
         </Button>
-        <Border CornerRadius="6" BorderBrush="{DynamicResource TextMutedBrush}" BorderThickness="1" Padding="12,16"
+        <Border CornerRadius="6" BorderBrush="{DynamicResource TextSecondaryBrush}" BorderThickness="1" Padding="12,16"
                 Visibility="{Binding IsEmpty, Converter={StaticResource file-shelf.visible}}">
           <TextBlock Text="{loc:T file-shelf.empty}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
                      TextAlignment="Center" />

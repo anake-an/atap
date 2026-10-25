@@ -15,12 +15,12 @@
                   HorizontalAlignment="Center"
                   Visibility="{Binding IsGridEmpty, Converter={StaticResource panel.visible}}">
         <TextBlock Text="{loc:T panel.empty}"
-                   Foreground="{DynamicResource PrimaryTextBrush}"
+                   Foreground="{DynamicResource TextBrush}"
                    FontSize="13"
                    FontWeight="SemiBold"
                    HorizontalAlignment="Center" />
         <TextBlock Text="{loc:T panel.emptyHint}"
-                   Foreground="{DynamicResource SecondaryTextBrush}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
                    FontSize="12"
                    Margin="0,2,0,0"
                    TextWrapping="Wrap"
@@ -30,8 +30,8 @@
 
       <controls:PageDots Count="{Binding PageCount}"
                          SelectedIndex="{Binding PageIndex}"
-                         DotBrush="{DynamicResource SecondaryTextBrush}"
-                         CurrentBrush="{DynamicResource PrimaryTextBrush}"
+                         DotBrush="{DynamicResource TextSecondaryBrush}"
+                         CurrentBrush="{DynamicResource TextBrush}"
                          HorizontalAlignment="Center"
                          Margin="0,8,0,0"
                          Cursor="Hand"

@@ -24,7 +24,7 @@
     <TextBlock DataContext="{Binding ViewModel}"
                AutomationProperties.Name="{Binding AccessibleSummary}"
                Text="{Binding Latest.Short}"
-               Foreground="{DynamicResource PrimaryTextBrush}"
+               Foreground="{DynamicResource TextBrush}"
                FontSize="13"
                FontWeight="SemiBold"
                VerticalAlignment="Center"
@@ -47,12 +47,12 @@
                  Margin="0,0,10,0" />
       <StackPanel Grid.Column="1" VerticalAlignment="Center">
         <TextBlock Text="{Binding Title}"
-                   Foreground="{DynamicResource PrimaryTextBrush}"
+                   Foreground="{DynamicResource TextBrush}"
                    FontSize="13"
                    FontWeight="SemiBold"
                    TextTrimming="CharacterEllipsis" />
         <TextBlock Text="{Binding Detail}"
-                   Foreground="{DynamicResource SecondaryTextBrush}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
                    FontSize="11"
                    TextTrimming="CharacterEllipsis"
                    Visibility="{Binding HasDetail, Converter={StaticResource push.visible}}" />
@@ -65,7 +65,7 @@
       </StackPanel>
       <TextBlock Grid.Column="2"
                  Text="{Binding Short}"
-                 Foreground="{DynamicResource SecondaryTextBrush}"
+                 Foreground="{DynamicResource TextSecondaryBrush}"
                  FontSize="12"
                  VerticalAlignment="Center"
                  Margin="10,0,0,0" />

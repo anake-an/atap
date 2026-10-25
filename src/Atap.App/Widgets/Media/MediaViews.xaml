@@ -20,7 +20,7 @@
         <TextBlock Text="&#xE8D6;"
                    FontFamily="{StaticResource IconFont}"
                    FontSize="11"
-                   Foreground="{DynamicResource SecondaryTextBrush}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center" />
       </Border>
@@ -73,7 +73,7 @@
           <TextBlock Text="&#xE8D6;"
                      FontFamily="{StaticResource IconFont}"
                      FontSize="24"
-                     Foreground="{DynamicResource SecondaryTextBrush}"
+                     Foreground="{DynamicResource TextSecondaryBrush}"
                      HorizontalAlignment="Center"
                      VerticalAlignment="Center" />
         </Border>
@@ -86,12 +86,12 @@
 
       <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
         <TextBlock Text="{Binding Title}"
-                   Foreground="{DynamicResource PrimaryTextBrush}"
+                   Foreground="{DynamicResource TextBrush}"
                    FontSize="14"
                    FontWeight="SemiBold"
                    TextTrimming="CharacterEllipsis" />
         <TextBlock Text="{Binding Artist}"
-                   Foreground="{DynamicResource SecondaryTextBrush}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
                    FontSize="12"
                    TextTrimming="CharacterEllipsis" />
 

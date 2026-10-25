@@ -80,7 +80,7 @@
             <Style TargetType="Path">
               <Style.Triggers>
                 <DataTrigger Binding="{Binding IsHigh, Source={x:Static controls:Contrast.Current}}" Value="True">
-                  <Setter Property="Stroke" Value="{DynamicResource PrimaryTextBrush}" />
+                  <Setter Property="Stroke" Value="{DynamicResource TextBrush}" />
                   <Setter Property="StrokeThickness" Value="1" />
                 </DataTrigger>
               </Style.Triggers>

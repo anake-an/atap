@@ -14,10 +14,11 @@
   <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
   <FontFamily x:Key="TextFont">Segoe UI Variable Text, Segoe UI</FontFamily>
 
-  <!-- The brushes today's widgets use. New code should prefer the token brushes from Tokens.xaml. -->
+  <!-- Older brush keys. New code uses the token brushes from Tokens.xaml. PrimaryTextBrush and SecondaryTextBrush
+       are kept for outside views and show the same colours as TextBrush and TextSecondaryBrush. -->
   <SolidColorBrush x:Key="NotchBackgroundBrush" Color="Black" />
-  <SolidColorBrush x:Key="PrimaryTextBrush" Color="#FFFFFFFF" />
-  <SolidColorBrush x:Key="SecondaryTextBrush" Color="#99FFFFFF" />
+  <SolidColorBrush x:Key="PrimaryTextBrush" Color="{StaticResource TextColor}" />
+  <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource TextSecondaryColor}" />
   <SolidColorBrush x:Key="PlaceholderBrush" Color="#FF2A2A2A" />
   <SolidColorBrush x:Key="AccentBrush" Color="#FF30D158" />
   <SolidColorBrush x:Key="ButtonHoverBrush" Color="#26FFFFFF" />
@@ -30,7 +31,7 @@
           <Border Margin="-2"
                   CornerRadius="8"
                   BorderThickness="2"
-                  BorderBrush="{DynamicResource PrimaryTextBrush}"
+                  BorderBrush="{DynamicResource TextBrush}"
                   SnapsToDevicePixels="True" />
         </ControlTemplate>
       </Setter.Value>
@@ -42,7 +43,7 @@
   <Style x:Key="IconButton" TargetType="Button">
     <Setter Property="Focusable" Value="False" />
     <Setter Property="FocusVisualStyle" Value="{StaticResource NotchFocusVisual}" />
-    <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
     <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
     <Setter Property="FontSize" Value="14" />
     <Setter Property="Width" Value="32" />
