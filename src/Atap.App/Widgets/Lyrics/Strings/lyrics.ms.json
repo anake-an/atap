@@ -5,7 +5,7 @@
   "lyrics.romanize": "Tunjukkan baris Jepun dan Korea dalam huruf Rumi",
   "lyrics.romanizeHint": "Menambah satu baris dalam huruf Rumi di bawah lirik yang ditulis dalam kana atau Hangul.",
   "lyrics.translateUrl": "Pautan terjemahan",
-  "lyrics.translateUrlHint": "Biarkan kosong untuk mematikan terjemahan. Atap meletakkan baris yang sedang dimainkan di tempat {text} dan bahasa di tempat {lang}, contohnya https://translate.example.com/translate?q={text}&target={lang}. Gunakan perkhidmatan anda sendiri atau yang anda percayai, kerana setiap baris dihantar kepadanya.",
+  "lyrics.translateUrlHint": "Biarkan kosong untuk mematikan terjemahan. Atap meletakkan baris yang sedang dimainkan di tempat {text} dan bahasa di tempat {lang}, contohnya https://translate.example.com/translate?q={text}&target={lang}. Gunakan perkhidmatan anda sendiri atau yang anda percayai, kerana setiap baris dihantar kepadanya. Pautan ini kekal pada PC ini dan tidak pernah disegerakkan.",
   "lyrics.translateTo": "Terjemah ke",
   "lyrics.translateTo.en": "Bahasa Inggeris",
   "lyrics.translateTo.ms": "Bahasa Melayu",

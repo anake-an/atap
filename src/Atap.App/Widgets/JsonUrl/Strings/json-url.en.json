@@ -43,7 +43,7 @@
   "json-url.itemValue": "Value of each item",
   "json-url.itemValueHint": "Where each item's value sits, such as status. Leave it empty to show names only.",
   "json-url.header": "Sign-in header",
-  "json-url.headerHint": "Only if the site needs one. Write it as Name: value, such as Authorization: Bearer abc123. Atap keeps it locked on this PC.",
+  "json-url.headerHint": "Only if the site needs one. Write it as Name: value, such as Authorization: Bearer abc123. Atap keeps it locked on this PC. Put any key here, not in the link, because the link is synced.",
   "json-url.noLink": "Add a link in this widget's settings.",
   "json-url.loading": "Loading.",
   "json-url.failed": "Could not reach the link. Check it and your connection.",

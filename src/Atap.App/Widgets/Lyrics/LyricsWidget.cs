@@ -51,6 +51,8 @@ public sealed class LyricsDescriptor : IWidgetDescriptor
         new(TranslateUrlKey, "lyrics.translateUrl", SettingType.Url, null)
         {
             DescriptionKey = "lyrics.translateUrlHint", MaxLength = 2048, Advanced = true,
+            // The link may hold a key in its query, so it stays on this PC and is never synced.
+            Scope = SettingScope.Machine,
         },
         new(TranslateToKey, "lyrics.translateTo", SettingType.Choice, "en", Languages) { Advanced = true },
         new(TranslatePathKey, "lyrics.translatePath", SettingType.String, "translatedText")

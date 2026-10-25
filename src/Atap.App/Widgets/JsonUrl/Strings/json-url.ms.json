@@ -43,7 +43,7 @@
   "json-url.itemValue": "Nilai setiap item",
   "json-url.itemValueHint": "Tempat nilai setiap item berada, seperti status. Biarkan kosong untuk menunjukkan nama sahaja.",
   "json-url.header": "Pengepala log masuk",
-  "json-url.headerHint": "Hanya jika laman itu memerlukannya. Tulis sebagai Nama: nilai, seperti Authorization: Bearer abc123. Atap menyimpannya dengan selamat pada PC ini.",
+  "json-url.headerHint": "Hanya jika laman itu memerlukannya. Tulis sebagai Nama: nilai, seperti Authorization: Bearer abc123. Atap menyimpannya dengan selamat pada PC ini. Letakkan sebarang kunci di sini, bukan dalam pautan, kerana pautan disegerakkan.",
   "json-url.noLink": "Tambah pautan dalam tetapan widget ini.",
   "json-url.loading": "Memuatkan.",
   "json-url.failed": "Pautan tidak dapat dicapai. Semak pautan dan sambungan anda.",
