@@ -16,7 +16,7 @@
           Width="22"
           Height="22"
           VerticalAlignment="Center">
-      <Border CornerRadius="5" Background="{DynamicResource PlaceholderBrush}">
+      <Border CornerRadius="6" Background="{DynamicResource PlaceholderBrush}">
         <TextBlock Text="&#xE8D6;"
                    FontFamily="{StaticResource IconFont}"
                    FontSize="11"
@@ -24,7 +24,7 @@
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center" />
       </Border>
-      <Border CornerRadius="5">
+      <Border CornerRadius="6">
         <Border.Background>
           <ImageBrush ImageSource="{Binding AlbumArt}" Stretch="UniformToFill" />
         </Border.Background>
@@ -69,7 +69,7 @@
       </Grid.RowDefinitions>
 
       <Grid Width="64" Height="64" VerticalAlignment="Center">
-        <Border CornerRadius="10" Background="{DynamicResource PlaceholderBrush}">
+        <Border CornerRadius="8" Background="{DynamicResource PlaceholderBrush}">
           <TextBlock Text="&#xE8D6;"
                      FontFamily="{StaticResource IconFont}"
                      FontSize="24"
@@ -77,7 +77,7 @@
                      HorizontalAlignment="Center"
                      VerticalAlignment="Center" />
         </Border>
-        <Border CornerRadius="10">
+        <Border CornerRadius="8">
           <Border.Background>
             <ImageBrush ImageSource="{Binding AlbumArt}" Stretch="UniformToFill" />
           </Border.Background>

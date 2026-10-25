@@ -8,34 +8,12 @@
 
   <BooleanToVisibilityConverter x:Key="clipboard.visible" />
 
-  <Style x:Key="clipboard.button" TargetType="Button">
-    <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
-    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-    <Setter Property="Background" Value="{DynamicResource RaisedBrush}" />
-    <Setter Property="Padding" Value="12,5" />
-    <Setter Property="Template">
-      <Setter.Value>
-        <ControlTemplate TargetType="Button">
-          <Border x:Name="Chrome" CornerRadius="6" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"
-                  SnapsToDevicePixels="True">
-            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.FontSize="12"
-                              TextElement.FontWeight="SemiBold" RecognizesAccessKey="False" />
-          </Border>
-          <ControlTemplate.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Chrome" Property="Opacity" Value="0.85" />
-            </Trigger>
-          </ControlTemplate.Triggers>
-        </ControlTemplate>
-      </Setter.Value>
-    </Setter>
-  </Style>
+  <Style x:Key="clipboard.button" TargetType="Button" BasedOn="{StaticResource Notch.Button}" />
 
   <!-- A row: click to copy again, the cross removes it. -->
   <Style x:Key="clipboard.row" TargetType="Button">
     <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.card}" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
     <Setter Property="Template">
       <Setter.Value>

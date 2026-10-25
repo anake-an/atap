@@ -28,7 +28,7 @@
       <Setter.Value>
         <ControlTemplate>
           <Border Margin="-2"
-                  CornerRadius="10"
+                  CornerRadius="8"
                   BorderThickness="2"
                   BorderBrush="{DynamicResource PrimaryTextBrush}"
                   SnapsToDevicePixels="True" />
@@ -37,8 +37,8 @@
     </Setter>
   </Style>
 
-  <!-- Flat round icon button for widget controls. It takes focus only while the panel has the keyboard, so a
-       click on the notch never takes focus from the app in front. -->
+  <!-- Flat icon button for widget controls, a 6 pixel rounded square like every notch button. It takes focus only
+       while the panel has the keyboard, so a click on the notch never takes focus from the app in front. -->
   <Style x:Key="IconButton" TargetType="Button">
     <Setter Property="Focusable" Value="False" />
     <Setter Property="FocusVisualStyle" Value="{StaticResource NotchFocusVisual}" />
@@ -51,7 +51,7 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="Button">
-          <Border x:Name="Chrome" Background="Transparent" CornerRadius="16">
+          <Border x:Name="Chrome" Background="Transparent" CornerRadius="6">
             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Border>
           <ControlTemplate.Triggers>

@@ -54,7 +54,7 @@
                      VerticalAlignment="Center" />
           <Border DockPanel.Dock="Left"
                   Background="{DynamicResource RaisedBrush}"
-                  CornerRadius="8"
+                  CornerRadius="6"
                   Padding="6,0"
                   Margin="8,0,0,0"
                   VerticalAlignment="Center"
@@ -75,7 +75,7 @@
                   Visibility="{Binding HasItems, Converter={StaticResource missed-alerts.visible}}">
             <Button.Template>
               <ControlTemplate TargetType="Button">
-                <Border x:Name="Chrome" Background="Transparent" CornerRadius="8" Padding="8,2">
+                <Border x:Name="Chrome" Background="Transparent" CornerRadius="6" Padding="8,2">
                   <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
                 <ControlTemplate.Triggers>

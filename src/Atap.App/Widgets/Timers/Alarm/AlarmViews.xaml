@@ -9,7 +9,7 @@
 
   <BooleanToVisibilityConverter x:Key="alarm.visible" />
 
-  <!-- On and off for one alarm: a dark pill switch with a round knob. -->
+  <!-- On and off for one alarm: the same switch as in Settings, 40 by 20 with a 12 pixel knob, in the notch colours. -->
   <Style x:Key="alarm.switch" TargetType="CheckBox">
     <Setter Property="Focusable" Value="True" />
     <Setter Property="Cursor" Value="Hand" />
@@ -17,9 +17,9 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="CheckBox">
-          <Border x:Name="Track" Width="36" Height="20" CornerRadius="10" Background="{DynamicResource RaisedBrush}"
+          <Border x:Name="Track" Width="40" Height="20" CornerRadius="10" Background="{DynamicResource RaisedBrush}"
                   BorderBrush="{DynamicResource TextSecondaryBrush}" BorderThickness="1" SnapsToDevicePixels="True">
-            <Ellipse x:Name="Knob" Width="12" Height="12" Margin="4,0" HorizontalAlignment="Left"
+            <Ellipse x:Name="Knob" Width="12" Height="12" Margin="4,0" HorizontalAlignment="Left" VerticalAlignment="Center"
                      Fill="{DynamicResource TextSecondaryBrush}" />
           </Border>
           <ControlTemplate.Triggers>
@@ -38,7 +38,7 @@
     </Setter>
   </Style>
 
-  <!-- A day in the editor: a round chip, filled when the alarm repeats on that day. -->
+  <!-- A day in the editor: a 6 pixel rounded chip, filled when the alarm repeats on that day. -->
   <Style x:Key="alarm.day" TargetType="ToggleButton">
     <Setter Property="Width" Value="30" />
     <Setter Property="Height" Value="30" />
@@ -49,7 +49,7 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="ToggleButton">
-          <Border x:Name="Chip" CornerRadius="15" Background="{DynamicResource RaisedBrush}" SnapsToDevicePixels="True">
+          <Border x:Name="Chip" CornerRadius="6" Background="{DynamicResource RaisedBrush}" SnapsToDevicePixels="True">
             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.FontSize="12"
                               TextElement.FontWeight="SemiBold" RecognizesAccessKey="False" />
           </Border>
@@ -64,38 +64,10 @@
     </Setter>
   </Style>
 
-  <!-- A button with words, for Add, Save, Delete and Cancel: a rounded rectangle, as in Windows 11. -->
-  <Style x:Key="alarm.button" TargetType="Button">
-    <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
-    <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
-    <Setter Property="Background" Value="{DynamicResource RaisedBrush}" />
-    <Setter Property="Padding" Value="12,5" />
-    <Setter Property="Template">
-      <Setter.Value>
-        <ControlTemplate TargetType="Button">
-          <Border x:Name="Chrome" CornerRadius="6" Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}"
-                  SnapsToDevicePixels="True">
-            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.FontSize="12"
-                              TextElement.FontWeight="SemiBold" RecognizesAccessKey="False" />
-          </Border>
-          <ControlTemplate.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-              <Setter TargetName="Chrome" Property="Opacity" Value="0.85" />
-            </Trigger>
-            <Trigger Property="IsEnabled" Value="False">
-              <Setter TargetName="Chrome" Property="Opacity" Value="0.4" />
-            </Trigger>
-          </ControlTemplate.Triggers>
-        </ControlTemplate>
-      </Setter.Value>
-    </Setter>
-  </Style>
+  <!-- A button with words, for Add, Save, Delete and Cancel: the notch's shared button from the UI kit. -->
+  <Style x:Key="alarm.button" TargetType="Button" BasedOn="{StaticResource Notch.Button}" />
 
-  <Style x:Key="alarm.accentButton" TargetType="Button" BasedOn="{StaticResource alarm.button}">
-    <Setter Property="Background" Value="{DynamicResource ProductivityAccentBrush}" />
-    <Setter Property="Foreground" Value="{DynamicResource NotchSurfaceBrush}" />
-  </Style>
+  <Style x:Key="alarm.accentButton" TargetType="Button" BasedOn="{StaticResource Notch.AccentButton}" />
 
   <!-- One alarm: its time and days open the editor, the switch turns it on or off. -->
   <DataTemplate x:Key="alarm.row">
@@ -104,11 +76,11 @@
         <ColumnDefinition Width="*" />
         <ColumnDefinition Width="Auto" />
       </Grid.ColumnDefinitions>
-      <Button Command="{Binding EditCommand}" Cursor="Hand" FocusVisualStyle="{DynamicResource focus.card}"
+      <Button Command="{Binding EditCommand}" Cursor="Hand" FocusVisualStyle="{DynamicResource focus.round}"
               HorizontalContentAlignment="Stretch" AutomationProperties.Name="{Binding AccessibleName}">
         <Button.Template>
           <ControlTemplate TargetType="Button">
-            <Border x:Name="Chrome" CornerRadius="8" Padding="6,4" Background="Transparent">
+            <Border x:Name="Chrome" CornerRadius="6" Padding="6,4" Background="Transparent">
               <ContentPresenter />
             </Border>
             <ControlTemplate.Triggers>
@@ -133,7 +105,7 @@
   <!-- The list, with Snooze while an alarm has just rung. -->
   <DataTemplate x:Key="alarm.list">
     <StackPanel AutomationProperties.Name="{Binding AccessibleSummary}">
-      <Border Margin="0,0,0,6" Padding="10,6" CornerRadius="8" Background="{DynamicResource RaisedBrush}"
+      <Border Margin="0,0,0,6" Padding="10,6" CornerRadius="6" Background="{DynamicResource RaisedBrush}"
               Visibility="{Binding CanSnooze, Converter={StaticResource alarm.visible}}">
         <DockPanel>
           <Button DockPanel.Dock="Right" Style="{StaticResource alarm.accentButton}" Content="{loc:T alarm.snooze}"
@@ -168,7 +140,7 @@
         </Grid.ColumnDefinitions>
         <StackPanel>
           <controls:IconButton Icon="{DynamicResource icon.chevronUp}" Label="{loc:T alarm.hourUp}" Command="{Binding HourUpCommand}" />
-          <TextBlock Text="{loc:T alarm.hour}" Foreground="{DynamicResource TextMutedBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <TextBlock Text="{loc:T alarm.hour}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" HorizontalAlignment="Center" />
           <controls:IconButton Icon="{DynamicResource icon.chevronDown}" Label="{loc:T alarm.hourDown}" Command="{Binding HourDownCommand}" />
         </StackPanel>
         <TextBlock Grid.Column="1" Text="{Binding EditTimeText}" Foreground="{DynamicResource TextBrush}" FontSize="28"
@@ -176,7 +148,7 @@
                    AutomationProperties.LiveSetting="Polite" />
         <StackPanel Grid.Column="2">
           <controls:IconButton Icon="{DynamicResource icon.chevronUp}" Label="{loc:T alarm.minuteUp}" Command="{Binding MinuteUpCommand}" />
-          <TextBlock Text="{loc:T alarm.minute}" Foreground="{DynamicResource TextMutedBrush}" FontSize="10" HorizontalAlignment="Center" />
+          <TextBlock Text="{loc:T alarm.minute}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="11" HorizontalAlignment="Center" />
           <controls:IconButton Icon="{DynamicResource icon.chevronDown}" Label="{loc:T alarm.minuteDown}" Command="{Binding MinuteDownCommand}" />
         </StackPanel>
       </Grid>
