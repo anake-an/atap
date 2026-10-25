@@ -115,6 +115,23 @@ public sealed class OnboardingTests : IDisposable
     }
 
     [Fact]
+    public async Task ClosingSetupWithX_LetsGoOfTheWindow()
+    {
+        var window = new FakeSetupWindow();
+        var feature = new OnboardingFeature(_services.Settings, freshInstall: true, () => window);
+        await feature.StartAsync();
+        Assert.Same(window, feature.Window);
+
+        // Setup is not done, so the feature keeps running. The closed window must not stay with it.
+        window.Close();
+        Assert.Null(feature.Window);
+        Assert.False(_services.Settings.Values.GetBool(OnboardingDescriptor.DoneKey));
+
+        await feature.DisposeAsync();
+        Assert.Equal(1, window.Closes);
+    }
+
+    [Fact]
     public void SafeMode_NeverShowsSetup() =>
         Assert.False(new OnboardingDescriptor().IsEnabled(_services.Settings.Values, AppMode.Safe));
 
@@ -223,6 +240,19 @@ public sealed class OnboardingTests : IDisposable
             startup,
             oneDrive ? sync : null,
             oneDrive ? SyncFolder : null);
+    }
+
+    private sealed class FakeSetupWindow : IOnboardingWindow
+    {
+        public int Closes { get; private set; }
+
+        public event EventHandler? Closed;
+
+        public void Close()
+        {
+            Closes++;
+            Closed?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     private sealed class NoLocation : ILocationSource

@@ -46,6 +46,7 @@ internal partial class LayoutEditorWindow : Window, ILayoutEditorWindow
         {
             viewModel.PropertyChanged -= OnViewModelChanged;
             viewModel.Dispose();
+            Atap.Platform.Diagnostics.MemoryTrim.Soon(Dispatcher);
         };
         SourceInitialized += (_, _) => Place();
         ContentRendered += (_, _) => _placed = true;

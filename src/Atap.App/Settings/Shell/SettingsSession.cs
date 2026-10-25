@@ -1,5 +1,6 @@
 using System.Windows;
 using Atap.Composition;
+using Atap.Platform.Diagnostics;
 using Atap.Settings.Form;
 
 namespace Atap.Settings.Shell;
@@ -91,5 +92,7 @@ internal sealed class SettingsSession : ISettingsSession
         _window.DataContext = null;
         _model.Dispose();
         Closed?.Invoke(this, EventArgs.Empty);
+        // Settings is the largest window. What it used goes back to Windows instead of staying with Atap.
+        MemoryTrim.Soon(_window.Dispatcher);
     }
 }

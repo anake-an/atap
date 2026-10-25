@@ -61,6 +61,9 @@ internal sealed class OnboardingFeature(IAppSettings settings, bool freshInstall
 {
     private IOnboardingWindow? _window;
 
+    /// <summary>The open setup window, or null.</summary>
+    internal IOnboardingWindow? Window => _window;
+
     public Task StartAsync()
     {
         if (!freshInstall)
@@ -68,7 +71,14 @@ internal sealed class OnboardingFeature(IAppSettings settings, bool freshInstall
             settings.Set(OnboardingDescriptor.DoneKey, true);
             return Task.CompletedTask;
         }
-        _window = open();
+        var window = open();
+        // Closed with X, setup is not done, so the feature keeps running until Atap restarts. It lets go of the window all the same.
+        window.Closed += (_, _) =>
+        {
+            if (ReferenceEquals(_window, window))
+                _window = null;
+        };
+        _window = window;
         return Task.CompletedTask;
     }
 
@@ -82,5 +92,7 @@ internal sealed class OnboardingFeature(IAppSettings settings, bool freshInstall
 
 internal interface IOnboardingWindow
 {
+    event EventHandler? Closed;
+
     void Close();
 }

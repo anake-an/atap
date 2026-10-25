@@ -64,6 +64,21 @@ public class LayoutEditSessionTests
     }
 
     [Fact]
+    public void Undo_KeepsTheNewestHundredSteps()
+    {
+        var session = NewSession();
+        for (var i = 0; i < LayoutEditSession.MaxUndo + 20; i++)
+            session.Add("json-url", Open);
+
+        var undone = 0;
+        while (session.Undo())
+            undone++;
+
+        Assert.Equal(LayoutEditSession.MaxUndo, undone);
+        Assert.Equal(20, session.Draft.EnabledWidgets.Count(id => id.StartsWith("json-url", StringComparison.Ordinal)));
+    }
+
+    [Fact]
     public void Add_AMultiInstanceWidget_GetsNumberedIds()
     {
         var session = NewSession();
