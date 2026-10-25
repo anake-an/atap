@@ -2,10 +2,13 @@ using System.Runtime.InteropServices;
 
 namespace Atap.Platform.Foreground;
 
-/// <summary>The foreground window event and the Windows "user is busy" state.</summary>
+/// <summary>The foreground window and location events, and the Windows "user is busy" state.</summary>
 internal static class ForegroundNative
 {
     public const uint EVENT_SYSTEM_FOREGROUND = 0x0003;
+    public const uint EVENT_OBJECT_LOCATIONCHANGE = 0x800B;
+    public const int OBJID_WINDOW = 0;
+    public const int CHILDID_SELF = 0;
     public const uint WINEVENT_OUTOFCONTEXT = 0x0000;
     public const uint WINEVENT_SKIPOWNPROCESS = 0x0002;
 
