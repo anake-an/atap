@@ -66,8 +66,8 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
         UpdateState(force: true);
     }
 
-    /// <summary>Raised after the content for a new surface has been set; the view resizes (or hides) on this.</summary>
-    public event EventHandler? ContentChanged;
+    /// <summary>Raised after the content has been set. The view resizes (or hides) on this, and fades content in only when it is new.</summary>
+    public event EventHandler<NotchContentChangedEventArgs>? ContentChanged;
 
     /// <summary>The resolved surface. Hidden while a full-screen app is in front or a rule hides the notch.</summary>
     public NotchSurface Surface
@@ -223,7 +223,7 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
                 return;
             RebuildItems();
             ReportVisibility();
-            ContentChanged?.Invoke(this, EventArgs.Empty);
+            ContentChanged?.Invoke(this, NotchContentChangedEventArgs.Swapped);
         }
     }
 
@@ -337,7 +337,7 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
             if (!wasHidden || force)
             {
                 _host.ReportVisibility(this, NothingShown);
-                ContentChanged?.Invoke(this, EventArgs.Empty);
+                ContentChanged?.Invoke(this, NotchContentChangedEventArgs.Refreshed);
             }
             return;
         }
@@ -374,11 +374,13 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
             {
                 _shownContent = content;
                 _shownBanner = banner;
-                ContentChanged?.Invoke(this, EventArgs.Empty);
+                ContentChanged?.Invoke(this, NotchContentChangedEventArgs.Refreshed);
             }
             return;
         }
 
+        // New content fades in. The same content rebuilt, such as after a layout save or a card that came or went, only resizes.
+        var swapped = !unchanged || wasHidden;
         ShownSurface = next;
         State = DisplayStateOf(next);
         // A panel opened by a drag shows the page with the file shelf.
@@ -390,7 +392,7 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
         _shownContent = SurfaceContent;
         _shownBanner = Banner;
         ReportVisibility();
-        ContentChanged?.Invoke(this, EventArgs.Empty);
+        ContentChanged?.Invoke(this, swapped ? NotchContentChangedEventArgs.Swapped : NotchContentChangedEventArgs.Refreshed);
     }
 
     /// <summary>Surfaces without placements borrow the shape of the closest state.</summary>

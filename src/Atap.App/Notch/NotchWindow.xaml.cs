@@ -29,15 +29,11 @@ public partial class NotchWindow : Window, INotchWindow
     private const double TuckedLength = 90;
     private const double TuckedDepth = 3;
 
-    // Extra window room so the spring overshoot is not clipped.
-    private const double OvershootAllowance = 0.15;
-
     // The size and the shoulders spring this long, on the same curve as the website.
     private static readonly Duration ResizeDuration = new(TimeSpan.FromMilliseconds(600));
 
-    // New content waits until the shape has started to grow, then fades in, so it never pops in at the old size.
-    private static readonly TimeSpan ContentFadeDelay = TimeSpan.FromMilliseconds(120);
-    private static readonly TimeSpan ContentFadeDuration = TimeSpan.FromMilliseconds(280);
+    // New content fades in from the first frame, while the shape grows around it, so the notch is never empty.
+    private static readonly Duration ContentFadeDuration = new(TimeSpan.FromMilliseconds(220));
 
     // The pointer has to rest on the notch a moment before it opens, and be away a moment before it closes,
     // so passing over it or slipping off the edge does not make it flicker.
@@ -77,6 +73,16 @@ public partial class NotchWindow : Window, INotchWindow
     private double _windowWidth = MinPillLength;
     private double _windowHeight = MinPillDepth;
 
+    // The size the pill is going to, which sets where the notch sits inside the window room.
+    private Size _pillTarget = new(MinPillLength, MinPillDepth);
+
+    // The room kept on sides whose window edge would move with the size. Cleared when the notch moves or hides.
+    private Size _keptRoom;
+
+    // What the running spring is going to, so asking for the same size again does not restart it.
+    private Size _springTarget;
+    private double _springRadius;
+
     // NotchShape.ShoulderRoom snapped to whole pixels by Reposition. It changes only with the monitor's scale.
     private double _appliedShoulderRoom;
 
@@ -101,6 +107,8 @@ public partial class NotchWindow : Window, INotchWindow
 
         _viewModel.ContentChanged += OnContentChanged;
         Notch.SizeChanged += (_, _) => UpdateOutline();
+        // A widget whose content grew or shrank on its own, such as one that loaded its data. Raised during layout, so queued.
+        ContentFrame.NaturalSizeChanged += (_, _) => QueueResize(animate: !IsCalm);
         Loaded += OnLoaded;
     }
 
@@ -117,6 +125,10 @@ public partial class NotchWindow : Window, INotchWindow
     public void Place(DisplayMonitor monitor, NotchAnchor anchor, int offset)
     {
         var anchorChanged = !_anchorStyleApplied || anchor != _anchor;
+        if (anchorChanged || !Equals(monitor, TargetMonitor) || offset != _offset)
+            _keptRoom = default;
+        // Windows may have moved the window with a display change, so it is always placed again.
+        _appliedBounds = default;
         TargetMonitor = monitor;
         _anchor = anchor;
         _offset = offset;
@@ -140,7 +152,11 @@ public partial class NotchWindow : Window, INotchWindow
         if (_isClosed)
             return;
         if (_viewModel.IsHidden)
+        {
+            // Nothing shows while hidden, so the window can let go of the room it kept without anything jumping.
+            _keptRoom = default;
             Hide();
+        }
         else if (!IsVisible)
             Show(); // ShowActivated is false, so this does not take focus.
     }
@@ -162,6 +178,8 @@ public partial class NotchWindow : Window, INotchWindow
     protected override void OnDpiChanged(DpiScale oldDpi, DpiScale newDpi)
     {
         base.OnDpiChanged(oldDpi, newDpi);
+        _keptRoom = default;
+        _appliedBounds = default;
         // WPF moves the window to Windows' suggested rectangle while handling the change; place it after that.
         Dispatcher.InvokeAsync(Reposition);
     }
@@ -227,18 +245,28 @@ public partial class NotchWindow : Window, INotchWindow
         UpdateVisibility();
     }
 
-    private void OnContentChanged(object? sender, EventArgs e)
+    // Less motion, from Atap or battery saver, or Windows' animation effects off: size and content change at once.
+    private bool IsCalm => _viewModel.LessMotion || !SystemParameters.ClientAreaAnimation;
+
+    /// <summary>
+    /// One smooth step: the new content, its size and the window room are all set here, before the next frame,
+    /// so the content is never drawn at the old size and the window never catches up a frame late.
+    /// </summary>
+    private void OnContentChanged(object? sender, NotchContentChangedEventArgs e)
     {
         ApplySurfaceTemplate();
         ApplyTextScale();
         UpdateVisibility();
         UpdateKeyboardMode();
-        // Less motion, from Atap or from Windows' animation effects, changes size and content at once.
-        var calm = _viewModel.LessMotion || !SystemParameters.ClientAreaAnimation;
-        // Started here, before the next frame, so the new content is never drawn at full strength first.
-        if (!calm)
+        if (!IsLoaded || _isClosed)
+            return;
+        var plan = NotchTransition.Plan(e.Change, IsCalm, hasSize: !double.IsNaN(Pill.Width));
+        if (plan.Fade)
             FadeInContent();
-        QueueResize(animate: !calm);
+        // A resize still waiting from earlier is done by this one.
+        _resizeQueued = false;
+        _queuedResizeAnimates = true;
+        ResizeToContent(plan.Spring);
     }
 
     /// <summary>Draws everything in the notch at the chosen text size. The notch grows to fit, as it does for new content.</summary>
@@ -572,26 +600,39 @@ public partial class NotchWindow : Window, INotchWindow
             double.IsNaN(Pill.Width) ? 0 : Pill.Width,
             double.IsNaN(Pill.Height) ? 0 : Pill.Height);
         var currentRadius = ShoulderRadius;
+        var spring = animate && current.Width > 0 && current.Height > 0;
+
+        // Already there, or already springing there: a second request for the same size changes nothing, so the
+        // spring is never restarted half way (a hover and a click in quick succession, or a late layout pass).
+        if (spring && target == _springTarget && targetRadius == _springRadius)
+            return;
+        if (spring && current == target && currentRadius == targetRadius)
+            return;
 
         var generation = ++_resizeGeneration;
+        _pillTarget = target;
+        var (during, after) = NotchTransition.Room(_keptRoom, current, target, spring, _anchor);
+        _keptRoom = new Size(Math.Max(_keptRoom.Width, during.Width), Math.Max(_keptRoom.Height, during.Height));
 
-        if (!animate || current.Width == 0 || current.Height == 0)
+        if (!spring)
         {
             Pill.BeginAnimation(WidthProperty, null);
             Pill.BeginAnimation(HeightProperty, null);
             BeginAnimation(ShoulderRadiusProperty, null);
+            _springTarget = default;
             Pill.Width = target.Width;
             Pill.Height = target.Height;
             ShoulderRadius = targetRadius;
-            SetWindowSize(target.Width, target.Height);
+            SetWindowSize(after.Width, after.Height);
             return;
         }
 
-        if (current == target && currentRadius == targetRadius)
-            return;
-
+        // The window takes its room for the whole spring now, in the same frame as the new content. Sides whose
+        // edge would move keep their room, so the window does not move and nothing is drawn a frame out of place.
         // The shoulder room stays the same, so the radius springs inside it without moving the notch.
-        SetWindowSize(WithOvershoot(current.Width, target.Width), WithOvershoot(current.Height, target.Height));
+        SetWindowSize(during.Width, during.Height);
+        _springTarget = target;
+        _springRadius = targetRadius;
 
         var ease = CubicBezierEase.NotchSpring;
         var widthAnimation = new DoubleAnimation(current.Width, target.Width, ResizeDuration) { EasingFunction = ease };
@@ -599,8 +640,11 @@ public partial class NotchWindow : Window, INotchWindow
         var radiusAnimation = new DoubleAnimation(currentRadius, targetRadius, ResizeDuration) { EasingFunction = ease };
         heightAnimation.Completed += (_, _) =>
         {
-            if (generation == _resizeGeneration)
-                SetWindowSize(target.Width, target.Height);
+            if (generation != _resizeGeneration)
+                return;
+            _springTarget = default;
+            // Only the free sides shrink back, so the anchored corner stays where it is.
+            SetWindowSize(after.Width, after.Height);
         };
 
         Pill.BeginAnimation(WidthProperty, widthAnimation);
@@ -609,28 +653,20 @@ public partial class NotchWindow : Window, INotchWindow
     }
 
     /// <summary>
-    /// Hides the content for a moment and fades it in while the shape springs to its new size.
-    /// It ends at the content's own opacity and keeps nothing running.
+    /// Fades new content in from the first frame while the shape springs to its new size, so there is no empty
+    /// moment and no flash. It ends at the content's own opacity and keeps nothing running.
     /// </summary>
     private void FadeInContent()
     {
         if (!IsLoaded || _isClosed)
             return;
-        var fade = new DoubleAnimationUsingKeyFrames
+        var fade = new DoubleAnimation(0, 1, ContentFadeDuration)
         {
-            Duration = new Duration(ContentFadeDelay + ContentFadeDuration),
+            EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseOut },
             FillBehavior = FillBehavior.Stop,
         };
-        fade.KeyFrames.Add(new DiscreteDoubleKeyFrame(0, KeyTime.FromTimeSpan(TimeSpan.Zero)));
-        fade.KeyFrames.Add(new DiscreteDoubleKeyFrame(0, KeyTime.FromTimeSpan(ContentFadeDelay)));
-        fade.KeyFrames.Add(new EasingDoubleKeyFrame(
-            1, KeyTime.FromTimeSpan(ContentFadeDelay + ContentFadeDuration), new QuadraticEase { EasingMode = EasingMode.EaseOut }));
         SurfaceHost.BeginAnimation(OpacityProperty, fade);
     }
-
-    // The larger of two sizes, plus room for the spring to overshoot the change between them.
-    private static double WithOvershoot(double current, double target) =>
-        Math.Max(current, target) + Math.Abs(target - current) * OvershootAllowance;
 
     private void SetWindowSize(double width, double height)
     {
@@ -658,9 +694,18 @@ public partial class NotchWindow : Window, INotchWindow
         var bounds = PlacementGeometry.Compute(
             monitor.Bounds, scale, _anchor, _windowWidth, _windowHeight, _offset, _appliedShoulderRoom).Bounds;
 
-        // Keep WPF's logical size equal to the pixel size, so its layout fills the window exactly.
-        Width = bounds.Width / scale;
-        Height = bounds.Height / scale;
+        // The room can be larger than the pill, so the notch is placed inside it where the placement puts it.
+        var notch = PlacementGeometry.Compute(
+            monitor.Bounds, scale, _anchor, _pillTarget.Width, _pillTarget.Height, _offset, _appliedShoulderRoom).Bounds;
+        var margin = NotchTransition.Margin(bounds, notch, Notch.HorizontalAlignment, Notch.VerticalAlignment, scale);
+        if (Notch.Margin != margin)
+            Notch.Margin = margin;
+
+        if (bounds == _appliedBounds)
+            return;
+        _appliedBounds = bounds;
+        // One move and size in pixels, then WPF's logical size to match, which is then a no-op for the window.
+        // Two separate moves could show a frame of the old picture in the wrong place.
         NativeMethods.SetWindowPos(
             _hwnd,
             IntPtr.Zero,
@@ -669,5 +714,10 @@ public partial class NotchWindow : Window, INotchWindow
             bounds.Width,
             bounds.Height,
             NativeMethods.SWP_NOZORDER | NativeMethods.SWP_NOACTIVATE | NativeMethods.SWP_NOOWNERZORDER);
+        // Keep WPF's logical size equal to the pixel size, so its layout fills the window exactly.
+        Width = bounds.Width / scale;
+        Height = bounds.Height / scale;
     }
+
+    private PixelRect _appliedBounds;
 }

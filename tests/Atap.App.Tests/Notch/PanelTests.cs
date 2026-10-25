@@ -201,6 +201,25 @@ public sealed class PanelTests : IAsyncLifetime
     }
 
     [Fact]
+    public void NewContentIsSwapped_ButABannerOrALayoutSaveOnlyRefreshes()
+    {
+        using var model = Model();
+        var changes = new List<NotchContentChange>();
+        model.ContentChanged += (_, e) => changes.Add(e.Change);
+
+        // Hover, then a click before the hover settled: two new surfaces, each content set before its event.
+        model.IsHovered = true;
+        _feature.Toggle();
+        _notch.SetSurfaceContent(NotchSurface.Alert, "alert", "alerts");
+        _services.Layout.Update(d => d.States.Panel.Pages[0].Placements.RemoveAt(1));
+        model.StepPage(1);
+
+        Assert.Equal(
+            [NotchContentChange.Swapped, NotchContentChange.Swapped, NotchContentChange.Refreshed, NotchContentChange.Refreshed, NotchContentChange.Swapped],
+            changes);
+    }
+
+    [Fact]
     public void AnAlert_ShowsAsABanner_WhileTheNotchIsOpen()
     {
         using var model = Model();
