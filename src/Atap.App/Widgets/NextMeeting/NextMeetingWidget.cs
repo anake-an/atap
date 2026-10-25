@@ -66,7 +66,8 @@ public sealed class NextMeetingDescriptor : IWidgetDescriptor
 /// <summary>
 /// Fetches the calendar every 15 minutes. The link is a secret: it is read from the secret store, fetched with
 /// FromSecret so the copy stays in memory, and never shown or logged. One timer waits for the next change (5
-/// minutes before a start, the start, the end). A minute tick runs only while a meeting is live.
+/// minutes before a start, the start, the end). A minute tick runs only while a meeting is live or the card is on
+/// screen. The feed is read off the UI thread.
 /// </summary>
 public sealed class NextMeetingWidget : WidgetBase
 {
@@ -83,6 +84,7 @@ public sealed class NextMeetingWidget : WidgetBase
     private IDisposable? _refresh;
     private IDisposable? _change;
     private IDisposable? _minute;
+    private bool _live;
 
     internal NextMeetingWidget(WidgetContext context, Action<Uri> open)
         : base(context)
@@ -96,19 +98,25 @@ public sealed class NextMeetingWidget : WidgetBase
     public override Task StartAsync(SettingValues settings, CancellationToken cancellationToken = default)
     {
         _stopping = new CancellationTokenSource();
+        Context.Visibility.Changed += OnVisibilityChanged;
         _url = FeedUrl(settings.GetSecretRef(NextMeetingDescriptor.UrlKey) is { } reference ? Context.Secrets.Get(reference) : null);
         if (_url is null)
         {
             _viewModel.ShowState(MeetingState.NoLink);
             return Task.CompletedTask;
         }
-        _refresh = Context.Scheduler.Every(RefreshEvery, () => _ = LoadAsync(), new ScheduleOptions(TimeSpan.FromMinutes(3), Deferrable: true));
-        _ = LoadAsync();
+        _refresh = Context.Scheduler.Every(RefreshEvery, () => Loading = LoadAsync(), new ScheduleOptions(TimeSpan.FromMinutes(3), Deferrable: true));
+        Loading = LoadAsync();
         return Task.CompletedTask;
     }
 
+    /// <summary>The load in progress, for tests.</summary>
+    internal Task Loading { get; private set; } = Task.CompletedTask;
+
     public override Task StopAsync()
     {
+        Context.Visibility.Changed -= OnVisibilityChanged;
+        _live = false;
         _refresh?.Dispose();
         _refresh = null;
         _change?.Dispose();
@@ -152,9 +160,19 @@ public sealed class NextMeetingWidget : WidgetBase
             if (stopping.IsCancellationRequested)
                 return;
             if (!result.Body.IsEmpty)
-                _events = IcsParser.Parse(Encoding.UTF8.GetString(result.Body.Span), TimeZoneInfo.Local);
+            {
+                // A feed with years of history takes a while to read, so it is read off the UI thread.
+                var body = result.Body;
+                var events = await Task.Run(() => IcsParser.Parse(Encoding.UTF8.GetString(body.Span), TimeZoneInfo.Local), stopping.Token);
+                if (stopping.IsCancellationRequested)
+                    return;
+                _events = events;
+            }
             else if (_events.Count == 0)
+            {
                 _viewModel.ShowState(MeetingState.Failed);
+                return;
+            }
         }
         catch (OperationCanceledException)
         {
@@ -175,16 +193,9 @@ public sealed class NextMeetingWidget : WidgetBase
         var meetings = MeetingSchedule.Between(_events, now, endOfTomorrow);
         var next = MeetingSchedule.Next(meetings, now);
         _viewModel.Show(next, meetings.Where(m => m != next).Take(3).ToList(), now);
-        var live = next is not null && MeetingSchedule.IsLive(next, now);
-        SetIsLive(live);
-
-        if (live && _minute is null)
-            _minute = Context.Scheduler.EveryMinute(() => _viewModel.Tick(Context.Time.GetUtcNow()));
-        else if (!live && _minute is not null)
-        {
-            _minute.Dispose();
-            _minute = null;
-        }
+        _live = next is not null && MeetingSchedule.IsLive(next, now);
+        SetIsLive(_live);
+        FollowMinutes(next is not null && (_live || Shown));
 
         // The next moment the view changes: going live, starting, or ending.
         if (next is not null)
@@ -192,6 +203,29 @@ public sealed class NextMeetingWidget : WidgetBase
             var due = new[] { next.Start - MeetingSchedule.LiveBefore, next.Start, next.End }.Where(t => t > now).DefaultIfEmpty(next.End).Min();
             _change = Context.Scheduler.At(due, Show);
         }
+    }
+
+    private bool Shown => Context.Visibility.Value is WidgetVisibility.Compact or WidgetVisibility.Expanded or WidgetVisibility.Panel;
+
+    /// <summary>"In 45 min" counts down each minute while a meeting is live or the card is on screen.</summary>
+    private void FollowMinutes(bool tick)
+    {
+        if (tick && _minute is null)
+            _minute = Context.Scheduler.EveryMinute(() => _viewModel.Tick(Context.Time.GetUtcNow()));
+        else if (!tick && _minute is not null)
+        {
+            _minute.Dispose();
+            _minute = null;
+        }
+    }
+
+    private void OnVisibilityChanged(object? sender, EventArgs e)
+    {
+        if (_stopping is null || !_viewModel.HasNext)
+            return;
+        var now = Context.Time.GetUtcNow();
+        _viewModel.Tick(now);
+        FollowMinutes(Shown || _live);
     }
 
     private void JoinNext(Uri link) => _open(link);
