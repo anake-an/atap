@@ -47,8 +47,11 @@ public sealed class FocusTimerViewModel : ObservableObject, IAccessibleSummary, 
     /// <summary>"24:59". While idle, the full length of the phase that is next.</summary>
     public string TimeText => TimerText.Clock(Remaining);
 
-    /// <summary>"25 min", or "Paused". For the compact notch, which changes once a minute.</summary>
-    public string ShortText => IsPaused ? _text["focus.paused"] : TimerText.Remaining(Remaining, _text.Language);
+    /// <summary>"25 min" left, also while paused. For the compact notch, which changes once a minute.</summary>
+    public string ShortText => TimerText.Remaining(Remaining, _text.Language);
+
+    /// <summary>"Paused" under or beside the time in the compact notch, or empty while it runs or waits.</summary>
+    public string CompactState => IsPaused ? _text["focus.paused"] : string.Empty;
 
     /// <summary>0 to 100.</summary>
     public double Progress => _state.ProgressAt(_now) * 100;

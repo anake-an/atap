@@ -5,6 +5,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using Atap.Core;
 using Atap.Core.Notch;
 using Atap.Core.Placement;
 using Atap.Interop;
@@ -21,6 +22,9 @@ public partial class NotchWindow : Window, INotchWindow
     // Smallest pill along the anchored edge (length) and away from it (depth).
     private const double MinPillLength = 120;
     private const double MinPillDepth = 33; // 15 px shoulder plus 18 px corner, so idle shoulders keep their full size
+
+    // On a side edge the compact tab fits its stacked content. It stays long enough to read as the notch and to point at.
+    private const double MinSideCompactLength = 72;
 
     // Slim: a thin bar that still reads as the notch. Tucked away: a hairline at the edge, still easy to reach
     // with the pointer pushed against the screen edge. Their shoulders are no deeper than the bar.
@@ -572,7 +576,7 @@ public partial class NotchWindow : Window, INotchWindow
 
         var vertical = _viewModel.IsVertical;
         var minWidth = vertical ? MinPillDepth : MinPillLength;
-        var minHeight = vertical ? MinPillLength : MinPillDepth;
+        var minHeight = vertical ? (_viewModel.State == NotchState.Compact ? MinSideCompactLength : MinPillLength) : MinPillDepth;
 
         Size target;
         double targetRadius;
