@@ -18,6 +18,8 @@ public sealed class MediaViewModel : ObservableObject, IAccessibleSummary, IDisp
     private bool _hasSession;
     private bool _canSkipPrevious;
     private bool _canSkipNext;
+    private double _progress;
+    private bool _hasProgress;
 
     public MediaViewModel(ILocalizer text, Func<Task> skipPrevious, Func<Task> togglePlayPause, Func<Task> skipNext)
     {
@@ -101,6 +103,28 @@ public sealed class MediaViewModel : ObservableObject, IAccessibleSummary, IDisp
         }
     }
 
+    /// <summary>How far through the song, from 0 to 100. Only meaningful while <see cref="HasProgress"/>.</summary>
+    public double Progress
+    {
+        get => _progress;
+        private set => SetProperty(ref _progress, value);
+    }
+
+    /// <summary>False when the player reports no song length, so the bar is left out.</summary>
+    public bool HasProgress
+    {
+        get => _hasProgress;
+        private set => SetProperty(ref _hasProgress, value);
+    }
+
+    /// <summary>Sets the bar from a share of the song, 0 to 1, or hides it with null.</summary>
+    public void SetProgress(double? fraction)
+    {
+        HasProgress = fraction is not null;
+        // Whole tenths of a percent, so a tick that moves the bar less than a pixel changes nothing.
+        Progress = fraction is { } value ? Math.Round(value * 1000) / 10 : 0;
+    }
+
     public void Clear()
     {
         SetTitle(null);
@@ -110,6 +134,7 @@ public sealed class MediaViewModel : ObservableObject, IAccessibleSummary, IDisp
         HasSession = false;
         CanSkipPrevious = false;
         CanSkipNext = false;
+        SetProgress(null);
     }
 
     public void SetTrack(string? title, string? artist)

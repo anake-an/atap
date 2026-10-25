@@ -163,13 +163,29 @@ public sealed class PanelTests : IAsyncLifetime
     [Fact]
     public void AnEmptyPanel_SaysSo()
     {
-        _services.Layout.Update(d => d.States.Panel.Pages = [Page("main")]);
+        _services.Layout.Update(d =>
+        {
+            d.States.Panel.Pages = [Page("main")];
+            d.States.Expanded.Placements = [];
+        });
         using var model = Model();
         _feature.Toggle();
 
         Assert.Equal(NotchSurface.Panel, model.Surface);
         Assert.True(model.IsGridEmpty);
         Assert.Equal(0, model.PageCount);
+    }
+
+    [Fact]
+    public void AnUnfilledPanel_ShowsTheHoverWidgets()
+    {
+        _services.Layout.Update(d => d.States.Panel.Pages = [Page("main")]);
+        using var model = Model();
+        _feature.Toggle();
+
+        Assert.Equal(NotchSurface.Panel, model.Surface);
+        Assert.Equal(["alpha"], model.GridItems.Select(i => i.InstanceId));
+        Assert.Equal(1, model.PageCount);
     }
 
     [Fact]
@@ -182,6 +198,25 @@ public sealed class PanelTests : IAsyncLifetime
         Assert.Equal(NotchSurface.Expanded, model.Surface);
         Assert.Equal(["alpha"], model.GridItems.Select(i => i.InstanceId));
         Assert.Empty(model.CenterItems);
+    }
+
+    [Fact]
+    public void NewContentIsSwapped_ButABannerOrALayoutSaveOnlyRefreshes()
+    {
+        using var model = Model();
+        var changes = new List<NotchContentChange>();
+        model.ContentChanged += (_, e) => changes.Add(e.Change);
+
+        // Hover, then a click before the hover settled: two new surfaces, each content set before its event.
+        model.IsHovered = true;
+        _feature.Toggle();
+        _notch.SetSurfaceContent(NotchSurface.Alert, "alert", "alerts");
+        _services.Layout.Update(d => d.States.Panel.Pages[0].Placements.RemoveAt(1));
+        model.StepPage(1);
+
+        Assert.Equal(
+            [NotchContentChange.Swapped, NotchContentChange.Swapped, NotchContentChange.Refreshed, NotchContentChange.Refreshed, NotchContentChange.Swapped],
+            changes);
     }
 
     [Fact]
@@ -225,10 +260,10 @@ public sealed class PanelTests : IAsyncLifetime
         grid.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
         grid.Arrange(new Rect(grid.DesiredSize));
 
-        // Row 0: medium and small, 60 tall. Row 1: large, 20 tall. Four columns wide.
+        // Medium and small side by side, 60 tall, the small one grown into the free fourth column. Large under them.
         Assert.Equal(new Size(430, 90), grid.DesiredSize);
         Assert.Equal(new Rect(0, 0, 210, 60), Slot(grid.Children[0]));
-        Assert.Equal(new Rect(220, 0, 100, 60), Slot(grid.Children[1]));
+        Assert.Equal(new Rect(220, 0, 210, 60), Slot(grid.Children[1]));
         Assert.Equal(new Rect(0, 70, 430, 20), Slot(grid.Children[2]));
     });
 

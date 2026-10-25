@@ -43,6 +43,32 @@ public sealed class TimerWidgetTests : IDisposable
     }
 
     [Fact]
+    public async Task Focus_CompactText_ShowsTheTimeInEveryState()
+    {
+        var (_, viewModel) = await StartFocusAsync();
+        _visibility.Value = WidgetVisibility.Compact;
+
+        // Idle: the length of the next session, no state.
+        Assert.Equal("25 min", viewModel.ShortText);
+        Assert.Equal(string.Empty, viewModel.CompactState);
+        Assert.Equal("Focus timer. Focus next, 25 min", viewModel.AccessibleSummary);
+
+        // Running: the time left.
+        viewModel.ToggleCommand.Execute(null);
+        Advance(TimeSpan.FromMinutes(10) + TimeSpan.FromSeconds(1));
+        Assert.Equal("15 min", viewModel.ShortText);
+        Assert.Equal(string.Empty, viewModel.CompactState);
+        Assert.Equal("Focus timer. Focus, 15 min left", viewModel.AccessibleSummary);
+
+        // Paused: still the time left, with a small "Paused".
+        viewModel.ToggleCommand.Execute(null);
+        Assert.True(viewModel.IsPaused);
+        Assert.Equal("15 min", viewModel.ShortText);
+        Assert.Equal("Paused", viewModel.CompactState);
+        Assert.Equal("Focus timer. Focus, paused with 15 min left", viewModel.AccessibleSummary);
+    }
+
+    [Fact]
     public async Task Focus_AtTheEnd_AlertsOnce_AndWaitsAtTheBreak()
     {
         var (widget, viewModel) = await StartFocusAsync();

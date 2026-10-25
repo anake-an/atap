@@ -7,9 +7,10 @@ namespace Atap.Ui.Controls;
 
 /// <summary>
 /// The 4-column grid of the Expanded and Panel surfaces, as an items panel. Each child sets
-/// <c>controls:WidgetGrid.Size</c>, and <see cref="GridPacker"/> places it: Small takes 1 column, Medium 2
-/// and Large 4, in order. A row is as tall as its tallest widget, and the grid is only as wide as its widest
-/// row, so one medium widget gives a 2-column notch.
+/// <c>controls:WidgetGrid.Size</c>: Small takes 1 column, Medium 2 and Large 4. <see cref="GridPacker.Flow"/>
+/// places them by their heights, so a tall card sits beside short ones, cards grow into free space beside and
+/// under them, and the edges line up with no empty area. The grid is only as wide as the columns it uses, so one
+/// medium widget gives a 2-column notch.
 /// </summary>
 public class WidgetGrid : Panel
 {
@@ -25,8 +26,7 @@ public class WidgetGrid : Panel
         nameof(Gap), typeof(double), typeof(WidgetGrid),
         new FrameworkPropertyMetadata(8.0, FrameworkPropertyMetadataOptions.AffectsMeasure));
 
-    private GridPacking _packing = GridPacker.Pack([]);
-    private double[] _rowHeights = [];
+    private GridFlow _flow = GridPacker.Flow([], [], 0);
 
     public static WidgetSize GetSize(UIElement element) => (WidgetSize)element.GetValue(SizeProperty);
 
@@ -49,36 +49,35 @@ public class WidgetGrid : Panel
     /// <summary>The width of a widget that takes <paramref name="span"/> columns.</summary>
     public double WidthOf(int span) => span * ColumnWidth + (span - 1) * Gap;
 
+    /// <summary>Where each child goes, in child order. Tests read it.</summary>
+    internal GridFlow Flow => _flow;
+
     protected override Size MeasureOverride(Size availableSize)
     {
         var children = InternalChildren.Cast<UIElement>().ToList();
-        _packing = GridPacker.Pack(children.Select(GetSize));
-        _rowHeights = new double[_packing.Rows];
+        var sizes = children.Select(GetSize).ToList();
+        foreach (var (child, size) in children.Zip(sizes))
+            child.Measure(new Size(WidthOf(GridPacker.SpanOf(size)), double.PositiveInfinity));
 
+        _flow = GridPacker.Flow(sizes, children.Select(c => c.DesiredSize.Height).ToList(), Gap);
+
+        // A card that grew sideways lays out again at its new width, so its text uses the room.
         for (var i = 0; i < children.Count; i++)
         {
-            var cell = _packing.Cells[i];
-            children[i].Measure(new Size(WidthOf(cell.Span), double.PositiveInfinity));
-            _rowHeights[cell.Row] = Math.Max(_rowHeights[cell.Row], children[i].DesiredSize.Height);
+            if (_flow.Boxes[i].Span != GridPacker.SpanOf(sizes[i]))
+                children[i].Measure(new Size(WidthOf(_flow.Boxes[i].Span), double.PositiveInfinity));
         }
 
-        if (_packing.Rows == 0)
-            return default;
-        return new Size(WidthOf(_packing.Columns), _rowHeights.Sum() + (_packing.Rows - 1) * Gap);
+        return children.Count == 0 ? default : new Size(WidthOf(_flow.Columns), _flow.Height);
     }
 
     protected override Size ArrangeOverride(Size finalSize)
     {
-        var tops = new double[_rowHeights.Length];
-        for (var row = 1; row < tops.Length; row++)
-            tops[row] = tops[row - 1] + _rowHeights[row - 1] + Gap;
-
         var children = InternalChildren;
-        for (var i = 0; i < children.Count && i < _packing.Cells.Count; i++)
+        for (var i = 0; i < children.Count && i < _flow.Boxes.Count; i++)
         {
-            var cell = _packing.Cells[i];
-            var left = cell.Column * (ColumnWidth + Gap);
-            children[i].Arrange(new Rect(left, tops[cell.Row], WidthOf(cell.Span), _rowHeights[cell.Row]));
+            var box = _flow.Boxes[i];
+            children[i].Arrange(new Rect(box.Column * (ColumnWidth + Gap), box.Top, WidthOf(box.Span), box.Height));
         }
 
         return finalSize;

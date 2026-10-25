@@ -33,7 +33,7 @@
   "home-assistant.needsSetup": "Add your broker address and a topic in this widget's settings.",
   "home-assistant.badField": "The part of the message to show is not written right. Check it in this widget's settings.",
   "home-assistant.connecting": "Connecting to Home Assistant.",
-  "home-assistant.waiting": "Connected. Waiting for the first reading.",
+  "home-assistant.waiting": "Connected. Waiting for the first reading…",
   "home-assistant.retrying": "Cannot reach the broker. Trying again soon.",
   "home-assistant.signInRefused": "The broker did not accept the user name or password.",
   "home-assistant.needsTls": "This broker is on the internet. Turn on a secure connection under More options.",

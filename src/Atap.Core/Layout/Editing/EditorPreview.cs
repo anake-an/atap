@@ -61,14 +61,15 @@ public static class PreviewLayout
             return cells;
         }
 
-        var packing = GridPacker.Pack(sizes);
-        foreach (var cell in packing.Cells)
+        // The same flow the panel uses, with every preview tile one row tall, so the picture matches the notch.
+        var flow = GridPacker.Flow(sizes, Enumerable.Repeat(metrics.RowHeight, sizes.Count).ToList(), metrics.Gap);
+        foreach (var box in flow.Boxes)
         {
             cells.Add(new PreviewRect(
-                cell.Column * (metrics.ColumnWidth + metrics.Gap),
-                cell.Row * (metrics.RowHeight + metrics.Gap),
-                metrics.WidthOf(cell.Span),
-                metrics.RowHeight));
+                box.Column * (metrics.ColumnWidth + metrics.Gap),
+                box.Top,
+                metrics.WidthOf(box.Span),
+                box.Height));
         }
         return cells;
     }

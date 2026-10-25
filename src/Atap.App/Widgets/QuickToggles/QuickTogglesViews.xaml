@@ -13,7 +13,7 @@
   <!-- A tile: icon and name, filled with the accent while on. A rounded rectangle, never an oval. -->
   <Style x:Key="quick-toggles.tile" TargetType="Button">
     <Setter Property="Cursor" Value="Hand" />
-    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.card}" />
+    <Setter Property="FocusVisualStyle" Value="{DynamicResource focus.round}" />
     <Setter Property="Margin" Value="0,0,6,6" />
     <Setter Property="Template">
       <Setter.Value>

@@ -27,7 +27,7 @@
     <TextBlock DataContext="{Binding ViewModel}"
                AutomationProperties.Name="{Binding AccessibleSummary}"
                Text="{Binding CompactText}"
-               Foreground="{DynamicResource PrimaryTextBrush}"
+               Foreground="{DynamicResource TextBrush}"
                FontSize="13"
                FontWeight="SemiBold"
                VerticalAlignment="Center"
@@ -56,7 +56,7 @@
             <TextBlock Text="{Binding MicApps}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextTrimming="CharacterEllipsis" />
           </StackPanel>
         </DockPanel>
-        <TextBlock Text="{loc:T privacy-dot.none}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" TextWrapping="Wrap"
+        <TextBlock Text="{loc:T privacy-dot.none}" Style="{DynamicResource card.Empty}"
                    Visibility="{Binding NoneOn, Converter={StaticResource privacy-dot.visible}}" />
       </StackPanel>
     </controls:WidgetCard>

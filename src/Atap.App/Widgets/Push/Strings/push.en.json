@@ -1,7 +1,7 @@
 {
-  "push.name": "Push",
+  "push.name": "Progress from programs",
   "push.description": "Shows progress that programs and scripts on this PC send with atap push, such as a build or a backup.",
-  "push.empty": "Nothing pushed",
+  "push.empty": "Nothing sent yet.",
   "push.from": "from {source}",
   "push.state.running": "Running",
   "push.state.done": "Done",

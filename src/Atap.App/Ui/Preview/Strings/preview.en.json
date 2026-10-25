@@ -7,7 +7,7 @@
   "preview.hint.compact": "Something live, like a song or a timer, takes the small notch. The one highest in this list goes first.",
   "preview.hint.expanded": "The notch grows a little when you point at it.",
   "preview.hint.panel": "The full panel opens when you click the notch. Add pages to scroll through.",
-  "preview.empty": "Nothing here yet",
+  "preview.empty": "Nothing here yet.",
   "preview.tile": "{name}, {size}",
   "preview.pageOf": "Page 1 of {count}",
   "preview.sample.audio-output.value": "Headphones",

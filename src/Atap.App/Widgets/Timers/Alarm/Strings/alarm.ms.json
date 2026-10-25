@@ -1,7 +1,7 @@
 {
   "alarm.name": "Penggera",
-  "alarm.description": "Penggera yang berbunyi pada notch, sekali atau pada hari yang anda pilih. Ia tetap berbunyi walaupun kad tiada pada mana-mana halaman.",
-  "alarm.noneOn": "Tiada penggera dihidupkan",
+  "alarm.description": "Penggera yang berbunyi pada notch, sekali atau pada hari yang anda pilih. Penggera tetap berbunyi walaupun widget ini tiada pada notch.",
+  "alarm.noneOn": "Tiada penggera dihidupkan.",
   "alarm.empty": "Belum ada penggera.",
   "alarm.add": "Tambah penggera",
   "alarm.editing": "Tetapkan penggera",

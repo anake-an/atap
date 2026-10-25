@@ -7,8 +7,8 @@ namespace Atap.Platform.Audio;
 /// <summary>An output such as "Speakers (Realtek)" or "Headphones".</summary>
 internal sealed record AudioOutput(string Id, string Name, bool IsDefault);
 
-/// <summary>One app making sound, with its own volume.</summary>
-internal sealed record AppAudio(string Id, string Name, int VolumePercent, bool Muted);
+/// <summary>One app making sound, with its own volume. The id stands for every session of the app. The name is empty for the system sounds or when nothing usable is known.</summary>
+internal sealed record AppAudio(string Id, string Name, int VolumePercent, bool Muted, bool IsSystemSounds = false);
 
 /// <summary>Outputs and per-app volume. Read on demand, with nothing held open between calls. Faked in tests.</summary>
 internal interface IAudioDevices
@@ -20,7 +20,7 @@ internal interface IAudioDevices
 
     void OpenSoundSettings();
 
-    /// <summary>Apps with an active audio session on the default output.</summary>
+    /// <summary>Apps with an audio session on the default output, one row per app, with the system sounds.</summary>
     IReadOnlyList<AppAudio> Apps();
 
     void SetAppVolume(string id, int percent);
@@ -98,19 +98,15 @@ internal sealed class WindowsAudioDevices : IAudioDevices
                 return [];
             var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
             var sessions = device.AudioSessionManager.Sessions;
-            var apps = new List<AppAudio>();
+            var found = new List<AudioSessionInfo>();
             for (var i = 0; i < sessions.Count; i++)
             {
                 var session = sessions[i];
-                if (session.IsSystemSoundsSession || session.State == NAudio.CoreAudioApi.Interfaces.AudioSessionState.AudioSessionStateExpired)
+                if (session.State == NAudio.CoreAudioApi.Interfaces.AudioSessionState.AudioSessionStateExpired)
                     continue;
-                apps.Add(new AppAudio(
-                    session.GetSessionInstanceIdentifier,
-                    NameOf(session),
-                    (int)Math.Round(session.SimpleAudioVolume.Volume * 100),
-                    session.SimpleAudioVolume.Mute));
+                found.Add(Read(session));
             }
-            return apps.GroupBy(a => a.Name).Select(g => g.First()).ToList();
+            return AudioSessionRules.Merge(found);
         }
         catch (Exception ex) when (ex is COMException or InvalidOperationException or ArgumentException)
         {
@@ -119,23 +115,22 @@ internal sealed class WindowsAudioDevices : IAudioDevices
     }
 
     public void SetAppVolume(string id, int percent) =>
-        WithSession(id, s => s.SimpleAudioVolume.Volume = Math.Clamp(percent, 0, 100) / 100f);
+        WithSessions(id, s => s.SimpleAudioVolume.Volume = Math.Clamp(percent, 0, 100) / 100f);
 
-    public void SetAppMuted(string id, bool muted) => WithSession(id, s => s.SimpleAudioVolume.Mute = muted);
+    public void SetAppMuted(string id, bool muted) => WithSessions(id, s => s.SimpleAudioVolume.Mute = muted);
 
-    private static void WithSession(string id, Action<AudioSessionControl> change)
+    /// <summary>Changes every session a mixer row stands for.</summary>
+    private static void WithSessions(string rowId, Action<AudioSessionControl> change)
     {
+        var ids = AudioSessionRules.SplitIds(rowId).ToHashSet(StringComparer.Ordinal);
         try
         {
             using var enumerator = new MMDeviceEnumerator();
             var sessions = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia).AudioSessionManager.Sessions;
             for (var i = 0; i < sessions.Count; i++)
             {
-                if (sessions[i].GetSessionInstanceIdentifier == id)
-                {
+                if (ids.Contains(sessions[i].GetSessionInstanceIdentifier))
                     change(sessions[i]);
-                    return;
-                }
             }
         }
         catch (Exception ex) when (ex is COMException or InvalidOperationException or ArgumentException)
@@ -144,21 +139,38 @@ internal sealed class WindowsAudioDevices : IAudioDevices
         }
     }
 
-    /// <summary>The session's display name, else the process's file description or name.</summary>
-    private static string NameOf(AudioSessionControl session)
+    /// <summary>The session and what its program says about itself. The system sounds session has no program.</summary>
+    private static AudioSessionInfo Read(AudioSessionControl session)
     {
-        if (!string.IsNullOrWhiteSpace(session.DisplayName) && !session.DisplayName.StartsWith('@'))
-            return session.DisplayName;
-        try
+        var processId = (int)session.GetProcessID;
+        var system = session.IsSystemSoundsSession || processId == 0;
+        string? description = null, product = null, processName = null, path = null;
+        if (!system)
         {
-            using var process = Process.GetProcessById((int)session.GetProcessID);
-            var description = process.MainModule?.FileVersionInfo.FileDescription;
-            return string.IsNullOrWhiteSpace(description) ? process.ProcessName : description;
+            try
+            {
+                using var process = Process.GetProcessById(processId);
+                processName = process.ProcessName;
+                var module = process.MainModule;
+                path = module?.FileName;
+                description = module?.FileVersionInfo.FileDescription;
+                product = module?.FileVersionInfo.ProductName;
+            }
+            catch (Exception e) when (e is ArgumentException or InvalidOperationException or System.ComponentModel.Win32Exception or NotSupportedException)
+            {
+                // A protected or finished process. What was read so far is used.
+            }
         }
-        catch (Exception e) when (e is ArgumentException or InvalidOperationException or System.ComponentModel.Win32Exception)
-        {
-            return session.GetSessionIdentifier;
-        }
+        return new AudioSessionInfo(
+            session.GetSessionInstanceIdentifier,
+            system,
+            session.DisplayName,
+            description,
+            product,
+            processName,
+            path,
+            (int)Math.Round(session.SimpleAudioVolume.Volume * 100),
+            session.SimpleAudioVolume.Mute);
     }
 
     private enum ERole
