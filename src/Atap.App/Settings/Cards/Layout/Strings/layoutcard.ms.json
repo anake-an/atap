@@ -1,7 +1,8 @@
 {
   "layoutcard.title": "Susun atur",
+  "layoutcard.summary": "Notch anda sepintas lalu",
+  "layoutcard.summaryHint": "Apa yang notch tunjukkan dalam setiap keadaan sekarang, dengan kandungan contoh. Tekan Sunting susun atur untuk mengubahnya.",
   "layoutcard.edit": "Sunting susun atur",
-  "layoutcard.editHint": "Pilih apa yang dipaparkan pada notch, pada setiap saiz, dan pada setiap halaman panel.",
   "layoutcard.restore": "Susun atur sebelumnya",
   "layoutcard.restoreHint": "Mengembalikan susun atur sebelum kali terakhir anda menekan Selesai. Tekan sekali lagi untuk menukarnya semula.",
   "layoutcard.restoreButton": "Kembalikan",

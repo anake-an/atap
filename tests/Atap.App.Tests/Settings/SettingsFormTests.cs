@@ -398,6 +398,64 @@ public sealed class SettingsFormTests : IDisposable
     }
 
     [Fact]
+    public void PickingALanguage_SwitchesInOneClick_AndKeepsTheChoiceSelected() => Sta.Run(() =>
+    {
+        // The language field relabels its own options when the language changes, in the middle of the click.
+        var text = new Localizer(new AssemblyStringResources(typeof(App).Assembly), Localizer.English);
+        var definition = new SettingDefinition("language.choice", "language.choice", SettingType.Choice, "system", ["system", Localizer.English, Localizer.Malay]);
+        _services.Settings.Register([definition]);
+        _services.Settings.Changed += (_, e) =>
+        {
+            if (e.Keys.Contains("language.choice"))
+                text.SetLanguage(_services.Settings.Values.GetString("language.choice") == Localizer.Malay ? Localizer.Malay : Localizer.English);
+        };
+        using var form = new SettingsFormViewModel([definition], new SettingsFormContext(new AppSettingsTarget(_services.Settings), text, _secrets));
+        var host = SettingsUi.Render(form);
+        var list = Assert.Single(SettingsUi.Visible<ListBox>(host));
+        var field = Assert.IsType<ChoiceField>(form.Fields[0]);
+
+        list.SelectedItem = field.Options.Single(o => o.Value == Localizer.Malay);
+        SettingsUi.Layout(host);
+
+        Assert.Equal(Localizer.Malay, _services.Settings.Values.GetString("language.choice"));
+        Assert.Equal(Localizer.Malay, text.Language);
+        Assert.Equal(Localizer.Malay, field.Selected?.Value);
+        Assert.Equal(Localizer.Malay, (list.SelectedItem as ChoiceOption)?.Value);
+        Assert.Equal("Bahasa Melayu", field.Selected?.Label);
+
+        // Back again: every label changes this time, and the pick still holds after one click.
+        list.SelectedItem = field.Options.Single(o => o.Value == "system");
+        SettingsUi.Layout(host);
+
+        Assert.Equal("system", _services.Settings.Values.GetString("language.choice"));
+        Assert.Equal(Localizer.English, text.Language);
+        Assert.Equal("system", field.Selected?.Value);
+        Assert.Same(field.Selected, list.SelectedItem);
+        Assert.Contains(field.Selected, field.Options);
+    });
+
+    [Fact]
+    public void Relabelling_NeverWritesAPick() => Sta.Run(() =>
+    {
+        var text = new Localizer(new AssemblyStringResources(typeof(App).Assembly), Localizer.English);
+        var definition = new SettingDefinition("language.choice", "language.choice", SettingType.Choice, "system", ["system", Localizer.English, Localizer.Malay]);
+        _services.Settings.Register([definition]);
+        _services.Settings.Set("language.choice", Localizer.English);
+        using var form = new SettingsFormViewModel([definition], new SettingsFormContext(new AppSettingsTarget(_services.Settings), text, _secrets));
+        var host = SettingsUi.Render(form);
+        var writes = 0;
+        _services.Settings.Changed += (_, _) => writes++;
+
+        text.SetLanguage(Localizer.Malay);
+        SettingsUi.Layout(host);
+        text.SetLanguage(Localizer.English);
+        SettingsUi.Layout(host);
+
+        Assert.Equal(0, writes);
+        Assert.Equal(Localizer.English, ((ChoiceField)form.Fields[0]).Selected?.Value);
+    });
+
+    [Fact]
     public void WidgetSettings_ChangeOnlyThatInstance()
     {
         _services.Layout.Load();
