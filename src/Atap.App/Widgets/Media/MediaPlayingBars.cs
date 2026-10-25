@@ -45,7 +45,7 @@ public sealed class MediaPlayingBars : StackPanel
                 RenderTransformOrigin = new Point(0.5, 1),
                 RenderTransform = scale,
             };
-            bar.SetResourceReference(Shape.FillProperty, "AccentBrush");
+            bar.SetResourceReference(Shape.FillProperty, "MediaAccentBrush");
             Children.Add(bar);
         }
         Loaded += (_, _) => Update();

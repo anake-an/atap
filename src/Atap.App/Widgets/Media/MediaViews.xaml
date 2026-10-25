@@ -131,7 +131,7 @@
                              Margin="0,8,0,0"
                              Value="{Binding Progress, Mode=OneWay}"
                              Maximum="100"
-                             Accent="{DynamicResource AccentBrush}"
+                             Accent="{DynamicResource MediaAccentBrush}"
                              AutomationProperties.Name="{loc:T media.progress}"
                              Visibility="{Binding HasProgress, Converter={StaticResource media.visible}}" />
     </Grid>
