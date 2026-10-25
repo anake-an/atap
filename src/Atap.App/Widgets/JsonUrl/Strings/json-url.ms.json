@@ -45,7 +45,7 @@
   "json-url.header": "Pengepala log masuk",
   "json-url.headerHint": "Hanya jika laman itu memerlukannya. Tulis sebagai Nama: nilai, seperti Authorization: Bearer abc123. Atap menyimpannya dengan selamat pada PC ini. Letakkan sebarang kunci di sini, bukan dalam pautan, kerana pautan disegerakkan.",
   "json-url.noLink": "Tambah pautan dalam tetapan widget ini.",
-  "json-url.loading": "Memuatkan.",
+  "json-url.loading": "Memuatkan…",
   "json-url.failed": "Pautan tidak dapat dicapai. Semak pautan dan sambungan anda.",
   "json-url.offline": "Anda di luar talian. Atap akan cuba lagi apabila anda kembali.",
   "json-url.blocked": "Atap tidak dapat membuka pautan ini. http biasa hanya berfungsi untuk alamat dalam rangkaian rumah anda.",

@@ -1,7 +1,7 @@
 {
   "media.name": "Now playing",
   "media.description": "Shows what is playing and lets you pause or skip it.",
-  "media.nothingPlaying": "Nothing playing",
+  "media.nothingPlaying": "Nothing playing.",
   "media.unknownTitle": "Unknown title",
   "media.previous": "Previous",
   "media.playPause": "Play or pause",

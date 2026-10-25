@@ -1,7 +1,7 @@
 {
   "alarm.name": "Alarms",
-  "alarm.description": "Alarms that ring on the notch, once or on the days you pick. They ring even when the card is not on a page.",
-  "alarm.noneOn": "No alarms on",
+  "alarm.description": "Alarms that ring on the notch, once or on the days you pick. They still ring when the widget is not on the notch.",
+  "alarm.noneOn": "No alarms on.",
   "alarm.empty": "No alarms yet.",
   "alarm.add": "Add alarm",
   "alarm.editing": "Set alarm",

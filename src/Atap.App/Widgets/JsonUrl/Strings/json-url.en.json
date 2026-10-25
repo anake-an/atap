@@ -45,7 +45,7 @@
   "json-url.header": "Sign-in header",
   "json-url.headerHint": "Only if the site needs one. Write it as Name: value, such as Authorization: Bearer abc123. Atap keeps it locked on this PC. Put any key here, not in the link, because the link is synced.",
   "json-url.noLink": "Add a link in this widget's settings.",
-  "json-url.loading": "Loading.",
+  "json-url.loading": "Loading…",
   "json-url.failed": "Could not reach the link. Check it and your connection.",
   "json-url.offline": "You are offline. Atap tries again when you are back.",
   "json-url.blocked": "Atap cannot open this link. Plain http works only for addresses on your home network.",

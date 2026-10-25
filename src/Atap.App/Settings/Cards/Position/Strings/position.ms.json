@@ -7,7 +7,7 @@
   "position.screen.primary": "Skrin utama",
   "position.screen.all": "Semua skrin",
   "position.screen.notConnected": "{name} (tidak bersambung)",
-  "position.editLayout": "Ubah susun atur",
+  "position.editLayout": "Sunting susun atur",
   "position.editLayoutHint": "Pilih apa yang dipaparkan pada notch, dan di mana.",
   "position.notSaved": "Notch telah beralih, tetapi perubahan ini tidak dapat disimpan. Ia akan kembali seperti asal apabila Atap dimulakan semula."
 }

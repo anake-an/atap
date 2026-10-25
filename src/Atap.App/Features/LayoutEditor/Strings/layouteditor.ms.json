@@ -10,7 +10,7 @@
   "layouteditor.pageName": "Halaman {number}",
   "layouteditor.addPage": "Tambah halaman",
   "layouteditor.removePage": "Buang halaman",
-  "layouteditor.empty": "Seret widget ke sini",
+  "layouteditor.empty": "Seret widget ke sini.",
   "layouteditor.copy": "Salinan {number}",
   "layouteditor.size": "Saiz",
   "layouteditor.size.small": "K",

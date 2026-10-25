@@ -1,5 +1,5 @@
 {
-  "water.name": "Air",
+  "water.name": "Peringatan minum air",
   "water.description": "Peringatan lembut untuk minum air, dan kiraan gelas untuk hari ini. Ia berhenti seketika semasa PC dikunci.",
   "water.interval": "Ingatkan saya setiap",
   "water.minutes": "min",
@@ -16,5 +16,5 @@
   "water.paused": "Dijeda semasa PC dikunci",
   "water.alert": "Masa untuk minum air",
   "water.alertCount": "{count} daripada {goal} gelas hari ini",
-  "water.accessible": "Air. {count} gelas. {next}"
+  "water.accessible": "Peringatan minum air. {count} gelas. {next}"
 }

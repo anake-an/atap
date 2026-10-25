@@ -1,5 +1,5 @@
 {
-  "water.name": "Water",
+  "water.name": "Water reminder",
   "water.description": "A gentle reminder to drink water, and a count of glasses for the day. It waits while the PC is locked.",
   "water.interval": "Remind me every",
   "water.minutes": "min",
@@ -16,5 +16,5 @@
   "water.paused": "Paused while the PC is locked",
   "water.alert": "Time for some water",
   "water.alertCount": "{count} of {goal} glasses today",
-  "water.accessible": "Water. {count} glasses. {next}"
+  "water.accessible": "Water reminder. {count} glasses. {next}"
 }

@@ -17,7 +17,7 @@
   "lyrics.translatePath": "Where the translation is in the reply",
   "lyrics.translatePathHint": "The field that holds the translated text, such as translatedText or data.translation.",
   "lyrics.noSong": "Play a song to see its lyrics.",
-  "lyrics.loading": "Looking for the lyrics.",
+  "lyrics.loading": "Looking for the lyrics…",
   "lyrics.instrumental": "This song has no words.",
   "lyrics.none": "No lyrics for this song.",
   "lyrics.failed": "Could not reach LRCLIB. Check your connection.",

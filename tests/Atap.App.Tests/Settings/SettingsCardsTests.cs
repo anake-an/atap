@@ -213,7 +213,7 @@ public sealed class SettingsCardsTests : IDisposable
         updates.Set(UpdateStatus.Downloading);
         Assert.False(card.CanCheck);
         Assert.False(card.CheckCommand.CanExecute(null));
-        Assert.Equal("Downloading the update...", card.StatusText);
+        Assert.Equal("Downloading the update…", card.StatusText);
     }
 
     [Fact]
