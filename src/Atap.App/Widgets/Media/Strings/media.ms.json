@@ -7,5 +7,6 @@
   "media.playPause": "Main atau jeda",
   "media.next": "Seterusnya",
   "media.accessible": "Sedang dimainkan. {title}",
-  "media.accessibleWithArtist": "Sedang dimainkan. {title} oleh {artist}"
+  "media.accessibleWithArtist": "Sedang dimainkan. {title} oleh {artist}",
+  "media.progress": "Kedudukan lagu"
 }

@@ -7,5 +7,6 @@
   "media.playPause": "Play or pause",
   "media.next": "Next",
   "media.accessible": "Now playing. {title}",
-  "media.accessibleWithArtist": "Now playing. {title} by {artist}"
+  "media.accessibleWithArtist": "Now playing. {title} by {artist}",
+  "media.progress": "Song position"
 }

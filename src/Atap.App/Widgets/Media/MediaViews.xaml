@@ -1,9 +1,13 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization"
+                    xmlns:controls="clr-namespace:Atap.Ui.Controls"
+                    xmlns:media="clr-namespace:Atap.Widgets.Media">
 
   <!-- Templates get a PlacementViewModel; the MediaViewModel is in .ViewModel.
        Merged only while a media instance exists. -->
+
+  <BooleanToVisibilityConverter x:Key="media.visible" />
 
   <!-- Compact, left slot: album art, or a music-note placeholder. -->
   <DataTemplate x:Key="media.Compact.Left">
@@ -28,27 +32,26 @@
     </Grid>
   </DataTemplate>
 
-  <!-- Compact, right slot: static "playing" bars (no looping animation, by design). -->
+  <!-- Compact, right slot: the "playing" bars. They bounce only while playing and shown, and stand still with
+       less motion or battery saver (the notch's LessMotion), see MediaPlayingBars. Dim while paused. -->
   <DataTemplate x:Key="media.Compact.Right">
-    <StackPanel DataContext="{Binding ViewModel}"
-                AutomationProperties.Name="{Binding AccessibleSummary}"
-                Orientation="Horizontal"
-                Height="14"
-                VerticalAlignment="Center"
-                Margin="2,0">
-      <StackPanel.Style>
-        <Style TargetType="StackPanel">
+    <media:MediaPlayingBars DataContext="{Binding ViewModel}"
+                            AutomationProperties.Name="{Binding AccessibleSummary}"
+                            IsPlaying="{Binding IsPlaying}"
+                            IsCalm="{Binding DataContext.LessMotion, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}"
+                            Height="14"
+                            VerticalAlignment="Center"
+                            Margin="2,0">
+      <media:MediaPlayingBars.Style>
+        <Style TargetType="media:MediaPlayingBars">
           <Style.Triggers>
             <DataTrigger Binding="{Binding IsPlaying}" Value="False">
               <Setter Property="Opacity" Value="0.4" />
             </DataTrigger>
           </Style.Triggers>
         </Style>
-      </StackPanel.Style>
-      <Rectangle Width="3" Height="7" Margin="1,0" RadiusX="1.5" RadiusY="1.5" VerticalAlignment="Bottom" Fill="{DynamicResource AccentBrush}" />
-      <Rectangle Width="3" Height="13" Margin="1,0" RadiusX="1.5" RadiusY="1.5" VerticalAlignment="Bottom" Fill="{DynamicResource AccentBrush}" />
-      <Rectangle Width="3" Height="9" Margin="1,0" RadiusX="1.5" RadiusY="1.5" VerticalAlignment="Bottom" Fill="{DynamicResource AccentBrush}" />
-    </StackPanel>
+      </media:MediaPlayingBars.Style>
+    </media:MediaPlayingBars>
   </DataTemplate>
 
   <!-- Expanded, medium: art, title, artist and transport buttons. -->
@@ -60,6 +63,10 @@
         <ColumnDefinition Width="Auto" />
         <ColumnDefinition Width="*" />
       </Grid.ColumnDefinitions>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
 
       <Grid Width="64" Height="64" VerticalAlignment="Center">
         <Border CornerRadius="10" Background="{DynamicResource PlaceholderBrush}">
@@ -115,6 +122,18 @@
                   AutomationProperties.Name="{loc:T media.next}" />
         </StackPanel>
       </StackPanel>
+
+      <!-- How far through the song. It moves once a second while open and playing, and is left out when the
+           player gives no length. -->
+      <controls:ProgressPill Grid.Row="1"
+                             Grid.ColumnSpan="2"
+                             Height="3"
+                             Margin="0,8,0,0"
+                             Value="{Binding Progress, Mode=OneWay}"
+                             Maximum="100"
+                             Accent="{DynamicResource AccentBrush}"
+                             AutomationProperties.Name="{loc:T media.progress}"
+                             Visibility="{Binding HasProgress, Converter={StaticResource media.visible}}" />
     </Grid>
   </DataTemplate>
 
