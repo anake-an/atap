@@ -32,8 +32,9 @@
     </Grid>
   </DataTemplate>
 
-  <!-- Compact, right slot: the "playing" bars. They bounce only while playing and shown, and stand still with
-       less motion or battery saver (the notch's LessMotion), see MediaPlayingBars. Dim while paused. -->
+  <!-- Compact, right slot: the "playing" bars, in the album colour. They bounce only while playing and shown, and
+       stand still with less motion or battery saver (the notch's LessMotion), see MediaPlayingBars. Dim while
+       paused. High contrast keeps the system colour. -->
   <DataTemplate x:Key="media.Compact.Right">
     <media:MediaPlayingBars DataContext="{Binding ViewModel}"
                             AutomationProperties.Name="{Binding AccessibleSummary}"
@@ -48,10 +49,97 @@
             <DataTrigger Binding="{Binding IsPlaying}" Value="False">
               <Setter Property="Opacity" Value="0.4" />
             </DataTrigger>
+            <MultiDataTrigger>
+              <MultiDataTrigger.Conditions>
+                <Condition Binding="{Binding HasAlbumColour}" Value="True" />
+                <Condition Binding="{Binding IsHigh, Source={x:Static controls:Contrast.Current}}" Value="False" />
+              </MultiDataTrigger.Conditions>
+              <Setter Property="Accent" Value="{Binding AlbumBrush}" />
+            </MultiDataTrigger>
           </Style.Triggers>
         </Style>
       </media:MediaPlayingBars.Style>
     </media:MediaPlayingBars>
+  </DataTemplate>
+
+  <!-- Compact, in the middle: the song title and a muted "· Artist", or the lyric line playing now when the setting
+       asks for it. A line too long scrolls slowly while shown, see MediaMarquee. Under it, a faint line in the album
+       colour shows how far the song is. The notch makes this placement itself for the middle of the small notch.
+       On a side edge the upright tab keeps only the art and the bars, so this is left out there. -->
+  <DataTemplate x:Key="media.Compact.Center">
+    <Grid DataContext="{Binding ViewModel}"
+          AutomationProperties.Name="{Binding AccessibleSummary}"
+          media:MediaShownReport.IsOn="True"
+          MaxWidth="180"
+          Margin="8,0">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="0" />
+      </Grid.RowDefinitions>
+      <Grid.Style>
+        <Style TargetType="Grid">
+          <Style.Triggers>
+            <DataTrigger Binding="{Binding DataContext.IsVertical, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}" Value="True">
+              <Setter Property="Visibility" Value="Collapsed" />
+            </DataTrigger>
+          </Style.Triggers>
+        </Style>
+      </Grid.Style>
+
+      <media:MediaMarquee HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          IsCalm="{Binding DataContext.LessMotion, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}">
+        <TextBlock FontSize="12"
+                   Foreground="{DynamicResource TextBrush}"
+                   TextWrapping="NoWrap"
+                   TextTrimming="CharacterEllipsis">
+          <Run Text="{Binding CompactText, Mode=OneWay}"
+               FontWeight="SemiBold" /><Run Text="{Binding CompactDetail, Mode=OneWay}"
+                                            Foreground="{DynamicResource TextSecondaryBrush}" />
+        </TextBlock>
+      </media:MediaMarquee>
+
+      <!-- The faint line lies over the notch's bottom padding, a few pixels above the edge, in a row of no height,
+           so the notch keeps its usual height. It runs from the art to the bars. The played part
+           moves once a second while the small notch shows it and the song plays. -->
+      <Grid Grid.Row="1"
+            Height="2"
+            VerticalAlignment="Top"
+            Margin="-8,6,-8,-8">
+        <Border CornerRadius="1" Opacity="0.3">
+          <Border.Style>
+            <Style TargetType="Border">
+              <Setter Property="Background" Value="{DynamicResource MediaAccentBrush}" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasAlbumColour}" Value="True">
+                  <Setter Property="Background" Value="{Binding AlbumBrush}" />
+                </DataTrigger>
+                <!-- High contrast: the progress line's own track and system colours show instead. -->
+                <DataTrigger Binding="{Binding IsHigh, Source={x:Static controls:Contrast.Current}}" Value="True">
+                  <Setter Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </Border.Style>
+        </Border>
+        <controls:ProgressPill Value="{Binding Progress, Mode=OneWay}"
+                               Maximum="100"
+                               Background="Transparent"
+                               AutomationProperties.Name="{loc:T media.progress}"
+                               Visibility="{Binding HasProgress, Converter={StaticResource media.visible}}">
+          <controls:ProgressPill.Style>
+            <Style TargetType="controls:ProgressPill" BasedOn="{StaticResource {x:Type controls:ProgressPill}}">
+              <Setter Property="Accent" Value="{DynamicResource MediaAccentBrush}" />
+              <Style.Triggers>
+                <DataTrigger Binding="{Binding HasAlbumColour}" Value="True">
+                  <Setter Property="Accent" Value="{Binding AlbumBrush}" />
+                </DataTrigger>
+              </Style.Triggers>
+            </Style>
+          </controls:ProgressPill.Style>
+        </controls:ProgressPill>
+      </Grid>
+    </Grid>
   </DataTemplate>
 
   <!-- Expanded, medium: art, title, artist and transport buttons. -->

@@ -125,6 +125,8 @@ internal sealed class MediaLyricsPlayer(Lease<MediaSessionSource> lease) : ILyri
 /// widget is open and the song plays. A seek re-syncs. Song names and lyrics are never logged.
 /// With a translation link set, the current synced line is translated through that link while the widget is open,
 /// one request at a time, and kept in memory for the song.
+/// The line playing now is also published to the shared <see cref="LyricLine"/>, which the music widget can show in
+/// the small notch. While it does, the lines keep moving with the widget closed.
 /// </summary>
 public sealed class LyricsWidget : WidgetBase
 {
@@ -140,12 +142,14 @@ public sealed class LyricsWidget : WidgetBase
     private (string Title, string Artist)? _song;
     private LyricsTimeline? _timeline;
     private IDisposable? _nextLine;
+    private Lease<LyricLine>? _line;
 
     internal LyricsWidget(WidgetContext context, Func<ILyricsPlayer> createPlayer)
         : base(context)
     {
         _createPlayer = createPlayer;
         _viewModel = new LyricsViewModel(context.Text);
+        _viewModel.PropertyChanged += OnViewChanged;
     }
 
     public override object ViewModel => _viewModel;
@@ -155,6 +159,8 @@ public sealed class LyricsWidget : WidgetBase
         _viewModel.Romanize = settings.GetBool(LyricsDescriptor.RomanizeKey);
         _translation = LyricsTranslation.Read(settings);
         _stopping = new CancellationTokenSource();
+        _line = Context.Shared.Acquire<LyricLine>();
+        _line.Value.WantedChanged += OnPositionChanged;
         _player = _createPlayer();
         _player.Changed += OnPlayerChanged;
         _player.PositionChanged += OnPositionChanged;
@@ -185,13 +191,28 @@ public sealed class LyricsWidget : WidgetBase
         _stopping = null;
         _song = null;
         _timeline = null;
+        if (_line is not null)
+        {
+            _line.Value.WantedChanged -= OnPositionChanged;
+            _line.Value.Publish(null);
+            _line.Dispose();
+            _line = null;
+        }
         return Task.CompletedTask;
     }
 
     public override ValueTask DisposeAsync()
     {
+        _viewModel.PropertyChanged -= OnViewChanged;
         _viewModel.Dispose();
         return base.DisposeAsync();
+    }
+
+    /// <summary>Shares the line playing now. A new state clears every line, and raises an empty name.</summary>
+    private void OnViewChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (string.IsNullOrEmpty(e.PropertyName) || e.PropertyName == nameof(LyricsViewModel.CurrentLine))
+            _line?.Value.Publish(_viewModel.CurrentLine);
     }
 
     /// <summary>The load in progress, for tests.</summary>
@@ -306,7 +327,10 @@ public sealed class LyricsWidget : WidgetBase
     private static bool Answered(FetchResult result) =>
         result.Status is FetchStatus.Fresh or FetchStatus.Cached or FetchStatus.Stale || result.Error == FetchError.HttpStatus;
 
-    /// <summary>Shows the line for now and arms one timer for the next, only while open and playing.</summary>
+    /// <summary>
+    /// Shows the line for now and arms one timer for the next, only while playing and open, or while the small
+    /// notch shows the line.
+    /// </summary>
     private void Cue()
     {
         _nextLine?.Dispose();
@@ -318,7 +342,8 @@ public sealed class LyricsWidget : WidgetBase
             cue.Index >= 0 ? timeline.Lines[cue.Index].Text : string.Empty,
             cue.NextIndex >= 0 ? timeline.Lines[cue.NextIndex].Text : string.Empty);
         var open = Context.Visibility.Value is WidgetVisibility.Expanded or WidgetVisibility.Panel;
-        if (open && position.IsPlaying && cue.NextAt is { } next)
+        var follow = open || _line?.Value.IsWanted == true;
+        if (follow && position.IsPlaying && cue.NextAt is { } next)
             _nextLine = Context.Scheduler.At(next, Cue);
         Translate(open);
     }

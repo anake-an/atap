@@ -474,6 +474,11 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
                     };
                 })
                 .ToList();
+
+            // The middle of the small notch, between the owner's left and right, can hold the owner's own view for it,
+            // such as the song title. A widget without one leaves it empty, see WidgetTemplateSelector.
+            if (state == NotchState.Compact && !items.Any(i => i.Slot == PlacementSlot.Center) && items.FirstOrDefault() is { } first)
+                items.Add(first with { Slot = PlacementSlot.Center, IsGap = true });
         }
 
         // Expanded and Panel lay every widget on the grid. Idle and Compact keep the slots around the camera.

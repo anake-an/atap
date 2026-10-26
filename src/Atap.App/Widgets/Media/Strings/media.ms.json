@@ -8,5 +8,9 @@
   "media.next": "Seterusnya",
   "media.accessible": "Sedang dimainkan. {title}",
   "media.accessibleWithArtist": "Sedang dimainkan. {title} oleh {artist}",
-  "media.progress": "Kedudukan lagu"
+  "media.progress": "Kedudukan lagu",
+  "media.compactShows": "Pada notch kecil, tunjukkan",
+  "media.compactShows.title": "Tajuk lagu",
+  "media.compactShows.lyric": "Baris lirik",
+  "media.compactShowsHint": "Baris lirik menunjukkan baris yang sedang dimainkan. Pilihan ini memerlukan widget Lirik, dan tajuk lagu ditunjukkan jika tiada lirik."
 }

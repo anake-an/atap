@@ -20,12 +20,16 @@ public sealed class MediaPlayingBars : StackPanel
     public static readonly DependencyProperty IsCalmProperty = DependencyProperty.Register(
         nameof(IsCalm), typeof(bool), typeof(MediaPlayingBars), new PropertyMetadata(false, OnChanged));
 
+    public static readonly DependencyProperty AccentProperty = DependencyProperty.Register(
+        nameof(Accent), typeof(Brush), typeof(MediaPlayingBars), new PropertyMetadata(null, OnAccentChanged));
+
     // Each bar's resting height share and its own pace, so they do not move in step.
     private static readonly (double Resting, double Seconds)[] Bars = [(0.55, 0.45), (1, 0.6), (0.7, 0.5)];
 
     private const int FrameRate = 24;
 
     private readonly List<ScaleTransform> _scales = [];
+    private readonly List<Rectangle> _bars = [];
     private bool _running;
 
     public MediaPlayingBars()
@@ -46,6 +50,7 @@ public sealed class MediaPlayingBars : StackPanel
                 RenderTransform = scale,
             };
             bar.SetResourceReference(Shape.FillProperty, "MediaAccentBrush");
+            _bars.Add(bar);
             Children.Add(bar);
         }
         Loaded += (_, _) => Update();
@@ -67,6 +72,13 @@ public sealed class MediaPlayingBars : StackPanel
         set => SetValue(IsCalmProperty, value);
     }
 
+    /// <summary>The colour of the bars, such as the album colour. Null keeps the music accent.</summary>
+    public Brush? Accent
+    {
+        get => (Brush?)GetValue(AccentProperty);
+        set => SetValue(AccentProperty, value);
+    }
+
     /// <summary>True while the bars move. Tests read it.</summary>
     internal bool IsAnimating => _running;
 
@@ -75,6 +87,17 @@ public sealed class MediaPlayingBars : StackPanel
         playing && shown && !calm && windowsAnimates;
 
     private static void OnChanged(DependencyObject d, DependencyPropertyChangedEventArgs e) => ((MediaPlayingBars)d).Update();
+
+    private static void OnAccentChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    {
+        foreach (var bar in ((MediaPlayingBars)d)._bars)
+        {
+            if (e.NewValue is Brush brush)
+                bar.Fill = brush;
+            else
+                bar.SetResourceReference(Shape.FillProperty, "MediaAccentBrush");
+        }
+    }
 
     private void Update()
     {
