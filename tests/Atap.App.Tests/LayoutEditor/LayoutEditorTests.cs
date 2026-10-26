@@ -92,7 +92,7 @@ public sealed class LayoutEditorTests : IDisposable
         var clock = editor.Gallery.SelectMany(g => g.Items).Single(i => i.TypeId == "clock");
 
         Assert.False(media.CanAdd);
-        Assert.Equal("Cannot go here", media.Note);
+        Assert.Equal("Not for this spot", media.Note);
         Assert.False(clock.CanAdd);
         Assert.Equal("Already here", clock.Note);
     }
@@ -124,6 +124,38 @@ public sealed class LayoutEditorTests : IDisposable
         editor.RemovePageCommand.Execute(null);
         Assert.Single(editor.Pages);
         Assert.False(editor.CanRemovePage);
+    }
+
+    [Fact]
+    public void AnEmptyPanelPage_SaysAClickShowsTheHoverWidgets_UntilAWidgetIsChosen()
+    {
+        using var editor = NewEditor();
+        editor.Tab = EditorTab.Panel;
+        editor.AddPageCommand.Execute(null);
+
+        Assert.True(editor.Picture.IsEmpty);
+        Assert.Equal(
+            "A click now shows what you see when you point at it, a little bigger. Drag a widget here to choose your own.",
+            editor.Picture.EmptyText);
+
+        editor.SelectedPage = editor.Pages[0];
+        AddFromGallery(editor, "stopwatch");
+        editor.SelectedPage = editor.Pages[1];
+
+        Assert.True(editor.Picture.IsEmpty);
+        Assert.Equal("Drag a widget here.", editor.Picture.EmptyText);
+    }
+
+    [Fact]
+    public void AnEmptySpotOffThePanel_AsksForAWidget()
+    {
+        using var editor = NewEditor();
+        editor.Tab = EditorTab.Open;
+        while (editor.Tiles.Count > 0)
+            editor.Tiles[0].Remove.Execute(null);
+
+        Assert.True(editor.Picture.IsEmpty);
+        Assert.Equal("Drag a widget here.", editor.Picture.EmptyText);
     }
 
     [Fact]
@@ -249,7 +281,7 @@ public sealed class LayoutEditorTests : IDisposable
         editor.BeginDrag(EditorDrag.FromGallery("media"));
         editor.DragOver(editor.Spot, 0);
 
-        Assert.Equal("Cannot go here", editor.DragHint);
+        Assert.Equal("Not for this spot", editor.DragHint);
         Assert.DoesNotContain(editor.Picture.Tiles, t => t.IsMarker);
         Assert.Equal(EditResult.Rejected, editor.Drop());
         Assert.False(editor.IsDirty);

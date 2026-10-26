@@ -12,7 +12,8 @@
   <BooleanToVisibilityConverter x:Key="Card.BoolToVisibility" />
 
   <!-- One notch state: its plain name and what it means, beside a picture of it with sample content. Every picture
-       is drawn at the same scale, so the states compare like they do on screen. -->
+       is drawn at the same scale, so the states compare like they do on screen. 720 fits a full four column panel
+       with its shoulders. -->
   <DataTemplate x:Key="Card.StatePicture">
     <Grid Margin="0,12,0,0" AutomationProperties.Name="{Binding AutomationName}">
       <Grid.ColumnDefinitions>
@@ -27,8 +28,8 @@
       </StackPanel>
       <Border Grid.Column="1" CornerRadius="6" Background="{DynamicResource WindowBrush}" Padding="8,0,8,8" MaxHeight="150" ClipToBounds="True">
         <Viewbox Stretch="Uniform" StretchDirection="DownOnly" VerticalAlignment="Top">
-          <Grid Width="680">
-            <ContentPresenter Content="{Binding}" HorizontalAlignment="Center" VerticalAlignment="Top" />
+          <Grid Width="720">
+            <ContentPresenter Content="{Binding}" VerticalAlignment="Top" />
           </Grid>
         </Viewbox>
       </Border>

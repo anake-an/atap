@@ -573,7 +573,19 @@ public sealed partial class LayoutEditorViewModel : ObservableObject, IDisposabl
                 tiles.Insert(Math.Clamp(EditorDrop.FinalIndex(drag, spot, _dropIndex), 0, tiles.Count), marker);
         }
 
-        Picture = new NotchPicture(state, _text[NotchPreviews.LabelKey(state)], _text[NotchPreviews.HintKey(state)], tiles, _text["layouteditor.empty"]);
+        Picture = new NotchPicture(state, _text[NotchPreviews.LabelKey(state)], _text[NotchPreviews.HintKey(state)], tiles, _text[EmptyKey(spot)]);
+    }
+
+    /// <summary>
+    /// What an empty spot says. An unfilled panel is not really empty: a click shows the hover widgets a size up,
+    /// so it says that instead of only asking for a widget.
+    /// </summary>
+    private string EmptyKey(EditSpot spot)
+    {
+        if (spot.State != NotchState.Panel)
+            return "layouteditor.empty";
+        var pages = _session.Pages.Select(p => new EffectivePage(p.Id, p.Name, p.Placements)).ToList();
+        return PanelContent.FollowsHover(pages) ? "layouteditor.emptyFollowsHover" : "layouteditor.empty";
     }
 
     /// <summary>The small notch while something is live: the widget highest in the priority list.</summary>
