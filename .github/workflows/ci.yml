@@ -55,6 +55,13 @@ jobs:
       - name: Test
         run: dotnet test Atap.sln --configuration Release --no-build --logger trx --results-directory TestResults
 
+      # The memory guards share the UI thread with other tests in the run above, so they skip there and run
+      # here on their own, where nothing else is left on that thread.
+      - name: Memory guards
+        env:
+          ATAP_MEMORY_TESTS: "1"
+        run: dotnet test tests/Atap.App.Tests/Atap.App.Tests.csproj --configuration Release --no-build --filter "FullyQualifiedName~Atap.Tests.Memory" --logger "trx;LogFileName=memory.trx" --results-directory TestResults
+
       - name: Upload test results
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
