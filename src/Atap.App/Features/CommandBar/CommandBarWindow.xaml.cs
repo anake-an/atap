@@ -25,6 +25,8 @@ public partial class CommandBarWindow : Window
         _previous = previous;
         DataContext = viewModel;
         viewModel.Done += (_, _) => CloseOnce(restoreFocus: false);
+        // The answer shows in the notch, which never takes the keyboard, so the app before the bar gets it back.
+        viewModel.Asked += (_, _) => CloseOnce(restoreFocus: true);
         Loaded += (_, _) =>
         {
             Place();
@@ -36,7 +38,7 @@ public partial class CommandBarWindow : Window
     protected override void OnPreviewKeyDown(KeyEventArgs e)
     {
         base.OnPreviewKeyDown(e);
-        // Esc closes from anywhere. The other keys belong to the box, so the answer and its buttons keep theirs.
+        // Esc closes from anywhere. The other keys belong to the box, so the tick box keeps its own.
         if (e.Key != Key.Escape && !Box.IsKeyboardFocusWithin)
             return;
         switch (e.Key)
@@ -71,14 +73,9 @@ public partial class CommandBarWindow : Window
     protected override void OnDeactivated(EventArgs e)
     {
         base.OnDeactivated(e);
-        // An answer stays while you look at something else. Esc or Close ends it.
-        if (DataContext is CommandBarViewModel { Ai.HasConversation: true })
-            return;
-        // A click on another window already moved the keyboard there.
+        // A click on another window already moved the keyboard there. An answer shows in the notch, so it stays.
         CloseOnce(restoreFocus: false);
     }
-
-    private void OnCloseAnswer(object sender, RoutedEventArgs e) => CloseOnce(restoreFocus: true);
 
     internal void CloseOnce(bool restoreFocus)
     {
@@ -135,7 +132,7 @@ internal sealed class CommandBarShell : ICommandBarShell
         window.Closed += (_, _) =>
         {
             _window = null;
-            // Stops an answer and forgets the conversation.
+            // Forgets the copied text. An answer in the notch carries on.
             viewModel.Dispose();
         };
         _window = window;

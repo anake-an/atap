@@ -44,6 +44,10 @@ public partial class NotchWindow : Window, INotchWindow
     private static readonly TimeSpan HoverOpenDelay = TimeSpan.FromMilliseconds(120);
     private static readonly TimeSpan HoverCloseDelay = TimeSpan.FromMilliseconds(300);
 
+    // Esc, held only while the pointer is on an answer, so Esc closes it without the notch taking the keyboard.
+    private const int EscapeHotkeyId = 1;
+    private const uint VirtualKeyEscape = 0x1B;
+
     // Shoulder radius in DIPs. It follows the state and springs along with the size.
     private static readonly DependencyProperty ShoulderRadiusProperty = DependencyProperty.Register(
         nameof(ShoulderRadius),
@@ -60,6 +64,7 @@ public partial class NotchWindow : Window, INotchWindow
     private readonly WheelPager _pager = new();
     private bool _pointerInside;
     private bool _filesInside;
+    private bool _holdsEscape;
 
     // While the panel has the keyboard, and the window that had it before, which gets it back.
     private bool _keyboardMode;
@@ -193,6 +198,7 @@ public partial class NotchWindow : Window, INotchWindow
     {
         _isClosed = true;
         _hoverTimer?.Stop();
+        UpdateEscape();
         _hwndSource?.RemoveHook(WndProc);
         _focus?.WindowClosed(this);
         // Null when the constructor failed: WPF still closes the half-built window at shutdown.
@@ -263,6 +269,7 @@ public partial class NotchWindow : Window, INotchWindow
         ApplyTextScale();
         UpdateVisibility();
         UpdateKeyboardMode();
+        UpdateEscape();
         if (!IsLoaded || _isClosed)
             return;
         var plan = NotchTransition.Plan(e.Change, IsCalm, hasSize: !double.IsNaN(Pill.Width));
@@ -342,7 +349,31 @@ public partial class NotchWindow : Window, INotchWindow
         _pointerInside = inside;
         if (inside)
             _focus.PointerEntered(this);
+        UpdateEscape();
         ScheduleHover();
+    }
+
+    /// <summary>
+    /// While the pointer is on an answer, Esc is a hotkey of this window and goes to the features as a key, so
+    /// Ask AI can close the answer. The notch still never takes the keyboard, and Esc is let go when the pointer leaves.
+    /// </summary>
+    private void UpdateEscape()
+    {
+        var wants = !_isClosed
+            && _hwnd != IntPtr.Zero
+            && _pointerInside
+            && !_viewModel.IsHidden
+            && _viewModel.ShownSurface == NotchSurface.Answer;
+        if (wants == _holdsEscape)
+            return;
+        if (wants)
+        {
+            // Another app may hold Esc already. Then only Close puts the answer away.
+            _holdsEscape = NativeMethods.RegisterHotKey(_hwnd, EscapeHotkeyId, NativeMethods.MOD_NOREPEAT, VirtualKeyEscape);
+            return;
+        }
+        NativeMethods.UnregisterHotKey(_hwnd, EscapeHotkeyId);
+        _holdsEscape = false;
     }
 
     // Hover does not fire while something is dragged. Files open the notch for the file shelf instead, with
@@ -451,6 +482,11 @@ public partial class NotchWindow : Window, INotchWindow
             case NativeMethods.WM_MOUSEACTIVATE when !_keyboardMode:
                 handled = true;
                 return new IntPtr(NativeMethods.MA_NOACTIVATE);
+
+            case NativeMethods.WM_HOTKEY when (int)wParam == EscapeHotkeyId:
+                handled = true;
+                _input.OnKey(Key.Escape, ModifierKeys.None, _viewModel.Surface);
+                return IntPtr.Zero;
 
             // Alt+F4 while the panel has the keyboard would close this notch for good. Close the panel instead.
             case NativeMethods.WM_SYSCOMMAND when ((int)wParam & 0xFFF0) == NativeMethods.SC_CLOSE:

@@ -66,8 +66,8 @@ internal sealed class GesturesFeature(IAppSettingsView settings, ICommandRegistr
     {
         switch (input.Kind)
         {
-            // The open panel keeps the wheel for scrolling its widgets.
-            case NotchInputKind.Wheel when input.Surface is not (NotchSurface.Panel or NotchSurface.Edit)
+            // The open panel keeps the wheel for scrolling its widgets, and an answer for scrolling its text.
+            case NotchInputKind.Wheel when input.Surface is not (NotchSurface.Panel or NotchSurface.Edit or NotchSurface.Answer)
                 && input.Delta != 0
                 && settings.Values.GetBool(GesturesDescriptor.WheelVolumeKey):
                 return Run(input.Delta > 0 ? GestureCommands.VolumeUp : GestureCommands.VolumeDown);

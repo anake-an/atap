@@ -8,6 +8,7 @@ using Atap.Core.Widgets;
 using Atap.Diagnostics;
 using Atap.Features.Ai;
 using Atap.Features.NetworkPrivacy;
+using Atap.Notch;
 
 [assembly: AtapFeature(typeof(AiDescriptor))]
 
@@ -15,7 +16,8 @@ namespace Atap.Features.Ai;
 
 /// <summary>
 /// Ask AI: a question typed in the command bar goes to the service the user picked, with their own key, and
-/// the answer streams back into the bar. Off by default and in safe mode. Every setting stays on this PC.
+/// the answer streams into the notch. The chat window carries a conversation on. Off by default and in safe
+/// mode. Every setting stays on this PC.
 /// </summary>
 internal sealed class AiDescriptor : IFeatureDescriptor
 {
@@ -32,6 +34,9 @@ internal sealed class AiDescriptor : IFeatureDescriptor
 
     /// <summary>What <see cref="AskCommand"/> passes to the command bar's open command.</summary>
     public const string AskArgument = "ai";
+
+    /// <summary>Opens the chat window. The command bar shows it as "Open Ask AI chat".</summary>
+    public const string ChatCommand = "ai.chat";
 
     public static string KeyFor(AiProvider provider) => KeyPrefix + AiProviders.IdOf(provider);
 
@@ -62,11 +67,29 @@ internal sealed class AiDescriptor : IFeatureDescriptor
         context.Secrets,
         context.Text,
         new AiTransport(AppInfo.Version, context.Network),
-        Log.Warn);
+        Log.Warn,
+        context.Notch,
+        new AiChatShell(() => Features.LayoutEditor.EditorScreen.ForNotch(context.Services.NotchHost)),
+        context.Ui,
+        Copy);
+
+    private static bool Copy(string value)
+    {
+        try
+        {
+            System.Windows.Clipboard.SetText(value);
+            return true;
+        }
+        catch (Exception)
+        {
+            // Another app holds the clipboard.
+            return false;
+        }
+    }
 }
 
-/// <summary>What the command bar uses to ask. Null in <see cref="AskAi.Current"/> while Ask AI is off.</summary>
-internal interface IAskAi
+/// <summary>The running Ask AI service, for the chats. <see cref="AiFeature"/> is the real one.</summary>
+internal interface IAiService
 {
     /// <summary>What is missing before a question can go, read fresh from the settings.</summary>
     AiSetupProblem Problem { get; }
@@ -84,6 +107,23 @@ internal interface IAskAi
     event EventHandler? SetupChanged;
 }
 
+/// <summary>What the command bar uses to ask. Null in <see cref="AskAi.Current"/> while Ask AI is off.</summary>
+internal interface IAskAi
+{
+    /// <summary>What is missing before a question can go, read fresh from the settings.</summary>
+    AiSetupProblem Problem { get; }
+
+    /// <summary>The service's name, such as "Claude".</summary>
+    string ServiceName { get; }
+
+    /// <summary>Sends a question typed in the bar. The answer shows in the notch. False when nothing was sent.</summary>
+    /// <param name="copied">The copied text, only when the user ticked the box for it.</param>
+    bool Ask(string question, string? copied);
+
+    /// <summary>The service, key, model or server changed. Raised on the UI thread.</summary>
+    event EventHandler? SetupChanged;
+}
+
 /// <summary>The running Ask AI, for the command bar. Set and cleared on the UI thread by <see cref="AiFeature"/>.</summary>
 internal static class AskAi
 {
@@ -91,21 +131,33 @@ internal static class AskAi
 }
 
 /// <summary>
-/// Owns the transport while Ask AI is on. It follows the Privacy offline switch, registers <c>ai.ask</c>, and
-/// logs failed requests by provider, status and kind of error, never the question, the answer or the key.
-/// Holds no timer.
+/// Owns the transport while Ask AI is on. It follows the Privacy offline switch, registers <c>ai.ask</c> and
+/// <c>ai.chat</c>, and logs failed requests by provider, status and kind of error, never the question, the answer
+/// or the key. The answers in the notch and the chats live in <see cref="Answers"/> and go when it stops. Holds no
+/// timer.
 /// </summary>
+/// <param name="notch">Where answers show.</param>
+/// <param name="chatShell">Opens the chat window.</param>
+/// <param name="ui">The UI thread, where answer pieces are shown. Inline when null, for tests.</param>
+/// <param name="copy">Puts an answer on the clipboard.</param>
 internal sealed class AiFeature(
     ICommandRegistry commands,
     IAppSettings settings,
     ISecretStore secrets,
     ILocalizer text,
     AiTransport transport,
-    Action<string, Exception?> log) : IAppFeature, IAskAi
+    Action<string, Exception?> log,
+    INotchControl notch,
+    IAiChatShell chatShell,
+    SynchronizationContext? ui,
+    Func<string, bool> copy) : IAppFeature, IAiService
 {
-    private IDisposable? _registration;
+    private readonly List<IDisposable> _registrations = [];
 
     public event EventHandler? SetupChanged;
+
+    /// <summary>The answers in the notch and the chats, while Ask AI runs.</summary>
+    public AiAnswers? Answers { get; private set; }
 
     public AiSetupProblem Problem
     {
@@ -125,22 +177,37 @@ internal sealed class AiFeature(
         transport.OfflineMode = settings.Values.GetBool(NetworkPrivacyDescriptor.OfflineKey);
         settings.Changed += OnSettingsChanged;
         transport.Attempted += OnAttempted;
-        _registration = commands.Register(new AtapCommand(AiDescriptor.AskCommand, "ai.ask", _ => commands.TryRunAsync(CommandBar.CommandBarViewModel.OpenCommandId, AiDescriptor.AskArgument))
+        var answers = new AiAnswers(this, text, notch, chatShell, ui, copy);
+        Answers = answers;
+        _registrations.Add(commands.Register(new AtapCommand(AiDescriptor.AskCommand, "ai.ask", _ => commands.TryRunAsync(CommandBar.CommandBarViewModel.OpenCommandId, AiDescriptor.AskArgument))
         {
             ShowInCommandBar = false,
-        });
-        AskAi.Current = this;
+        }));
+        _registrations.Add(commands.Register(new AtapCommand(AiDescriptor.ChatCommand, "ai.chat.open", _ =>
+        {
+            answers.OpenChat();
+            return Task.CompletedTask;
+        })
+        {
+            KeywordsKey = "ai.chat.keywords",
+        }));
+        _registrations.Add(notch.AddInputHandler(answers));
+        AskAi.Current = answers;
         return Task.CompletedTask;
     }
 
     public ValueTask DisposeAsync()
     {
-        if (ReferenceEquals(AskAi.Current, this))
+        if (Answers is { } answers && ReferenceEquals(AskAi.Current, answers))
             AskAi.Current = null;
         settings.Changed -= OnSettingsChanged;
         transport.Attempted -= OnAttempted;
-        _registration?.Dispose();
-        _registration = null;
+        foreach (var registration in _registrations)
+            registration.Dispose();
+        _registrations.Clear();
+        // Stops every answer, closes the chat window and forgets the chats.
+        Answers?.Dispose();
+        Answers = null;
         // Stops a question in flight.
         transport.Dispose();
         return ValueTask.CompletedTask;

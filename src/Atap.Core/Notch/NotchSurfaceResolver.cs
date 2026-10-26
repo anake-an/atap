@@ -4,8 +4,9 @@ namespace Atap.Core.Notch;
 public static class NotchSurfaceResolver
 {
     /// <summary>
-    /// Returns the first that applies: Hidden, Edit, Panel, Expanded (hover or peek, with content),
-    /// Alert, Slim, Compact (a live owner with content), then Idle.
+    /// Returns the first that applies: Hidden, Edit, Panel, Answer, Expanded (hover or peek, with content),
+    /// Alert, Slim, Compact (a live owner with content), then Idle. The answer wins over hover, so the pointer
+    /// can reach its buttons.
     /// </summary>
     public static NotchSurface Resolve(NotchInputs inputs)
     {
@@ -17,6 +18,8 @@ public static class NotchSurfaceResolver
             return NotchSurface.Edit;
         if (inputs.PanelOpen)
             return NotchSurface.Panel;
+        if (inputs.HasAnswer)
+            return NotchSurface.Answer;
         if ((inputs.Hovered || inputs.Peeking) && inputs.HasExpandedContent)
             return NotchSurface.Expanded;
         if (inputs.HasAlert)

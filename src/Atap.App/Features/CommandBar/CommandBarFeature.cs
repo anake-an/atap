@@ -123,9 +123,9 @@ internal sealed class CommandBarFeature(
         }
         var search = CommandBarDescriptor.SearchPages.GetValueOrDefault(settings.Values.GetString(CommandBarDescriptor.SearchKey))
             ?? CommandBarDescriptor.SearchPages["google"];
-        // A fresh pane for each open, so nothing from an earlier conversation is kept.
+        // Fresh for each open, so copied text read for an earlier question is not kept.
         var pane = ai?.Invoke() is { } running
-            ? new AskAiViewModel(running, text, SynchronizationContext.Current, readClipboard ?? (() => null), Copy)
+            ? new AskAiViewModel(running, text, readClipboard ?? (() => null))
             : null;
         var viewModel = new CommandBarViewModel(commands, text, apps, OpenUrl, Copy, search, pane, argument == AiDescriptor.AskArgument);
         shell.Show(viewModel);

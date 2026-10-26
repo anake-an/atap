@@ -1,0 +1,138 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- An Ask AI answer. Ask AI gives this surface an AiNotchAnswer (NotchViewModel.SurfaceContent) and takes it
+       back on Close, Esc or Continue in chat. The notch grows down to fit while the answer streams in, and a long
+       answer scrolls inside it. The answer is plain text in a TextBlock. Nothing in it is parsed, linked or loaded.
+       Nothing here animates, so Less motion only needs the notch's own resize, which already follows it. -->
+
+  <BooleanToVisibilityConverter x:Key="answer.visible" />
+
+  <!-- A thin scroll bar for the dark notch, with no arrows. -->
+  <Style x:Key="answer.thumb" TargetType="Thumb">
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="Thumb">
+          <Border x:Name="Bar" Margin="3,2" CornerRadius="2" Background="{DynamicResource TextMutedBrush}" Opacity="0.6" />
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Bar" Property="Opacity" Value="0.9" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="answer.page" TargetType="RepeatButton">
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="RepeatButton">
+          <Border Background="Transparent" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="answer.scrollBar" TargetType="ScrollBar">
+    <Setter Property="Width" Value="10" />
+    <Setter Property="MinWidth" Value="10" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ScrollBar">
+          <Track x:Name="PART_Track" IsDirectionReversed="True">
+            <Track.DecreaseRepeatButton>
+              <RepeatButton Command="ScrollBar.PageUpCommand" Style="{StaticResource answer.page}" />
+            </Track.DecreaseRepeatButton>
+            <Track.IncreaseRepeatButton>
+              <RepeatButton Command="ScrollBar.PageDownCommand" Style="{StaticResource answer.page}" />
+            </Track.IncreaseRepeatButton>
+            <Track.Thumb>
+              <Thumb Style="{StaticResource answer.thumb}" />
+            </Track.Thumb>
+          </Track>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="answer.muted" TargetType="TextBlock">
+    <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
+
+  <!-- The question in small muted text, the answer, what is happening, then the service, Copy, Continue in chat
+       and Close. The buttons never take the keyboard, as the notch never does here. -->
+  <DataTemplate x:Key="answer.body">
+    <StackPanel AutomationProperties.Name="{loc:T ai.answer}">
+      <TextBlock Text="{Binding Last.QuestionLine}" Style="{StaticResource answer.muted}" Margin="2,2,2,0"
+                 AutomationProperties.Name="{Binding Last.QuestionLine}" />
+      <ScrollViewer MaxHeight="300" Margin="0,6,0,0" Focusable="False" IsTabStop="False"
+                    VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                    Visibility="{Binding Last.HasAnswer, Converter={StaticResource answer.visible}, FallbackValue=Collapsed}">
+        <ScrollViewer.Resources>
+          <Style TargetType="ScrollBar" BasedOn="{StaticResource answer.scrollBar}" />
+        </ScrollViewer.Resources>
+        <TextBlock x:Name="Answer" Text="{Binding Last.AnswerText}" TextWrapping="Wrap" Margin="2,0,4,0"
+                   Foreground="{DynamicResource TextBrush}" FontSize="13" LineHeight="19"
+                   AutomationProperties.Name="{Binding Last.AnswerText}" />
+      </ScrollViewer>
+      <TextBlock x:Name="Status" Text="{Binding Last.StatusText}" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12"
+                 TextWrapping="Wrap" Margin="2,6,2,0" AutomationProperties.LiveSetting="Polite"
+                 Visibility="{Binding Last.HasStatus, Converter={StaticResource answer.visible}, FallbackValue=Collapsed}" />
+      <DockPanel Margin="0,10,0,0">
+        <TextBlock DockPanel.Dock="Left" Text="{Binding Last.ServiceName}" Style="{StaticResource answer.muted}"
+                   VerticalAlignment="Center" Margin="2,0,10,0" MaxWidth="120" />
+        <WrapPanel HorizontalAlignment="Right" VerticalAlignment="Center">
+          <Button Style="{DynamicResource Notch.Button}" Focusable="False" Margin="6,0,0,0"
+                  Content="{Binding Last.CopyText}" Command="{Binding Last.CopyCommand}"
+                  AutomationProperties.Name="{loc:T ai.copy}" />
+          <Button Style="{DynamicResource Notch.Button}" Focusable="False" Margin="6,0,0,0"
+                  Content="{loc:T ai.continue}" Command="{Binding ContinueCommand}"
+                  AutomationProperties.Name="{loc:T ai.continue}" />
+          <Button Style="{DynamicResource Notch.Button}" Focusable="False" Margin="6,0,0,0"
+                  Content="{loc:T ai.close}" Command="{Binding CloseCommand}"
+                  AutomationProperties.Name="{loc:T ai.close}" />
+        </WrapPanel>
+      </DockPanel>
+    </StackPanel>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding Last.HasFailed}" Value="True">
+        <Setter TargetName="Status" Property="Foreground" Value="{DynamicResource TextBrush}" />
+        <Setter TargetName="Status" Property="FontWeight" Value="SemiBold" />
+      </DataTrigger>
+    </DataTemplate.Triggers>
+  </DataTemplate>
+
+  <!-- The surface gets the window's NotchViewModel. The answer is its SurfaceContent. An alert that comes
+       meanwhile shows as a banner above it. On a side edge the notch is narrower and the buttons wrap. -->
+  <DataTemplate x:Key="surface.Answer">
+    <StackPanel AutomationProperties.Name="{loc:T ai.answer}">
+      <ContentPresenter Content="{Binding}" ContentTemplate="{DynamicResource notch.banner}" />
+      <ContentControl Content="{Binding SurfaceContent}" Focusable="False" IsTabStop="False">
+        <ContentControl.Style>
+          <Style TargetType="ContentControl">
+            <Setter Property="ContentTemplate" Value="{StaticResource answer.body}" />
+            <Setter Property="Width" Value="420" />
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsVertical}" Value="True">
+                <Setter Property="Width" Value="232" />
+              </DataTrigger>
+              <!-- A template would still build with no answer, as an empty notch. -->
+              <DataTrigger Binding="{Binding SurfaceContent}" Value="{x:Null}">
+                <Setter Property="ContentTemplate" Value="{x:Null}" />
+                <Setter Property="Visibility" Value="Collapsed" />
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </ContentControl.Style>
+      </ContentControl>
+    </StackPanel>
+  </DataTemplate>
+
+</ResourceDictionary>

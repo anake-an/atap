@@ -39,6 +39,15 @@ public class NotchSurfaceResolverTests
     }
 
     [Fact]
+    public void Answer_WinsOverHoverAndAlerts_ButNotThePanel()
+    {
+        var answer = Everything with { Hidden = false, Editing = false, PanelOpen = false, HasAnswer = true };
+        Assert.Equal(NotchSurface.Answer, NotchSurfaceResolver.Resolve(answer));
+        Assert.Equal(NotchSurface.Panel, NotchSurfaceResolver.Resolve(answer with { PanelOpen = true }));
+        Assert.Equal(NotchSurface.Answer, NotchSurfaceResolver.Resolve(Nothing with { HasAnswer = true }));
+    }
+
+    [Fact]
     public void Expanded_NeedsHoverOrPeek()
     {
         Assert.Equal(NotchSurface.Expanded, NotchSurfaceResolver.Resolve(Nothing with { Hovered = true, HasExpandedContent = true }));
@@ -82,6 +91,7 @@ public class NotchSurfaceResolverTests
     [InlineData(NotchSurface.Expanded, NotchState.Expanded)]
     [InlineData(NotchSurface.Panel, NotchState.Panel)]
     [InlineData(NotchSurface.Alert, null)]
+    [InlineData(NotchSurface.Answer, null)]
     [InlineData(NotchSurface.Slim, null)]
     [InlineData(NotchSurface.Edit, null)]
     [InlineData(NotchSurface.Hidden, null)]

@@ -9,6 +9,9 @@ public enum NotchSurface
     Edit,
     Panel,
 
+    /// <summary>An Ask AI answer. It stays until it is closed.</summary>
+    Answer,
+
     /// <summary>The hover or peek view.</summary>
     Expanded,
 
@@ -31,6 +34,7 @@ public enum NotchSurface
 /// <param name="Slim">Slim mode is on.</param>
 /// <param name="HasCompactOwner">A live widget claims compact.</param>
 /// <param name="HasCompactContent">The compact owner has a placement in the compact state.</param>
+/// <param name="HasAnswer">An Ask AI answer is showing.</param>
 public sealed record NotchInputs(
     bool Hidden,
     bool Editing,
@@ -41,4 +45,5 @@ public sealed record NotchInputs(
     bool HasAlert,
     bool Slim,
     bool HasCompactOwner,
-    bool HasCompactContent);
+    bool HasCompactContent,
+    bool HasAnswer = false);
