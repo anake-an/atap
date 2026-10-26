@@ -97,7 +97,10 @@ public sealed class AiSettingsTests : IDisposable
         Assert.NotNull(reference);
         Assert.Equal(Key, _secrets.Get(reference!));
         Assert.True(card.HasKey);
-        Assert.Equal("Key saved on this PC.", card.KeyState);
+        // Only the last four characters show, so you can tell which key is in use.
+        Assert.Equal("Key saved on this PC. It ends in …-123. Atap never shows the whole key again.", card.KeyState);
+        Assert.DoesNotContain(Key, card.KeyState, StringComparison.Ordinal);
+        Assert.StartsWith("To use another key", card.KeyHint, StringComparison.Ordinal);
         var account = Assert.Single(_checked);
         Assert.Equal(AiProvider.OpenAi, account.Provider);
         Assert.True(account.HasKey);

@@ -86,6 +86,18 @@ internal static class AiSetup
     public static bool HasKey(SettingValues values, ISecretStore secrets, AiProvider provider) =>
         values.GetSecretRef(AiDescriptor.KeyFor(provider)) is { } reference && secrets.IsAvailable && secrets.Get(reference) is not null;
 
+    /// <summary>
+    /// The last four characters of the saved key, so the card can say which key is in use without showing it.
+    /// Null when there is no key, or the key is too short for the end to say nothing about the rest.
+    /// </summary>
+    public static string? KeyEnding(SettingValues values, ISecretStore secrets, AiProvider provider)
+    {
+        if (values.GetSecretRef(AiDescriptor.KeyFor(provider)) is not { } reference || !secrets.IsAvailable)
+            return null;
+        var key = secrets.Get(reference)?.Trim();
+        return key is { Length: >= 16 } ? key[^4..] : null;
+    }
+
     /// <summary>A key saved here that does not open on this PC.</summary>
     public static bool HasKeyFromOtherPc(SettingValues values, ISecretStore secrets, AiProvider provider) =>
         values.GetSecretRef(AiDescriptor.KeyFor(provider)) is not null && !HasKey(values, secrets, provider);
