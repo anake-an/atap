@@ -1,7 +1,7 @@
 namespace Atap.Core.Diagnostics;
 
 /// <summary>What Atap uses at one moment, for the resource meter. Nothing here leaves the PC.</summary>
-/// <param name="PrivateBytes">Memory only Atap uses. The number Task Manager calls memory.</param>
+/// <param name="PrivateBytes">Memory Windows has set aside for Atap alone, used or not, graphics driver buffers included.</param>
 /// <param name="WorkingSet">Memory Atap has in RAM right now, shared parts included.</param>
 /// <param name="ManagedHeap">Memory the .NET garbage collector holds.</param>
 /// <param name="CpuPercent">Share of the whole processor since the last sample, 0 to 100.</param>
@@ -12,6 +12,7 @@ namespace Atap.Core.Diagnostics;
 /// <param name="RunningWidgets">Widget copies running.</param>
 /// <param name="SharedSources">Shared Windows sources in use, such as media sessions.</param>
 /// <param name="Assemblies">.NET assemblies loaded.</param>
+/// <param name="PrivateWorkingSet">Memory only Atap uses that is in RAM right now. The number Task Manager shows as memory. 0 when Windows does not report it.</param>
 public sealed record ResourceUsage(
     long PrivateBytes,
     long WorkingSet,
@@ -23,8 +24,12 @@ public sealed record ResourceUsage(
     int WakesLastHour,
     int RunningWidgets,
     int SharedSources,
-    int Assemblies)
+    int Assemblies,
+    long PrivateWorkingSet = 0)
 {
+    /// <summary>The memory to show first: the same number as Task Manager, or the set-aside memory where that is not known.</summary>
+    public long Memory => PrivateWorkingSet > 0 ? PrivateWorkingSet : PrivateBytes;
+
     /// <summary>Whole megabytes, rounded, as the meter and Task Manager show them.</summary>
     public static int Megabytes(long bytes) => (int)Math.Round(bytes / (1024.0 * 1024.0), MidpointRounding.AwayFromZero);
 
@@ -47,7 +52,8 @@ public sealed record ResourceUsage(
     public string ToDiagnostics(string version) => string.Join(
         Environment.NewLine,
         $"Atap {version}",
-        $"Memory (private): {Megabytes(PrivateBytes)} MB",
+        $"Memory (as in Task Manager): {Megabytes(Memory)} MB",
+        $"Memory set aside (private bytes): {Megabytes(PrivateBytes)} MB",
         $"Working set: {Megabytes(WorkingSet)} MB",
         $"Managed heap: {Megabytes(ManagedHeap)} MB",
         $"CPU: {CpuPercent.ToString("0.0", System.Globalization.CultureInfo.InvariantCulture)} %",

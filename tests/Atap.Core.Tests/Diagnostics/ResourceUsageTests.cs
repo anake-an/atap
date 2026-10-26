@@ -54,7 +54,8 @@ public class ResourceUsageTests
         Assert.Equal(
             [
                 "Atap 1.0.0",
-                "Memory (private): 45 MB",
+                "Memory (as in Task Manager): 45 MB",
+                "Memory set aside (private bytes): 45 MB",
                 "Working set: 80 MB",
                 "Managed heap: 12 MB",
                 "CPU: 0.3 %",
