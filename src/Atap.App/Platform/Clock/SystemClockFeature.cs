@@ -103,6 +103,9 @@ internal sealed class WindowsClockEvents : IClockEventSource
 
     private void OnPowerModeChanged(object sender, PowerModeChangedEventArgs e)
     {
+        // A line in the log, so a run that ends badly shows whether the PC had just slept or woken.
+        if (e.Mode is PowerModes.Suspend or PowerModes.Resume)
+            Atap.Diagnostics.Log.Info(e.Mode == PowerModes.Suspend ? "Windows is going to sleep." : "Windows woke up.");
         if (e.Mode == PowerModes.Resume)
             Resumed?.Invoke(this, EventArgs.Empty);
     }

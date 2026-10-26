@@ -197,8 +197,11 @@ public class NotchFrame : Decorator
         }
     }
 
-    /// <summary>The outline as a frozen geometry, moved by <paramref name="offset"/>.</summary>
-    private static StreamGeometry Geometry(NotchOutline outline, Vector offset)
+    /// <summary>
+    /// The outline as a frozen geometry, moved by <paramref name="offset"/>. The real notch draws with this too, so
+    /// the pictures and the notch always have the same shape.
+    /// </summary>
+    internal static StreamGeometry Geometry(NotchOutline outline, Vector offset)
     {
         var geometry = new StreamGeometry();
         using (var context = geometry.Open())
