@@ -86,6 +86,12 @@ internal sealed class AppServices : IDisposable
     /// <summary>Self-updates. Null in Store builds, where the Store updates Atap.</summary>
     public required IUpdateService? Updates { get; init; }
 
+    /// <summary>
+    /// "Delete all my Atap data": quits, and once everything has closed deletes Atap's data folders. Set by
+    /// the app at startup. Null in tests. Not a command on purpose, so no hotkey, gesture or script can run it.
+    /// </summary>
+    public Action? DeleteAllDataAndQuit { get; set; }
+
     /// <summary>The widget instances. The app applies the layout to it and starts it. Others use it as <see cref="IWidgetHostView"/>.</summary>
     public WidgetHost Widgets { get; private set; } = null!;
 

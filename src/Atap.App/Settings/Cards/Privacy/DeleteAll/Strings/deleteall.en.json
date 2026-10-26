@@ -1,0 +1,12 @@
+{
+  "deleteall.title": "Delete all data",
+  "deleteall.hint": "Remove everything Atap keeps on this PC and start over.",
+  "deleteall.button": "Delete all my Atap data",
+  "deleteall.confirmTitle": "Delete everything Atap keeps on this PC?",
+  "deleteall.whatGoes": "This deletes your settings, layout, profiles, to-dos, notes, saved passwords and keys, saved data and logs. Atap also stops starting with Windows. This cannot be undone.",
+  "deleteall.closes": "Atap closes when it is done. Atap itself stays installed, so you can open it again and start fresh.",
+  "deleteall.sync": "If you sync with OneDrive, the copy there is not deleted.",
+  "deleteall.confirm": "Delete and close Atap",
+  "deleteall.cancel": "Cancel",
+  "deleteall.deleting": "Deleting your data and closing Atap…"
+}

@@ -1,0 +1,12 @@
+{
+  "deleteall.title": "Padam semua data",
+  "deleteall.hint": "Buang semua yang Atap simpan pada PC ini dan mulakan semula.",
+  "deleteall.button": "Padam semua data Atap saya",
+  "deleteall.confirmTitle": "Padam semua yang Atap simpan pada PC ini?",
+  "deleteall.whatGoes": "Ini akan memadam tetapan, susun atur, profil, senarai tugas, nota, kata laluan dan kunci yang disimpan, data simpanan serta log anda. Atap juga tidak lagi bermula bersama Windows. Tindakan ini tidak boleh dibatalkan.",
+  "deleteall.closes": "Atap akan ditutup selepas selesai. Atap sendiri kekal dipasang, jadi anda boleh membukanya semula dan bermula dari awal.",
+  "deleteall.sync": "Jika anda menyegerakkan dengan OneDrive, salinan di sana tidak dipadam.",
+  "deleteall.confirm": "Padam dan tutup Atap",
+  "deleteall.cancel": "Batal",
+  "deleteall.deleting": "Memadam data anda dan menutup Atap…"
+}

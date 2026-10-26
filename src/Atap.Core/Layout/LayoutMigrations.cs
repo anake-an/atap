@@ -1,12 +1,15 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
+using Atap.Core.Malaysia;
 using Atap.Core.Storage;
+using Atap.Core.Sync;
 
 namespace Atap.Core.Layout;
 
 /// <summary>The layout.json upgrades, oldest first. Each one only adds or moves fields, or swaps an untouched default for the new one.</summary>
 public static class LayoutMigrations
 {
-    public static IReadOnlyList<IJsonMigration> All { get; } = [new V1ToV2(), new V2ToV3(), new V3ToV4()];
+    public static IReadOnlyList<IJsonMigration> All { get; } = [new V1ToV2(), new V2ToV3(), new V3ToV4(), new V4ToV5()];
 
     /// <summary>Runs every step from <paramref name="fromVersion"/> up to the current version and sets schemaVersion.</summary>
     public static void Upgrade(JsonObject root, int fromVersion)
@@ -107,5 +110,32 @@ public static class LayoutMigrations
 
         private static string? Text(JsonNode? node) =>
             node is JsonValue value && value.TryGetValue<string>(out var text) ? text : null;
+    }
+
+    /// <summary>
+    /// v4 to v5: the prayer times alert was on or off ("reminder"). It becomes the At prayer time choice
+    /// ("atPrayer"), so on is "notch" (the notch alert it always was) and off is "off". The old value stays,
+    /// so an older Atap still reads it. A choice already there is kept.
+    /// </summary>
+    private sealed class V4ToV5 : IJsonMigration
+    {
+        // As the widget names them. Written out here, so a later rename never changes what this step did.
+        private const string OldKey = "reminder";
+        private const string NewKey = "atPrayer";
+
+        public int FromVersion => 4;
+
+        public void Apply(JsonObject root)
+        {
+            if (root["widgetSettings"] is not JsonObject instances)
+                return;
+            foreach (var (instanceId, node) in instances)
+            {
+                if (SyncUnitNames.TypeIdOf(instanceId) !=MalaysiaKeys.WaktuSolatTypeId || node is not JsonObject settings || settings.ContainsKey(NewKey))
+                    continue;
+                if (settings[OldKey] is JsonValue old && old.GetValueKind() is JsonValueKind.True or JsonValueKind.False)
+                    settings[NewKey] = old.GetValueKind() == JsonValueKind.True ? "notch" : "off";
+            }
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Atap.Composition;
 using Atap.Core.Alerts;
 using Atap.Core.Malaysia;
@@ -186,6 +187,118 @@ public sealed class WaktuSolatWidgetTests : IDisposable
         Assert.Equal("SGR01", _esolat.Zones[^1]);
     }
 
+    [Fact]
+    public async Task NotchOnly_AlertsWithoutASound()
+    {
+        await StartAsync();
+
+        AdvanceTo(18, 59);
+
+        Assert.Null(Assert.IsType<ShownAlert>(_services.Alerts.Current).Alert.SoundKey);
+    }
+
+    [Fact]
+    public async Task SoftChime_PlaysTheChimeThatComesWithWindows()
+    {
+        await StartAsync(settings: new() { [WaktuSolatDescriptor.AtPrayerKey] = WaktuSolatDescriptor.AtPrayerChime });
+
+        AdvanceTo(18, 59);
+
+        var alert = Assert.IsType<ShownAlert>(_services.Alerts.Current).Alert;
+        Assert.Equal(WaktuSolatWidget.ChimeSound(), alert.SoundKey);
+        Assert.Equal(AlertPriority.High, alert.Priority);
+    }
+
+    [Fact]
+    public async Task Azan_PlaysThePickedFile()
+    {
+        await StartAsync(settings: new()
+        {
+            [WaktuSolatDescriptor.AtPrayerKey] = WaktuSolatDescriptor.AtPrayerAzan,
+            [WaktuSolatDescriptor.AzanFileKey] = @"C:\Sounds\azan.mp3",
+        });
+
+        AdvanceTo(18, 59);
+
+        var alert = Assert.IsType<ShownAlert>(_services.Alerts.Current).Alert;
+        Assert.Equal(AlertSounds.ForFile(@"C:\Sounds\azan.mp3"), alert.SoundKey);
+        Assert.Equal(AlertSoundKind.File, AlertSounds.Resolve(alert.SoundKey, null)?.Kind);
+        // High, not Critical, so Do not disturb and full screen still keep it quiet.
+        Assert.Equal(AlertPriority.High, alert.Priority);
+    }
+
+    [Fact]
+    public async Task NoAlert_ShowsNothingAtThePrayer()
+    {
+        await StartAsync(settings: new() { [WaktuSolatDescriptor.AtPrayerKey] = WaktuSolatDescriptor.AtPrayerOff });
+
+        AdvanceTo(19, 0);
+
+        Assert.Null(_services.Alerts.Current);
+    }
+
+    [Fact]
+    public async Task OldAlertTurnedOff_StaysOff()
+    {
+        await StartAsync(settings: new() { [WaktuSolatDescriptor.OldReminderKey] = false });
+
+        AdvanceTo(19, 0);
+
+        Assert.Null(_services.Alerts.Current);
+    }
+
+    [Theory]
+    [InlineData(null, null, WaktuSolatDescriptor.AtPrayerNotch)]
+    [InlineData(true, null, WaktuSolatDescriptor.AtPrayerNotch)]
+    [InlineData(false, null, WaktuSolatDescriptor.AtPrayerOff)]
+    [InlineData(false, WaktuSolatDescriptor.AtPrayerAzan, WaktuSolatDescriptor.AtPrayerAzan)]
+    [InlineData(null, WaktuSolatDescriptor.AtPrayerChime, WaktuSolatDescriptor.AtPrayerChime)]
+    [InlineData(null, "loud", WaktuSolatDescriptor.AtPrayerNotch)]
+    public void AtPrayer_ReadsTheChoice_OrTheOldOnOrOff(bool? reminder, string? atPrayer, string expected)
+    {
+        var values = new Dictionary<string, object>();
+        if (reminder is { } on)
+            values[WaktuSolatDescriptor.OldReminderKey] = on;
+        if (atPrayer is not null)
+            values[WaktuSolatDescriptor.AtPrayerKey] = atPrayer;
+
+        Assert.Equal(expected, WaktuSolatWidget.AtPrayerOf(Settings(values)));
+    }
+
+    [Theory]
+    [InlineData(WaktuSolatDescriptor.AtPrayerNotch, @"C:\Sounds\azan.mp3", null)]
+    [InlineData(WaktuSolatDescriptor.AtPrayerOff, @"C:\Sounds\azan.mp3", null)]
+    [InlineData(WaktuSolatDescriptor.AtPrayerChime, @"C:\Sounds\azan.mp3", "chime")]
+    [InlineData(WaktuSolatDescriptor.AtPrayerAzan, @"C:\Sounds\azan.mp3", @"file:C:\Sounds\azan.mp3")]
+    [InlineData(WaktuSolatDescriptor.AtPrayerAzan, "", "chime")]
+    [InlineData(WaktuSolatDescriptor.AtPrayerAzan, @"\\server\share\azan.mp3", "chime")]
+    [InlineData(WaktuSolatDescriptor.AtPrayerAzan, @"C:\Sounds\azan.exe", "chime")]
+    public void Sound_AzanFallsBackToTheChime_UntilAFileIsPicked(string atPrayer, string azanFile, string? expected)
+    {
+        Assert.Equal(expected, WaktuSolatWidget.SoundFor(atPrayer, azanFile, () => "chime"));
+    }
+
+    [Fact]
+    public void TheChime_IsAWindowsSound_NeverOneAtapShips()
+    {
+        var chime = WaktuSolatWidget.ChimeSound();
+
+        Assert.True(chime == AlertSounds.Windows || chime.EndsWith(@"\Media\chimes.wav", StringComparison.OrdinalIgnoreCase), chime);
+    }
+
+    [Fact]
+    public void AzanFile_ShowsOnlyForTheAzan_AndStaysOnThisPc()
+    {
+        var file = new WaktuSolatDescriptor().Settings.Single(s => s.Key == WaktuSolatDescriptor.AzanFileKey);
+
+        Assert.Equal(SettingType.File, file.Type);
+        Assert.Equal((WaktuSolatDescriptor.AtPrayerKey, (object)WaktuSolatDescriptor.AtPrayerAzan), file.VisibleWhen);
+        Assert.Equal(SettingScope.Machine, file.Scope);
+    }
+
+    private static SettingValues Settings(Dictionary<string, object> values) =>
+        new(new WaktuSolatDescriptor().Settings, values.ToDictionary(p => p.Key, p => JsonSerializer.SerializeToElement(p.Value)));
+
     private static async Task WaitUntil(Func<bool> condition)
     {
         for (var i = 0; i < 200 && !condition(); i++)
@@ -193,14 +306,16 @@ public sealed class WaktuSolatWidgetTests : IDisposable
         Assert.True(condition());
     }
 
-    private async Task<(WaktuSolatWidget Widget, WaktuSolatViewModel ViewModel)> StartAsync(string? zone = "SGR01")
+    private async Task<(WaktuSolatWidget Widget, WaktuSolatViewModel ViewModel)> StartAsync(
+        string? zone = "SGR01",
+        Dictionary<string, object>? settings = null)
     {
         if (zone is not null)
             _services.Settings.Set(MalaysiaKeys.Zone, zone);
         var descriptor = new WaktuSolatDescriptor();
         var widget = Assert.IsType<WaktuSolatWidget>(
             descriptor.Create(_services.CreateContext(descriptor.TypeId, descriptor, _lifetime, _visibility, _esolat)));
-        await widget.StartAsync(new SettingValues(descriptor.Settings, null));
+        await widget.StartAsync(settings is null ? new SettingValues(descriptor.Settings, null) : Settings(settings));
         return (widget, Assert.IsType<WaktuSolatViewModel>(widget.ViewModel));
     }
 
