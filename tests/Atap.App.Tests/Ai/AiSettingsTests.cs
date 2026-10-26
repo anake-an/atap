@@ -268,6 +268,25 @@ public sealed class AiSettingsTests : IDisposable
     }
 
     [Fact]
+    public void NetworkFeatures_ListsAskAi_AndFollowsItsSwitch()
+    {
+        using var card = new Atap.Settings.Cards.Privacy.NetworkFeatures.NetworkFeaturesViewModel(
+            WidgetCatalog.FromDescriptors([]), _services.Layout, updateChecks: null, _services.Text, _services.Settings);
+
+        var row = Assert.Single(card.Items);
+        Assert.Equal("Ask AI", row.Name);
+        Assert.Equal(
+            "Sends what you type, and copied text if you choose, to the service you picked, only when you press Enter. Your key stays on this PC.",
+            row.Detail);
+        Assert.False(row.IsOn);
+        Assert.Equal("Turn on in Home, under Ask AI", row.TurnOnHint);
+
+        _services.Settings.Set(AiDescriptor.EnabledKey, true);
+
+        Assert.True(Assert.Single(card.Items).IsOn);
+    }
+
+    [Fact]
     public void TheLog_HoldsTheProviderStatusAndKindOnly()
     {
         Assert.Equal("Ask AI to openai did not work: KeyNotAccepted, HTTP 401.", AiFeature.Describe(new AiAttempt(AiProvider.OpenAi, 401, AiError.KeyNotAccepted)));
