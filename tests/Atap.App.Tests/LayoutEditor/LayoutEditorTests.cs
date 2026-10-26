@@ -127,21 +127,33 @@ public sealed class LayoutEditorTests : IDisposable
     }
 
     [Fact]
-    public void AnEmptyPanelPage_SaysAClickShowsTheHoverWidgets_UntilAWidgetIsChosen()
+    public void AnEmptyFirstPanelPage_SaysAClickShowsTheHoverWidgets_UntilAWidgetIsChosen()
     {
         using var editor = NewEditor();
         editor.Tab = EditorTab.Panel;
-        editor.AddPageCommand.Execute(null);
+        EmptyThePage(editor);
 
         Assert.True(editor.Picture.IsEmpty);
         Assert.Equal(
             "A click now shows what you see when you point at it, a little bigger. Drag a widget here to choose your own.",
             editor.Picture.EmptyText);
 
-        editor.SelectedPage = editor.Pages[0];
+        editor.AddPageCommand.Execute(null);
         AddFromGallery(editor, "stopwatch");
-        editor.SelectedPage = editor.Pages[1];
+        editor.SelectedPage = editor.Pages[0];
 
+        Assert.True(editor.Picture.IsEmpty);
+        Assert.Equal("Drag a widget here.", editor.Picture.EmptyText);
+    }
+
+    [Fact]
+    public void AnEmptySecondPanelPage_AsksForAWidget_EvenWhileThePanelFollowsHover()
+    {
+        using var editor = NewEditor();
+        editor.Tab = EditorTab.Panel;
+        editor.AddPageCommand.Execute(null);
+
+        Assert.Equal(1, editor.SelectedPage?.Index);
         Assert.True(editor.Picture.IsEmpty);
         Assert.Equal("Drag a widget here.", editor.Picture.EmptyText);
     }
@@ -151,8 +163,7 @@ public sealed class LayoutEditorTests : IDisposable
     {
         using var editor = NewEditor();
         editor.Tab = EditorTab.Open;
-        while (editor.Tiles.Count > 0)
-            editor.Tiles[0].Remove.Execute(null);
+        EmptyThePage(editor);
 
         Assert.True(editor.Picture.IsEmpty);
         Assert.Equal("Drag a widget here.", editor.Picture.EmptyText);
@@ -412,6 +423,12 @@ public sealed class LayoutEditorTests : IDisposable
 
     private static void AddFromGallery(LayoutEditorViewModel editor, string typeId) =>
         editor.Gallery.SelectMany(g => g.Items).Single(i => i.TypeId == typeId).Add.Execute(null);
+
+    private static void EmptyThePage(LayoutEditorViewModel editor)
+    {
+        while (editor.Tiles.Count > 0)
+            editor.Tiles[0].Remove.Execute(null);
+    }
 
     private sealed class FakeWindow : ILayoutEditorWindow
     {

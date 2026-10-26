@@ -577,12 +577,12 @@ public sealed partial class LayoutEditorViewModel : ObservableObject, IDisposabl
     }
 
     /// <summary>
-    /// What an empty spot says. An unfilled panel is not really empty: a click shows the hover widgets a size up,
-    /// so it says that instead of only asking for a widget.
+    /// What an empty spot says. The first page of an unfilled panel is not really empty: a click shows the hover
+    /// widgets there a size up, so it says that instead of only asking for a widget. Other pages stay empty.
     /// </summary>
     private string EmptyKey(EditSpot spot)
     {
-        if (spot.State != NotchState.Panel)
+        if (spot.State != NotchState.Panel || spot.Page != 0)
             return "layouteditor.empty";
         var pages = _session.Pages.Select(p => new EffectivePage(p.Id, p.Name, p.Placements)).ToList();
         return PanelContent.FollowsHover(pages) ? "layouteditor.emptyFollowsHover" : "layouteditor.empty";
