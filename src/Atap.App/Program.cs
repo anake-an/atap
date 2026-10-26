@@ -55,6 +55,7 @@ internal static class Program
 
         Log.Info($"Atap {AppInfo.Version} starting on Windows {Environment.OSVersion.Version}.");
         RunMarker.Start(AtapPaths.Default);
+        CrashRestart.Register();
 
         try
         {
