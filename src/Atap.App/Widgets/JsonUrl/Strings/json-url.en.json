@@ -1,7 +1,7 @@
 {
   "json-url.name": "Value from a link",
   "json-url.description": "One value from any web link that gives JSON, such as your NAS, router or smart home. It lights up the notch when the value needs attention. You can add more than one.",
-  "json-url.privacy": "Atap downloads the link you give it, as often as you choose and never more than once a minute. A sign-in header stays locked on this PC, and replies fetched with one stay in memory only.",
+  "json-url.privacy": "Atap downloads the link you give it, as often as you choose but never more than once a minute. Any sign-in details stay locked on this PC, and replies fetched with them stay in memory only.",
   "json-url.url": "Link",
   "json-url.urlHint": "The web address that gives the data, such as http://192.168.1.10/api/status. Plain http works only for addresses on your home network.",
   "json-url.title": "Name on the notch",

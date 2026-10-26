@@ -4,8 +4,11 @@
   "networkuse.none": "Tiada apa-apa dalam Atap yang menggunakan internet buat masa ini.",
   "networkuse.on": "Hidup",
   "networkuse.off": "Mati",
-  "networkuse.hosts": "Menyambung ke {hosts}.",
-  "networkuse.userUrls": "Menyambung ke alamat yang anda taip.",
+  "networkuse.hosts": "Menggunakan internet: {hosts}",
+  "networkuse.userUrls": "Menggunakan internet: alamat yang anda taip",
+  "networkuse.hostsAndUserUrls": "Menggunakan internet: {hosts} dan alamat yang anda taip",
+  "networkuse.some": "Menggunakan internet",
+  "networkuse.turnOn": "Hidupkan di halaman Apa yang dipaparkan",
   "networkuse.updates": "Semakan kemas kini",
-  "networkuse.updatesDetail": "Bertanya kepada GitHub sama ada Atap versi baharu sudah keluar."
+  "networkuse.updatesDetail": "Menggunakan internet: GitHub, untuk menyemak sama ada Atap versi baharu sudah keluar"
 }

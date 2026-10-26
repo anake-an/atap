@@ -14,6 +14,9 @@ public enum UpdateStatus
 
     /// <summary>An update is downloaded and installs when Atap exits.</summary>
     ReadyToInstall,
+
+    /// <summary>Atap is closing to install the update, and opens again by itself.</summary>
+    Installing,
 }
 
 /// <summary>Self-updates for installed builds. Store builds have none (the Store updates the app).</summary>
@@ -30,7 +33,10 @@ public interface IUpdateService : IDisposable
     /// <summary>Starts the background schedule.</summary>
     void Start();
 
-    /// <summary>Checks now (and downloads if there is an update). Does nothing while a check is running.</summary>
+    /// <summary>
+    /// The user asked to check. An update is downloaded, then Atap closes, installs it and opens again by itself.
+    /// An update that is already downloaded installs at once. Does nothing while a check is running.
+    /// </summary>
     Task CheckNowAsync();
 
     /// <summary>Hands a downloaded update to the updater, which installs it once this process has exited.</summary>

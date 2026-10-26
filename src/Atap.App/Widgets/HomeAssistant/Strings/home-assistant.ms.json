@@ -1,7 +1,7 @@
 {
   "home-assistant.name": "Home Assistant",
   "home-assistant.description": "Satu bacaan daripada Home Assistant, seperti suhu bilik atau sama ada pintu terbuka. Ia muncul pada notch apabila nilai itu perlu perhatian anda.",
-  "home-assistant.privacy": "Atap bersambung ke broker MQTT yang anda nyatakan dan mendengar topik yang anda pilih. Mesej disimpan dalam memori sahaja. Kata laluan anda disimpan dengan selamat pada PC ini.",
+  "home-assistant.privacy": "Atap bersambung ke pelayan Home Assistant anda di alamat yang anda berikan dan mendengar topik yang anda pilih. Mesej disimpan dalam memori sahaja. Kata laluan anda disimpan dengan selamat pada PC ini.",
   "home-assistant.broker": "Alamat broker",
   "home-assistant.brokerHint": "Komputer yang menjalankan broker MQTT anda, seperti homeassistant.local atau 192.168.1.10.",
   "home-assistant.topic": "Topik",

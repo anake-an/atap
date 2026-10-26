@@ -1,7 +1,7 @@
 {
   "solat.name": "Waktu solat",
   "solat.description": "Waktu solat untuk kawasan anda, dengan kiraan detik ke waktu seterusnya.",
-  "solat.privacy": "Menghantar kod zon JAKIM anda ke e-Solat (www.e-solat.gov.my), atau ke api.waktusolat.app apabila e-Solat tidak berfungsi. Lebih kurang sebulan sekali.",
+  "solat.privacy": "Menghantar kawasan waktu solat anda ke e-Solat (www.e-solat.gov.my), atau ke api.waktusolat.app jika e-Solat tidak berfungsi. Lebih kurang sebulan sekali.",
   "solat.liveBefore": "Papar pada notch sebelum setiap waktu",
   "solat.liveBeforeHint": "Notch memaparkan kiraan detik sekian minit sebelum waktu. Pada 0, ia hanya dipaparkan apabila masuk waktu.",
   "solat.minutes": "min",

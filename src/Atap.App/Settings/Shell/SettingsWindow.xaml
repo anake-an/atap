@@ -4,6 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:shell="clr-namespace:Atap.Settings.Shell"
         xmlns:loc="clr-namespace:Atap.Ui.Localization"
+        xmlns:controls="clr-namespace:Atap.Ui.Controls"
         Title="{Binding Title}"
         Icon="/Atap;component/Assets/atap.ico"
         Width="1000" Height="720" MinWidth="680" MinHeight="480"
@@ -81,7 +82,8 @@
     </DockPanel>
 
     <ScrollViewer x:Name="Scroller" Grid.Column="1" Focusable="False"
-                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                  VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                  controls:SmoothWheelScroll.IsEnabled="True">
       <ContentControl Content="{Binding Current}" Focusable="False" IsTabStop="False"
                       MaxWidth="1000" Margin="28,24,36,36" />
     </ScrollViewer>
