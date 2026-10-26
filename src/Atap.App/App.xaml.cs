@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text.Json;
 using System.Windows;
 using Atap.Composition;
@@ -20,6 +21,7 @@ public partial class App : Application
     private Ui.Theme.HighContrastTheme? _highContrast;
     private readonly WidgetSettingsWatch _widgetSettings = new();
     private bool _quitting;
+    private bool _deleteDataOnQuit;
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -56,6 +58,11 @@ public partial class App : Application
             services.Layout.Changed += OnLayoutChanged;
 
             AppCommands.Register(services.Commands, () => _ = Dispatcher.InvokeAsync(QuitAsync), _updates);
+            services.DeleteAllDataAndQuit = () =>
+            {
+                _deleteDataOnQuit = true;
+                _ = Dispatcher.InvokeAsync(QuitAsync);
+            };
             var menu = new NotchMenuViewModel(services.NotchHost, _updates, services.Commands, services.Text);
             menu.QuitRequested += async (_, _) => await QuitAsync();
             services.NotchHost.Start(menu);
@@ -272,8 +279,41 @@ public partial class App : Application
             _services.NotchHost.Dispose();
             await _services.Widgets.DisposeAsync();
             _services.Dispose();
+            // Last, so nothing that closed above writes its files again.
+            if (_deleteDataOnQuit)
+            {
+                var paths = _services.Paths;
+                await Task.Run(() => DeleteAllData(paths));
+            }
         }
 
         Shutdown();
+    }
+
+    /// <summary>
+    /// Takes Atap out of Windows startup, then deletes its data folders. Nothing is logged from here on, as
+    /// the log folder goes too and a line would bring it back.
+    /// </summary>
+    private static void DeleteAllData(AtapPaths paths)
+    {
+        if (Platform.Startup.WindowsStartup.IsSupported)
+        {
+            try
+            {
+                Platform.Startup.WindowsStartup.CreateDefault().Unregister();
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or IOException)
+            {
+                // The entry stays, so Atap starts fresh at the next sign-in.
+            }
+        }
+        try
+        {
+            AtapDataEraser.Erase(paths);
+        }
+        catch (InvalidOperationException)
+        {
+            // Not Atap's own folders, for example a test copy pointed elsewhere: nothing is deleted.
+        }
     }
 }
