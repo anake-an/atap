@@ -24,8 +24,11 @@ internal sealed class HotkeysDescriptor : IFeatureDescriptor
     public const string PanelKey = Prefix + PanelFeature.ToggleCommand;
     public const string CommandBarKey = Prefix + "commandbar.open";
 
+    /// <summary>Opens the command bar ready to ask AI. Unset by default, and does nothing while Ask AI is off.</summary>
+    public const string AskAiKey = Prefix + Ai.AiDescriptor.AskCommand;
+
     /// <summary>Every shortcut setting, in the order Settings shows them.</summary>
-    public static IReadOnlyList<string> Keys { get; } = [PanelKey, CommandBarKey];
+    public static IReadOnlyList<string> Keys { get; } = [PanelKey, CommandBarKey, AskAiKey];
 
     public string Id => FeatureId;
 
@@ -40,6 +43,11 @@ internal sealed class HotkeysDescriptor : IFeatureDescriptor
         {
             SectionId = SettingsSections.Behavior,
             DescriptionKey = "hotkeys.commandBarHint",
+        },
+        new(AskAiKey, "hotkeys.askAi", SettingType.Hotkey, string.Empty)
+        {
+            SectionId = SettingsSections.Behavior,
+            DescriptionKey = "hotkeys.askAiHint",
         },
     ];
 

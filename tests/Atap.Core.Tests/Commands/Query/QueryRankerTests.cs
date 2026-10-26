@@ -104,6 +104,19 @@ public class QueryRankerTests
     }
 
     [Fact]
+    public void Rank_KeepsAskAiRightAboveWebSearch_EvenWhenFull()
+    {
+        var askAi = new QueryCandidate("ai", QueryResultKind.AskAi, "Ask AI: \"e\"");
+
+        var ranked = QueryRanker.Rank("e", [askAi, .. Everything], maxResults: 5);
+
+        Assert.Equal(5, ranked.Count);
+        Assert.Equal(WebSearch, ranked[^1].Candidate);
+        Assert.Equal(askAi, ranked[^2].Candidate);
+        Assert.Single(ranked, r => r.Candidate.Kind == QueryResultKind.AskAi);
+    }
+
+    [Fact]
     public void Rank_PinsCalculationsAndConversionsToTheTop()
     {
         var conversion = new QueryCandidate("conversion", QueryResultKind.Conversion, "5 km = 3.10685596118667 mi");

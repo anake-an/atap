@@ -15,6 +15,9 @@ public enum QueryResultKind
     /// <summary>An installed app.</summary>
     App,
 
+    /// <summary>The Ask AI row. Right above web search, with no text matching. Only while Ask AI is on.</summary>
+    AskAi,
+
     /// <summary>The web search row. Always the last row, with no text matching.</summary>
     WebSearch,
 }

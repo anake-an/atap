@@ -2,5 +2,7 @@
   "hotkeys.panel": "Show the panel",
   "hotkeys.panelHint": "Tap to open or close the panel. Hold to peek at the notch until you let go.",
   "hotkeys.commandBar": "Open the command bar",
-  "hotkeys.commandBarHint": "Type to run any Atap action, do quick sums or open an app."
+  "hotkeys.commandBarHint": "Type to run any Atap action, do quick sums or open an app.",
+  "hotkeys.askAi": "Ask AI",
+  "hotkeys.askAiHint": "Opens the command bar ready for a question. Turn on Ask AI first. No shortcut until you set one."
 }

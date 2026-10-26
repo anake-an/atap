@@ -5,7 +5,8 @@ namespace Atap.Core.Commands.Query;
 /// Calculations and conversions come first, because a provider only offers one when the query parsed.
 /// Commands and apps follow, if their title or a keyword matches, best score first.
 /// Equal scores go by kind (commands before apps), then title without case, then title, then id, all ordinal.
-/// The web search row is always last and always kept, even when the list is full.
+/// The web search row is always last and always kept, even when the list is full. The Ask AI row, when
+/// offered, is kept the same way, right above it.
 /// Rows with the same kind and id appear once, at their best place.
 /// </remarks>
 public static class QueryRanker
@@ -23,7 +24,7 @@ public static class QueryRanker
     /// </summary>
     /// <param name="query">The text typed.</param>
     /// <param name="candidates">Rows from every provider. Null entries are skipped.</param>
-    /// <param name="maxResults">Most rows returned, web search included. At least 1.</param>
+    /// <param name="maxResults">Most rows returned, web search and Ask AI included. At least 1.</param>
     public static IReadOnlyList<RankedCandidate> Rank(
         string? query, IEnumerable<QueryCandidate?> candidates, int maxResults = DefaultMaxResults)
     {
@@ -37,6 +38,7 @@ public static class QueryRanker
         var pinned = new List<RankedCandidate>();
         var matched = new List<RankedCandidate>();
         QueryCandidate? webSearch = null;
+        QueryCandidate? askAi = null;
 
         foreach (var candidate in candidates)
         {
@@ -54,6 +56,11 @@ public static class QueryRanker
                         webSearch = candidate;
                     break;
 
+                case QueryResultKind.AskAi:
+                    if (askAi is null || string.CompareOrdinal(candidate.Id, askAi.Id) < 0)
+                        askAi = candidate;
+                    break;
+
                 default:
                     var score = QueryMatcher.Score(prepared, candidate);
                     if (score > 0)
@@ -62,7 +69,7 @@ public static class QueryRanker
             }
         }
 
-        var room = webSearch is null ? maxResults : maxResults - 1;
+        var room = Math.Max(0, maxResults - (webSearch is null ? 0 : 1) - (askAi is null ? 0 : 1));
         var results = new List<RankedCandidate>(maxResults);
         var seen = new HashSet<(QueryResultKind, string)>();
         foreach (var row in pinned.Order(RowOrder).Concat(matched.Order(RowOrder)))
@@ -73,6 +80,8 @@ public static class QueryRanker
                 results.Add(row);
         }
 
+        if (askAi is not null)
+            results.Add(new RankedCandidate(askAi, 0));
         if (webSearch is not null)
             results.Add(new RankedCandidate(webSearch, 0));
         return results;

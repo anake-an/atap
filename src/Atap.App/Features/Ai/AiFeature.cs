@@ -71,6 +71,9 @@ internal interface IAskAi
     /// <summary>What is missing before a question can go, read fresh from the settings.</summary>
     AiSetupProblem Problem { get; }
 
+    /// <summary>The chosen service, read fresh from the settings.</summary>
+    AiProvider Provider { get; }
+
     /// <summary>The service's name, such as "Claude".</summary>
     string ServiceName { get; }
 
@@ -113,7 +116,9 @@ internal sealed class AiFeature(
         }
     }
 
-    public string ServiceName => text[AiText.ServiceKey(AiSetup.Provider(settings.Values))];
+    public AiProvider Provider => AiSetup.Provider(settings.Values);
+
+    public string ServiceName => text[AiText.ServiceKey(Provider)];
 
     public Task StartAsync()
     {

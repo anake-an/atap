@@ -2,6 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="clr-namespace:Atap.Ui.Localization"
+        xmlns:ai="clr-namespace:Atap.Features.Ai"
         Title="{loc:T commandbar.open}"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -61,6 +62,73 @@
           </Setter.Value>
         </Setter>
       </Style>
+
+      <!-- A Windows 11 tick box: a small rounded square, filled with the accent while ticked. -->
+      <Style x:Key="CommandBar.Check" TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{DynamicResource InkBrush}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="Template">
+          <Setter.Value>
+            <ControlTemplate TargetType="CheckBox">
+              <StackPanel Orientation="Horizontal" Background="Transparent">
+                <Border x:Name="Box" Width="18" Height="18" CornerRadius="4" BorderThickness="1"
+                        BorderBrush="{DynamicResource InkSecondaryBrush}" Background="{DynamicResource SettingsCardBrush}" VerticalAlignment="Center">
+                  <TextBlock x:Name="Tick" Text="&#xE73E;" FontFamily="{DynamicResource IconFont}" FontSize="12"
+                             Foreground="{DynamicResource SettingsCardBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed" />
+                </Border>
+                <ContentPresenter Margin="10,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="False" />
+              </StackPanel>
+              <ControlTemplate.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                  <Setter TargetName="Box" Property="Background" Value="{DynamicResource ToggleOnBrush}" />
+                  <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource ToggleOnBrush}" />
+                  <Setter TargetName="Tick" Property="Visibility" Value="Visible" />
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="True">
+                  <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource InkBrush}" />
+                </Trigger>
+              </ControlTemplate.Triggers>
+            </ControlTemplate>
+          </Setter.Value>
+        </Setter>
+      </Style>
+
+      <!-- The answer pane: the question, the answer as plain text, what is happening, and Stop, Copy and Ask again. -->
+      <DataTemplate x:Key="CommandBar.Answer" DataType="{x:Type ai:AskAiViewModel}">
+        <Border Margin="0,8,0,0" Padding="14,12" CornerRadius="6" BorderThickness="1"
+                Background="{DynamicResource WindowBrush}" BorderBrush="{DynamicResource SettingsCardBorderBrush}"
+                AutomationProperties.Name="{loc:T ai.answer}"
+                Visibility="{Binding HasConversation, Converter={StaticResource Settings.BoolToVisibility}}">
+          <StackPanel>
+            <TextBlock Text="{Binding QuestionText}" FontSize="12" Foreground="{DynamicResource InkSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+            <TextBox x:Name="Answer" Text="{Binding AnswerText, Mode=OneWay}" IsReadOnly="True" IsReadOnlyCaretVisible="False"
+                     TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                     MaxHeight="320" Margin="-3,8,-3,0" Padding="0" BorderThickness="0" Background="Transparent"
+                     Foreground="{DynamicResource InkBrush}" FontSize="14" FocusVisualStyle="{x:Null}"
+                     AutomationProperties.Name="{loc:T ai.answer}" />
+            <DockPanel Margin="0,12,0,0">
+              <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Style="{StaticResource Settings.Button}" Content="{loc:T ai.stop}" Command="{Binding StopCommand}" Margin="8,0,0,0"
+                        Visibility="{Binding IsAsking, Converter={StaticResource Settings.BoolToVisibility}}" />
+                <Button Style="{StaticResource Settings.Button}" Content="{Binding CopyText}" Command="{Binding CopyCommand}" Margin="8,0,0,0"
+                        AutomationProperties.Name="{loc:T ai.copy}" />
+                <Button Style="{StaticResource Settings.Button}" Content="{loc:T ai.again}" Command="{Binding AgainCommand}" Margin="8,0,0,0" />
+              </StackPanel>
+              <TextBlock x:Name="Status" Text="{Binding StatusText}" Style="{StaticResource Settings.Hint}" VerticalAlignment="Center"
+                         AutomationProperties.LiveSetting="Polite" />
+            </DockPanel>
+          </StackPanel>
+        </Border>
+        <DataTemplate.Triggers>
+          <DataTrigger Binding="{Binding HasFailed}" Value="True">
+            <Setter TargetName="Status" Property="Foreground" Value="{DynamicResource InkBrush}" />
+            <Setter TargetName="Status" Property="FontWeight" Value="SemiBold" />
+          </DataTrigger>
+        </DataTemplate.Triggers>
+      </DataTemplate>
     </ResourceDictionary>
   </Window.Resources>
 
@@ -103,6 +171,19 @@
         </TextBlock>
       </Grid>
 
+      <!-- Copied text goes with a question only while this is ticked, and the preview shows what goes. -->
+      <StackPanel Margin="12,4,12,0" Visibility="{Binding ShowCopiedOption, Converter={StaticResource Settings.BoolToVisibility}}">
+        <CheckBox Style="{StaticResource CommandBar.Check}" Content="{loc:T ai.includeCopied}" IsChecked="{Binding Ai.IncludeCopied}"
+                  AutomationProperties.Name="{loc:T ai.includeCopied}" />
+        <Border Margin="28,6,0,0" Padding="10,6" CornerRadius="6" Background="{DynamicResource WindowBrush}"
+                Visibility="{Binding Ai.HasCopiedPreview, Converter={StaticResource Settings.BoolToVisibility}}">
+          <TextBlock Text="{Binding Ai.CopiedPreview}" FontSize="12" Foreground="{DynamicResource InkSecondaryBrush}" TextWrapping="Wrap"
+                     MaxHeight="54" TextTrimming="CharacterEllipsis" />
+        </Border>
+        <TextBlock Text="{Binding Ai.CopiedNote}" Style="{StaticResource Settings.Hint}" Margin="28,4,0,0"
+                   Visibility="{Binding Ai.HasCopiedNote, Converter={StaticResource Settings.BoolToVisibility}}" />
+      </StackPanel>
+
       <ListBox x:Name="Results"
                ItemsSource="{Binding Rows}"
                SelectedIndex="{Binding SelectedIndex}"
@@ -114,6 +195,10 @@
                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                AutomationProperties.Name="{loc:T commandbar.results}"
                Visibility="{Binding HasRows, Converter={StaticResource Settings.BoolToVisibility}}" />
+
+      <!-- The answer, as plain text in a read-only box. Nothing in it is parsed, linked or loaded. -->
+      <ContentControl x:Name="AnswerPane" Content="{Binding Ai}" ContentTemplate="{StaticResource CommandBar.Answer}"
+                      Focusable="False" IsTabStop="False" />
     </StackPanel>
   </Border>
 </Window>

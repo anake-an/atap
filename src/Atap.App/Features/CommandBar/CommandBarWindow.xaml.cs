@@ -36,6 +36,9 @@ public partial class CommandBarWindow : Window
     protected override void OnPreviewKeyDown(KeyEventArgs e)
     {
         base.OnPreviewKeyDown(e);
+        // Esc closes from anywhere. The other keys belong to the box, so the answer and its buttons keep theirs.
+        if (e.Key != Key.Escape && !Box.IsKeyboardFocusWithin)
+            return;
         switch (e.Key)
         {
             case Key.Down:
@@ -124,7 +127,12 @@ internal sealed class CommandBarShell : ICommandBarShell
         // Noted before the command bar takes the keyboard, so Esc can give it back.
         var previous = NativeMethods.GetForegroundWindow();
         var window = new CommandBarWindow(viewModel, previous);
-        window.Closed += (_, _) => _window = null;
+        window.Closed += (_, _) =>
+        {
+            _window = null;
+            // Stops an answer and forgets the conversation.
+            viewModel.Dispose();
+        };
         _window = window;
         window.Show();
         window.Activate();
