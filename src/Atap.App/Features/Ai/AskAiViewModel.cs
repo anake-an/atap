@@ -10,13 +10,17 @@ namespace Atap.Features.Ai;
 /// <summary>
 /// The answer pane in the command bar. Only <see cref="Ask"/> sends, and the command bar calls it on Enter. The
 /// conversation lives here, in memory, so it goes when the bar closes and this is disposed. The answer is plain
-/// text, cleaned line by line with <see cref="TextSanitizer"/>. Copied text goes only while the box is ticked,
-/// and the tick clears after each question.
+/// text, cleaned line by line with <see cref="TextSanitizer"/>. Pieces of the answer are gathered and shown at
+/// most every 75 ms, and only the new text is cleaned, so a long answer stays cheap. Copied text goes only while
+/// the box is ticked, and the tick clears after each question.
 /// </summary>
 internal sealed class AskAiViewModel : ObservableObject, IDisposable
 {
     /// <summary>Earlier turns kept for follow-ups, so a long talk does not grow without end.</summary>
     internal const int MaxTurns = 20;
+
+    /// <summary>How often new pieces of the answer reach the screen, at most.</summary>
+    internal static readonly TimeSpan RefreshEvery = TimeSpan.FromMilliseconds(75);
 
     /// <summary>How much of the copied text the preview shows.</summary>
     private const int PreviewLength = 280;
@@ -26,13 +30,20 @@ internal sealed class AskAiViewModel : ObservableObject, IDisposable
     private readonly SynchronizationContext? _ui;
     private readonly Func<string?> _readClipboard;
     private readonly Func<string, bool> _copy;
+    private readonly TimeProvider _time;
     private readonly List<AiTurn> _turns = [];
+
+    // Pieces arrive on a worker thread. Everything below the lock is shared with it.
+    private readonly object _gate = new();
+    private readonly StringBuilder _pending = new();
     private readonly StringBuilder _answer = new();
+    private readonly AnswerCleaner _cleaner = new();
+    private ITimer? _refresh;
     private CancellationTokenSource? _asking;
     private string? _answerText;
+
     private string? _question;
     private string? _lastQuestion;
-    private string? _lastCopied;
     private bool _includeCopied;
     private string _copied = string.Empty;
     private bool _copiedCut;
@@ -46,13 +57,15 @@ internal sealed class AskAiViewModel : ObservableObject, IDisposable
     /// <param name="ui">Where answer pieces are shown. Inline when null, for tests.</param>
     /// <param name="readClipboard">Reads the copied text, only when the box is ticked.</param>
     /// <param name="copy">Puts the answer on the clipboard.</param>
-    public AskAiViewModel(IAskAi ai, ILocalizer text, SynchronizationContext? ui, Func<string?> readClipboard, Func<string, bool> copy)
+    /// <param name="time">The clock for the 75 ms refresh. The system clock when null.</param>
+    public AskAiViewModel(IAskAi ai, ILocalizer text, SynchronizationContext? ui, Func<string?> readClipboard, Func<string, bool> copy, TimeProvider? time = null)
     {
         _ai = ai;
         _text = text;
         _ui = ui;
         _readClipboard = readClipboard;
         _copy = copy;
+        _time = time ?? TimeProvider.System;
         StopCommand = new RelayCommand(Stop, () => IsAsking);
         CopyCommand = new RelayCommand(Copy, () => AnswerText.Length > 0);
         AgainCommand = new RelayCommand(AskAgain, () => !IsAsking && _lastQuestion is not null);
@@ -73,13 +86,27 @@ internal sealed class AskAiViewModel : ObservableObject, IDisposable
     /// <summary>True once a question was asked, so the pane shows.</summary>
     public bool HasConversation => _question is not null;
 
-    public bool IsAsking => _asking is not null;
+    public bool IsAsking
+    {
+        get
+        {
+            lock (_gate)
+                return _asking is not null;
+        }
+    }
 
     /// <summary>The question being answered, as typed, without any copied text.</summary>
     public string QuestionText => _question is null ? string.Empty : _text.Format("ai.question", ("question", TextSanitizer.Sanitize(_question)));
 
     /// <summary>The answer as plain text, cleaned line by line.</summary>
-    public string AnswerText => _answerText ??= Clean(_answer.ToString());
+    public string AnswerText
+    {
+        get
+        {
+            lock (_gate)
+                return _answerText ??= _cleaner.Text;
+        }
+    }
 
     /// <summary>Asking, done, or what went wrong. A screen reader reads it as it changes.</summary>
     public string StatusText => _status?.Invoke() ?? string.Empty;
@@ -129,14 +156,16 @@ internal sealed class AskAiViewModel : ObservableObject, IDisposable
         var asked = question.Trim();
         if (_disposed || asked.Length == 0 || _ai.Problem != AiSetupProblem.None)
             return false;
-        var copied = _includeCopied && _copied.Length > 0 ? _copied : null;
-        IncludeCopied = false;
-        Send(asked, copied);
+        Send(asked, TakeCopied());
         return true;
     }
 
     /// <summary>Stops the answer. What arrived stays on screen.</summary>
-    public void Stop() => _asking?.Cancel();
+    public void Stop()
+    {
+        lock (_gate)
+            _asking?.Cancel();
+    }
 
     /// <summary>Stops the answer and forgets the conversation. The command bar calls it when it closes.</summary>
     public void Dispose()
@@ -145,40 +174,61 @@ internal sealed class AskAiViewModel : ObservableObject, IDisposable
             return;
         _disposed = true;
         _ai.SetupChanged -= OnSetupChanged;
-        _asking?.Cancel();
-        _asking = null;
+        lock (_gate)
+        {
+            _asking?.Cancel();
+            _asking = null;
+            _refresh?.Dispose();
+            _refresh = null;
+            _pending.Clear();
+            _answer.Clear();
+            _cleaner.Clear();
+        }
         _turns.Clear();
-        _answer.Clear();
         _copied = string.Empty;
-        _lastCopied = null;
         _lastQuestion = null;
     }
 
+    /// <summary>Sends the last question again. Copied text goes only if the box is ticked now.</summary>
     private void AskAgain()
     {
         if (_lastQuestion is { } question)
-            Send(question, _lastCopied);
+            Send(question, TakeCopied());
+    }
+
+    /// <summary>The copied text while the box is ticked, else null. The tick clears, so it goes once.</summary>
+    private string? TakeCopied()
+    {
+        var copied = _includeCopied && _copied.Length > 0 ? _copied : null;
+        IncludeCopied = false;
+        return copied;
     }
 
     private void Send(string question, string? copied)
     {
         // A new question stops the last one. An unfinished turn is not kept.
-        _asking?.Cancel();
         if (_turns.Count > 0 && _turns[^1].Role == AiRole.User)
             _turns.RemoveAt(_turns.Count - 1);
         while (_turns.Count >= MaxTurns)
             _turns.RemoveRange(0, 2);
 
         _lastQuestion = question;
-        _lastCopied = copied;
         _question = question;
-        _answer.Clear();
-        _answerText = null;
         _failed = false;
         _justCopied = false;
         _turns.Add(new AiTurn(AiRole.User, AiPrompt.Build(question, copied)));
         var asking = new CancellationTokenSource();
-        _asking = asking;
+        lock (_gate)
+        {
+            _asking?.Cancel();
+            _asking = asking;
+            _refresh?.Dispose();
+            _refresh = null;
+            _pending.Clear();
+            _answer.Clear();
+            _cleaner.Clear();
+            _answerText = null;
+        }
         var service = _ai.ServiceName;
         SetStatus(() => _text.Format("ai.asking", ("service", service)));
         RaiseAll();
@@ -190,7 +240,7 @@ internal sealed class AskAiViewModel : ObservableObject, IDisposable
         AiEvent result;
         try
         {
-            result = await _ai.AskAsync(turns, e => OnUi(() => Append(e, asking)), asking.Token).ConfigureAwait(false);
+            result = await _ai.AskAsync(turns, e => Gather(e, asking), asking.Token).ConfigureAwait(false);
         }
         catch (Exception)
         {
@@ -200,26 +250,62 @@ internal sealed class AskAiViewModel : ObservableObject, IDisposable
         OnUi(() => Finish(result, asking));
     }
 
-    private void Append(AiEvent piece, CancellationTokenSource asking)
+    /// <summary>On the worker thread: keeps the piece, and asks for one refresh 75 ms on if none is waiting.</summary>
+    private void Gather(AiEvent piece, CancellationTokenSource asking)
     {
-        if (!ReferenceEquals(_asking, asking) || piece.Kind != AiEventKind.Delta)
+        if (piece.Kind != AiEventKind.Delta || piece.Text.Length == 0)
             return;
-        _answer.Append(piece.Text);
-        _answerText = null;
+        lock (_gate)
+        {
+            if (!ReferenceEquals(_asking, asking))
+                return;
+            _pending.Append(piece.Text);
+            _refresh ??= _time.CreateTimer(_ => OnUi(() => Refresh(asking)), null, RefreshEvery, Timeout.InfiniteTimeSpan);
+        }
+    }
+
+    /// <summary>Cleans only the new text and shows it.</summary>
+    private void Refresh(CancellationTokenSource asking)
+    {
+        lock (_gate)
+        {
+            // A refresh for an earlier question leaves the current one's timer alone.
+            if (!ReferenceEquals(_asking, asking))
+                return;
+            _refresh?.Dispose();
+            _refresh = null;
+            if (_pending.Length == 0)
+                return;
+            var added = _pending.ToString();
+            _pending.Clear();
+            _answer.Append(added);
+            _cleaner.Add(added);
+            _answerText = null;
+        }
         OnPropertyChanged(nameof(AnswerText));
         CopyCommand.NotifyCanExecuteChanged();
     }
 
     private void Finish(AiEvent result, CancellationTokenSource asking)
     {
+        // Whatever is still waiting shows before the end.
+        Refresh(asking);
+        string answer;
+        lock (_gate)
+        {
+            if (!ReferenceEquals(_asking, asking))
+            {
+                asking.Dispose();
+                return;
+            }
+            _asking = null;
+            answer = _answer.ToString();
+        }
         asking.Dispose();
-        if (!ReferenceEquals(_asking, asking))
-            return;
-        _asking = null;
         var service = _ai.ServiceName;
         if (result.Kind == AiEventKind.Done)
         {
-            _turns.Add(new AiTurn(AiRole.Assistant, _answer.ToString()));
+            _turns.Add(new AiTurn(AiRole.Assistant, answer));
             var capped = result.Capped;
             SetStatus(() => capped
                 ? _text["ai.capped"] + " " + _text.Format("ai.done", ("service", service))
@@ -240,14 +326,19 @@ internal sealed class AskAiViewModel : ObservableObject, IDisposable
 
     private void Copy()
     {
-        if (AnswerText.Length == 0 || !_copy(AnswerText))
+        var answer = AnswerText;
+        if (answer.Length == 0 || !_copy(answer))
             return;
         _justCopied = true;
         OnPropertyChanged(nameof(CopyText));
     }
 
-    /// <summary>The service, key or model changed: the answer in flight stops.</summary>
-    private void OnSetupChanged(object? sender, EventArgs e) => Stop();
+    /// <summary>The service, key or model changed: the answer in flight stops, and copied text is not kept for it.</summary>
+    private void OnSetupChanged(object? sender, EventArgs e)
+    {
+        Stop();
+        IncludeCopied = false;
+    }
 
     private void SetStatus(Func<string> status) => _status = status;
 
@@ -276,28 +367,74 @@ internal sealed class AskAiViewModel : ObservableObject, IDisposable
     /// <summary>Each line cleaned on its own, so line breaks stay and control and direction characters go.</summary>
     internal static string Clean(string text)
     {
-        if (text.Length == 0)
-            return string.Empty;
-        var lines = text.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
-        var cleaned = new StringBuilder(text.Length);
-        var blank = 0;
-        foreach (var line in lines)
+        var cleaner = new AnswerCleaner();
+        cleaner.Add(text);
+        return cleaner.Text;
+    }
+
+    /// <summary>
+    /// Cleans text as it arrives. Finished lines are cleaned once and kept. Only the unfinished last line is
+    /// cleaned again when more of it comes. At most one empty line stays between paragraphs.
+    /// </summary>
+    private sealed class AnswerCleaner
+    {
+        private readonly StringBuilder _done = new();
+        private string _partial = string.Empty;
+        private int _blank;
+
+        public string Text
         {
+            get
+            {
+                var last = TextSanitizer.Sanitize(_partial);
+                if (last.Length == 0)
+                    return _done.ToString().TrimEnd('\n');
+                var text = new StringBuilder(_done.Length + last.Length + 1).Append(_done);
+                if (text.Length > 0)
+                    text.Append('\n');
+                return text.Append(last).ToString();
+            }
+        }
+
+        public void Add(string text)
+        {
+            if (text.Length == 0)
+                return;
+            var start = 0;
+            for (var i = 0; i < text.Length; i++)
+            {
+                if (text[i] != '\n')
+                    continue;
+                AddLine(_partial + text[start..i]);
+                _partial = string.Empty;
+                start = i + 1;
+            }
+            _partial += text[start..];
+        }
+
+        public void Clear()
+        {
+            _done.Clear();
+            _partial = string.Empty;
+            _blank = 0;
+        }
+
+        private void AddLine(string line)
+        {
+            // A line break of "\r\n" leaves a "\r" that the cleaning takes out as a control character.
             var clean = TextSanitizer.Sanitize(line);
             if (clean.Length == 0)
             {
-                // At most one empty line between paragraphs.
-                if (++blank > 1 || cleaned.Length == 0)
-                    continue;
+                if (++_blank > 1 || _done.Length == 0)
+                    return;
             }
             else
             {
-                blank = 0;
+                _blank = 0;
             }
-            if (cleaned.Length > 0)
-                cleaned.Append('\n');
-            cleaned.Append(clean);
+            if (_done.Length > 0)
+                _done.Append('\n');
+            _done.Append(clean);
         }
-        return cleaned.ToString().TrimEnd('\n');
     }
 }

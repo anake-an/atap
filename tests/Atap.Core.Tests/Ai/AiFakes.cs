@@ -73,6 +73,53 @@ internal sealed record SeenRequest(HttpRequestMessage Message, string Body)
         Message.Headers.TryGetValues(name, out var values) ? string.Join(",", values) : null;
 }
 
+/// <summary>A body that repeats the same bytes forever, after an optional start, and counts what was read.</summary>
+internal sealed class EndlessStream(byte[] pattern, byte[]? start = null) : Stream
+{
+    private byte[] _current = start ?? pattern;
+    private int _offset;
+
+    public long Given { get; private set; }
+
+    public override bool CanRead => true;
+
+    public override bool CanSeek => false;
+
+    public override bool CanWrite => false;
+
+    public override long Length => throw new NotSupportedException();
+
+    public override long Position
+    {
+        get => throw new NotSupportedException();
+        set => throw new NotSupportedException();
+    }
+
+    public override int Read(byte[] buffer, int offset, int count)
+    {
+        if (_offset >= _current.Length)
+        {
+            _current = pattern;
+            _offset = 0;
+        }
+        var length = Math.Min(count, _current.Length - _offset);
+        Array.Copy(_current, _offset, buffer, offset, length);
+        _offset += length;
+        Given += length;
+        return length;
+    }
+
+    public override void Flush()
+    {
+    }
+
+    public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+
+    public override void SetLength(long value) => throw new NotSupportedException();
+
+    public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+}
+
 /// <summary>A response body the test writes to while the transport reads it. Reads wait, with the token, until there is more.</summary>
 internal sealed class ScriptedStream : Stream
 {

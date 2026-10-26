@@ -35,6 +35,9 @@ public sealed class AiTransport : IDisposable
 
     internal const int MaxLineBytes = 256 * 1024;
 
+    /// <summary>The most data one event may collect before its blank line.</summary>
+    internal const int MaxEventBytes = 256 * 1024;
+
     /// <summary>Only the start of an error body is read, to tell kinds of error apart. It is never kept.</summary>
     private const int MaxErrorBytes = 16 * 1024;
 
@@ -291,16 +294,23 @@ public sealed class AiTransport : IDisposable
         var answerBytes = 0;
         var started = false;
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        var reader = new SseReader(stream, MaxLineBytes, () =>
+        var reader = new SseReader(stream, MaxLineBytes, MaxEventBytes, MaxStreamBytes, () =>
         {
             if (started)
                 wait(StallLimit);
         });
         while (true)
         {
-            if (reader.BytesRead > MaxStreamBytes)
-                return started ? AiEvent.Done with { Capped = true } : AiEvent.Failed(AiError.Unexpected);
-            var message = await reader.ReadAsync(cancellationToken).ConfigureAwait(false);
+            SseMessage? message;
+            try
+            {
+                message = await reader.ReadAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (InvalidDataException) when (reader.OverTotal && started)
+            {
+                // What arrived stays. The rest was never read.
+                return AiEvent.Done with { Capped = true };
+            }
             if (message is not { } next)
                 return started ? AiEvent.Done : AiEvent.Failed(AiError.Unexpected);
             var result = dialect.Read(next);

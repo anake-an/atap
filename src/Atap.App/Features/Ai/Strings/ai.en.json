@@ -41,7 +41,7 @@
   "ai.server": "Server address",
   "ai.serverHint": "For example http://localhost:11434/v1",
   "ai.serverBad": "Type a full address that starts with http:// or https://.",
-  "ai.serverPlain": "This address is not encrypted. Atap sends to it only on this PC or your own network.",
+  "ai.serverPlain": "This address uses http, so your key crosses your home network unlocked. Use https if your server has it.",
   "ai.serverSaved": "Address saved.",
   "ai.model": "Model",
   "ai.modelHint": "Leave empty to use Fast or Smarter. Or type a model name from the service, such as {example}.",

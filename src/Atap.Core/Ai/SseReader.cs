@@ -7,13 +7,16 @@ public readonly record struct SseMessage(string Event, string Data);
 
 /// <summary>
 /// Reads server-sent events from a stream. Lines are split on the byte level, so a line or a letter split
-/// across two reads is put back together, and a line longer than the cap stops the read with
-/// <see cref="InvalidDataException"/> instead of growing without end.
+/// across two reads is put back together. Three caps stop the read with <see cref="InvalidDataException"/>
+/// instead of growing without end: one line, the data of one event, and everything read from the stream,
+/// which is after any decompression.
 /// </summary>
 internal sealed class SseReader
 {
     private readonly Stream _stream;
     private readonly int _maxLineBytes;
+    private readonly int _maxEventBytes;
+    private readonly long _maxTotalBytes;
     private readonly Action _onLine;
     private readonly byte[] _buffer = new byte[8192];
     private readonly MemoryStream _line = new();
@@ -23,16 +26,23 @@ internal sealed class SseReader
 
     /// <param name="stream">The response body.</param>
     /// <param name="maxLineBytes">The longest line accepted.</param>
+    /// <param name="maxEventBytes">The most data one event may collect, in characters, before its blank line.</param>
+    /// <param name="maxTotalBytes">The most the stream may give in all.</param>
     /// <param name="onLine">Called for every line read, comments and pings too, so a stall timer can start again.</param>
-    public SseReader(Stream stream, int maxLineBytes, Action onLine)
+    public SseReader(Stream stream, int maxLineBytes, int maxEventBytes, long maxTotalBytes, Action onLine)
     {
         _stream = stream;
         _maxLineBytes = maxLineBytes;
+        _maxEventBytes = maxEventBytes;
+        _maxTotalBytes = maxTotalBytes;
         _onLine = onLine;
     }
 
     /// <summary>Every byte read from the stream so far.</summary>
     public long BytesRead { get; private set; }
+
+    /// <summary>True once the stream gave more than the total cap. The read then stopped.</summary>
+    public bool OverTotal => BytesRead > _maxTotalBytes;
 
     /// <summary>The next event, or null at the end of the stream.</summary>
     public async ValueTask<SseMessage?> ReadAsync(CancellationToken cancellationToken)
@@ -69,6 +79,9 @@ internal sealed class SseReader
                     data = new StringBuilder(value);
                 else
                     data.Append('\n').Append(value);
+                // Data lines with no blank line between them would grow one event without end.
+                if (data.Length > _maxEventBytes)
+                    throw new InvalidDataException("An event from the server is too long.");
             }
         }
     }
@@ -97,6 +110,8 @@ internal sealed class SseReader
                 continue;
             }
             BytesRead += read;
+            if (BytesRead > _maxTotalBytes)
+                throw new InvalidDataException("The server sent too much.");
             _end = read;
         }
     }

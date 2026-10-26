@@ -41,7 +41,7 @@
   "ai.server": "Alamat pelayan",
   "ai.serverHint": "Contohnya http://localhost:11434/v1",
   "ai.serverBad": "Taip alamat penuh yang bermula dengan http:// atau https://.",
-  "ai.serverPlain": "Alamat ini tidak disulitkan. Atap menghantar kepadanya hanya di PC ini atau rangkaian anda sendiri.",
+  "ai.serverPlain": "Alamat ini menggunakan http, jadi kunci anda melalui rangkaian rumah anda tanpa dikunci. Gunakan https jika pelayan anda menyokongnya.",
   "ai.serverSaved": "Alamat disimpan.",
   "ai.model": "Model",
   "ai.modelHint": "Biarkan kosong untuk menggunakan Pantas atau Lebih bijak. Atau taip nama model daripada perkhidmatan itu, seperti {example}.",

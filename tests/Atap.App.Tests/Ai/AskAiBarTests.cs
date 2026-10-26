@@ -67,6 +67,8 @@ public sealed class AskAiBarTests : IDisposable
 
         _ai.Last.Delta("Kuala ");
         _ai.Last.Delta("Lumpur");
+        Assert.Equal(string.Empty, bar.Ai!.AnswerText);
+        _services.Time.Advance(AskAiViewModel.RefreshEvery);
         Assert.Equal("Kuala Lumpur", bar.Ai!.AnswerText);
         _ai.Last.Finish(AiEvent.Done);
 
@@ -217,8 +219,71 @@ public sealed class AskAiBarTests : IDisposable
         Ask(bar, "q");
 
         _ai.Last.Delta("First line‮ reversed\u0007\r\n\r\n\r\n\r\nSecond   line\n");
+        _services.Time.Advance(AskAiViewModel.RefreshEvery);
 
         Assert.Equal("First line reversed\n\nSecond line", bar.Ai!.AnswerText);
+    }
+
+    [Fact]
+    public void ManyTinyPieces_AreGathered_AndShownFast()
+    {
+        using var bar = Bar();
+        var shown = 0;
+        Ask(bar, "q");
+        bar.Ai!.PropertyChanged += (_, e) => shown += e.PropertyName == nameof(AskAiViewModel.AnswerText) ? 1 : 0;
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+
+        for (var i = 0; i < 65_000; i++)
+        {
+            _ai.Last.Delta(i % 100 == 99 ? "\n" : "a");
+            // A refresh every 1,000 pieces, as a fast stream past the 75 ms timer would get.
+            if (i % 1_000 == 999)
+                _services.Time.Advance(AskAiViewModel.RefreshEvery);
+        }
+        _ai.Last.Finish(AiEvent.Done);
+
+        clock.Stop();
+        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(2), $"Took {clock.Elapsed}.");
+        Assert.True(shown < 100, $"Shown {shown} times.");
+        Assert.Equal(650, bar.Ai.AnswerText.Split('\n').Length);
+        Assert.Equal(64_350, bar.Ai.AnswerText.Count(c => c == 'a'));
+    }
+
+    [Fact]
+    public void AskAgain_LeavesCopiedTextOut_UnlessTickedAgain()
+    {
+        _clipboard = "private notes";
+        using var bar = Bar();
+        bar.Ai!.IncludeCopied = true;
+        Ask(bar, "summarise");
+        Assert.Contains("private notes", _ai.Last.Turns[^1].Text);
+        _ai.Last.Finish(AiEvent.Failed(AiError.ServiceBusy));
+
+        bar.Ai.AgainCommand.Execute(null);
+        Assert.Equal("summarise", _ai.Last.Turns[^1].Text);
+        _ai.Last.Finish(AiEvent.Failed(AiError.ServiceBusy));
+
+        bar.Ai.IncludeCopied = true;
+        bar.Ai.AgainCommand.Execute(null);
+        Assert.Contains("private notes", _ai.Last.Turns[^1].Text);
+        Assert.False(bar.Ai.IncludeCopied);
+    }
+
+    [Fact]
+    public void ChangingTheService_UnticksCopiedText()
+    {
+        _clipboard = "private notes";
+        using var bar = Bar();
+        bar.Ai!.IncludeCopied = true;
+        Ask(bar, "first");
+        _ai.Last.Finish(AiEvent.Done);
+        bar.Ai.IncludeCopied = true;
+
+        _ai.RaiseSetupChanged();
+
+        Assert.False(bar.Ai.IncludeCopied);
+        bar.Ai.AgainCommand.Execute(null);
+        Assert.DoesNotContain("private notes", _ai.Last.Turns[^1].Text);
     }
 
     [Fact]
@@ -227,6 +292,7 @@ public sealed class AskAiBarTests : IDisposable
         using var bar = Bar();
         Ask(bar, "q");
         _ai.Last.Delta("The answer");
+        _services.Time.Advance(AskAiViewModel.RefreshEvery);
 
         bar.Ai!.CopyCommand.Execute(null);
 
@@ -312,7 +378,7 @@ public sealed class AskAiBarTests : IDisposable
         {
             _copied.Add(v);
             return true;
-        });
+        }, _services.Time);
         return new CommandBarViewModel(_services.Commands, _services.Text, new NoApps(), _ => { }, _ => true, CommandBarDescriptor.SearchPages["google"], pane, askMode);
     }
 

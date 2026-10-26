@@ -82,7 +82,7 @@ public sealed class AiPartsTests
     {
         var bytes = Encoding.UTF8.GetBytes(": hello\nevent: note\ndata: one\ndata: two\n\ndata: last");
         var lines = 0;
-        var reader = new SseReader(new MemoryStream(bytes), 1024, () => lines++);
+        var reader = new SseReader(new MemoryStream(bytes), 1024, 1024, 1024, () => lines++);
 
         var first = await reader.ReadAsync(CancellationToken.None);
         var second = await reader.ReadAsync(CancellationToken.None);

@@ -345,6 +345,55 @@ public sealed class AiTransportTests : IDisposable
         Assert.Equal(AiError.Unexpected, (await AskAsync(new AiAccount(AiProvider.OpenAi, "m", Key))).Result.Error);
     }
 
+    [Fact]
+    public async Task DataLinesWithNoBlankLine_StopAt256Kilobytes()
+    {
+        var body = new EndlessStream(Encoding.UTF8.GetBytes("data: " + new string('x', 1000) + "\n"));
+        _server.Respond = (_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StreamContent(body) });
+
+        var (result, _) = await AskAsync(new AiAccount(AiProvider.OpenAi, "m", Key));
+
+        Assert.Equal(AiError.Unexpected, result.Error);
+        Assert.True(body.Given < 512 * 1024, $"Read {body.Given} bytes.");
+    }
+
+    [Fact]
+    public async Task EventsThatNeverEnd_StopAt8Megabytes_KeepingWhatArrived()
+    {
+        var body = new EndlessStream(
+            Encoding.UTF8.GetBytes("event: ping\ndata: {\"type\":\"ping\"}\n\n"),
+            Encoding.UTF8.GetBytes("data: {\"type\":\"content_block_delta\",\"delta\":{\"type\":\"text_delta\",\"text\":\"Hi\"}}\n\n"));
+        _server.Respond = (_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StreamContent(body) });
+
+        var (result, text) = await AskAsync(new AiAccount(AiProvider.Anthropic, "m", Key));
+
+        Assert.Equal(AiEventKind.Done, result.Kind);
+        Assert.True(result.Capped);
+        Assert.Equal("Hi", text);
+        Assert.True(body.Given < AiTransport.MaxStreamBytes + 64 * 1024, $"Read {body.Given} bytes.");
+    }
+
+    [Fact]
+    public async Task AGzipBody_CountsWhatItUnpacksTo()
+    {
+        // About 40 MB of data lines that pack into a few kilobytes, read through the unpacking the real handler does.
+        using var packed = new MemoryStream();
+        using (var gzip = new System.IO.Compression.GZipStream(packed, System.IO.Compression.CompressionLevel.SmallestSize, leaveOpen: true))
+        {
+            var line = Encoding.UTF8.GetBytes(": keep going\n");
+            for (var i = 0; i < 3_000_000; i++)
+                gzip.Write(line);
+        }
+        Assert.True(packed.Length < 1024 * 1024);
+        packed.Position = 0;
+        var unpacked = new System.IO.Compression.GZipStream(packed, System.IO.Compression.CompressionMode.Decompress);
+        _server.Respond = (_, _) => Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StreamContent(unpacked) });
+
+        var (result, _) = await AskAsync(new AiAccount(AiProvider.OpenAi, "m", Key));
+
+        Assert.Equal(AiError.Unexpected, result.Error);
+    }
+
     [Theory]
     [InlineData(AiProvider.Anthropic, 401, "{\"type\":\"error\",\"error\":{\"type\":\"authentication_error\"}}", AiError.KeyNotAccepted)]
     [InlineData(AiProvider.Anthropic, 400, "{\"error\":{\"message\":\"Your credit balance is too low\"}}", AiError.OutOfCredit)]

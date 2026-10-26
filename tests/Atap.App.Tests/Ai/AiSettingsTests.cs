@@ -185,7 +185,7 @@ public sealed class AiSettingsTests : IDisposable
         card.GetKeyCommand.Execute(null);
 
         Assert.Equal([new Uri("https://aistudio.google.com/app/apikey")], _opened);
-        Assert.Equal("Gemini bills you for what you ask, not Atap. Check their prices first.", card.BillingText);
+        Assert.Equal("The company behind Gemini bills you for what you ask, not Atap. Check their prices first.", card.BillingText);
     }
 
     [Fact]
@@ -200,6 +200,7 @@ public sealed class AiSettingsTests : IDisposable
         Assert.False(card.HasKeyPage);
         Assert.False(card.CanPickService);
         Assert.True(card.HasServerWarning);
+        Assert.Equal("This address uses http, so your key crosses your home network unlocked. Use https if your server has it.", card.ServerWarning);
         card.Server = "not an address";
         card.SaveServerCommand.Execute(null);
         Assert.True(card.HasServerError);
