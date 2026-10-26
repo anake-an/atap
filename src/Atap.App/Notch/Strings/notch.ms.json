@@ -17,6 +17,7 @@
   "notch.update.check": "Semak kemas kini",
   "notch.update.checking": "Menyemak kemas kini…",
   "notch.update.downloading": "Memuat turun kemas kini…",
-  "notch.update.ready": "Kemas kini sudah sedia. Ia akan dipasang apabila Atap ditutup.",
+  "notch.update.ready": "Pasang kemas kini sekarang",
+  "notch.update.installing": "Memasang kemas kini. Atap akan dibuka semula sebentar lagi.",
   "notch.update.upToDate": "Atap sudah terkini. Semak semula."
 }

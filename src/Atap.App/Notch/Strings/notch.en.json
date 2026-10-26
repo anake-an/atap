@@ -17,6 +17,7 @@
   "notch.update.check": "Check for updates",
   "notch.update.checking": "Checking for updates…",
   "notch.update.downloading": "Downloading the update…",
-  "notch.update.ready": "An update is ready. It installs when Atap closes.",
+  "notch.update.ready": "Install the update now",
+  "notch.update.installing": "Installing the update. Atap opens again in a moment.",
   "notch.update.upToDate": "Atap is up to date. Check again."
 }
