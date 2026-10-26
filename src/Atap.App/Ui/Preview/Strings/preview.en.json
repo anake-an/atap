@@ -4,7 +4,7 @@
   "preview.state.expanded": "When you point at it",
   "preview.state.panel": "When you click it",
   "preview.hint.idle": "What the notch shows when nothing else is going on.",
-  "preview.hint.compact": "Something live, like a song or a timer, takes the small notch. The one highest in this list goes first.",
+  "preview.hint.compact": "When something is happening, like a song or a timer, it shows in the small notch. If two happen at once, the one higher in this list shows.",
   "preview.hint.expanded": "The notch grows a little when you point at it.",
   "preview.hint.panel": "The full panel opens when you click the notch. Add pages to scroll through.",
   "preview.empty": "Nothing here yet.",

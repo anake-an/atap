@@ -16,8 +16,9 @@ public sealed class LayoutDocument
     /// 2: adds <see cref="Placement"/> (missing means top centre on the primary monitor).
     /// 3: adds <see cref="Profiles"/>, and the panel holds pages instead of placements.
     /// 4: an untouched 1.0 panel page (music and missed alerts) becomes the new default, which follows the hover view.
+    /// 5: the prayer times alert's on or off setting becomes the At prayer time choice.
     /// </summary>
-    public const int CurrentSchemaVersion = 4;
+    public const int CurrentSchemaVersion = 5;
 
     private static readonly IReadOnlyDictionary<string, JsonElement> NoSettings = new Dictionary<string, JsonElement>();
 

@@ -256,6 +256,57 @@ public sealed class LayoutMigrationTests : IDisposable
         Assert.Equal(before, root["states"]!["panel"]!.ToJsonString());
     }
 
+    [Theory]
+    [InlineData("true", "notch")]
+    [InlineData("false", "off")]
+    public void V4_PrayerAlertOnOrOff_BecomesTheAtPrayerTimeChoice(string reminder, string expected)
+    {
+        var root = JsonNode.Parse($$"""
+            { "schemaVersion": 4, "widgetSettings": { "waktu-solat": { "reminder": {{reminder}}, "liveBefore": 5 } } }
+            """)!.AsObject();
+
+        LayoutMigrations.Upgrade(root, 4);
+
+        var settings = root["widgetSettings"]!["waktu-solat"]!.AsObject();
+        Assert.Equal(expected, settings["atPrayer"]!.GetValue<string>());
+        // Kept for an older Atap that reads the same file.
+        Assert.Equal(bool.Parse(reminder), settings["reminder"]!.GetValue<bool>());
+        Assert.Equal(5, settings["liveBefore"]!.GetValue<int>());
+        Assert.Equal(LayoutDocument.CurrentSchemaVersion, root["schemaVersion"]!.GetValue<int>());
+    }
+
+    [Fact]
+    public void V4_LeavesOtherWidgets_AnUnsetAlert_AndAChoiceAlreadyMade()
+    {
+        var root = JsonNode.Parse("""
+            { "schemaVersion": 4, "widgetSettings": {
+              "clock": { "reminder": false },
+              "waktu-solat#two": { "liveBefore": 5 },
+              "waktu-solat": { "reminder": false, "atPrayer": "azan" } } }
+            """)!.AsObject();
+
+        LayoutMigrations.Upgrade(root, 4);
+
+        var instances = root["widgetSettings"]!.AsObject();
+        Assert.False(instances["clock"]!.AsObject().ContainsKey("atPrayer"));
+        Assert.False(instances["waktu-solat#two"]!.AsObject().ContainsKey("atPrayer"));
+        Assert.Equal("azan", instances["waktu-solat"]!["atPrayer"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public void V4_FileWithThePrayerAlertOff_LoadsWithTheAlertOff()
+    {
+        Write("""
+            { "schemaVersion": 4, "enabledWidgets": [ "waktu-solat" ], "widgetSettings": { "waktu-solat": { "reminder": false } } }
+            """);
+
+        using var store = new LayoutStore(LayoutPath);
+        store.Load();
+
+        Assert.Equal(FileLoadOutcome.Migrated, store.LastLoadOutcome);
+        Assert.Equal("off", store.Document.GetWidgetSettings("waktu-solat")["atPrayer"].GetString());
+    }
+
     private void Write(string json)
     {
         Directory.CreateDirectory(_directory);

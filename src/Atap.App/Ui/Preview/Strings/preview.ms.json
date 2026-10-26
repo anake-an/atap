@@ -4,7 +4,7 @@
   "preview.state.expanded": "Apabila anda halakan tetikus",
   "preview.state.panel": "Apabila anda klik",
   "preview.hint.idle": "Apa yang notch tunjukkan apabila tiada apa-apa berlaku.",
-  "preview.hint.compact": "Sesuatu yang aktif, seperti lagu atau pemasa, mengambil notch kecil. Yang paling atas dalam senarai ini didahulukan.",
+  "preview.hint.compact": "Apabila sesuatu sedang berlaku, seperti lagu atau pemasa, ia dipaparkan pada notch kecil. Jika dua berlaku serentak, yang lebih atas dalam senarai ini akan dipaparkan.",
   "preview.hint.expanded": "Notch membesar sedikit apabila anda halakan tetikus padanya.",
   "preview.hint.panel": "Panel penuh terbuka apabila anda klik notch. Tambah halaman untuk ditatal.",
   "preview.empty": "Belum ada apa-apa.",
