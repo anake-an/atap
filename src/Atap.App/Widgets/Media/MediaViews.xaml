@@ -69,6 +69,7 @@
   <DataTemplate x:Key="media.Compact.Center">
     <Grid DataContext="{Binding ViewModel}"
           AutomationProperties.Name="{Binding AccessibleSummary}"
+          media:MediaShownReport.IsOn="True"
           MaxWidth="180"
           Margin="8,0">
       <Grid.RowDefinitions>
@@ -98,12 +99,13 @@
         </TextBlock>
       </media:MediaMarquee>
 
-      <!-- The faint line sits in the notch's bottom padding, so the notch does not grow for it. The played part
-           moves once a second while the small notch shows and the song plays. -->
+      <!-- The faint line lies over the notch's bottom padding, a few pixels above the edge, in a row of no height,
+           so the notch keeps its usual height. It runs from the art to the bars. The played part
+           moves once a second while the small notch shows it and the song plays. -->
       <Grid Grid.Row="1"
             Height="2"
             VerticalAlignment="Top"
-            Margin="0,6,0,-8">
+            Margin="-8,6,-8,-8">
         <Border CornerRadius="1" Opacity="0.3">
           <Border.Style>
             <Style TargetType="Border">

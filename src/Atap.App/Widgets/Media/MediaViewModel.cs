@@ -25,6 +25,7 @@ public sealed class MediaViewModel : ObservableObject, IAccessibleSummary, IDisp
     private bool _hasProgress;
     private bool _prefersLyricLine;
     private string _lyricLine = string.Empty;
+    private bool _isCompactMiddleShown;
 
     public MediaViewModel(ILocalizer text, Func<Task> skipPrevious, Func<Task> togglePlayPause, Func<Task> skipNext)
     {
@@ -101,6 +102,16 @@ public sealed class MediaViewModel : ObservableObject, IAccessibleSummary, IDisp
             _lyricLine = value;
             OnCompactChanged();
         }
+    }
+
+    /// <summary>
+    /// True while the middle of the small notch is on screen, with the title and the progress line. Set by the view
+    /// through <see cref="MediaShownReport"/>. False on a side edge, where that part is left out.
+    /// </summary>
+    public bool IsCompactMiddleShown
+    {
+        get => _isCompactMiddleShown;
+        set => SetProperty(ref _isCompactMiddleShown, value);
     }
 
     /// <summary>True while the small notch shows a lyric line and not the title.</summary>

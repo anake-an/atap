@@ -47,6 +47,7 @@ public sealed class MediaWidget : WidgetBase
         _source.Value.Changed += OnSourceChanged;
         _source.Value.PositionChanged += OnPositionChanged;
         Context.Visibility.Changed += OnVisibilityChanged;
+        _viewModel.PropertyChanged += OnViewChanged;
         Show();
         WantLine();
         await _source.Value.WhenReady.WaitAsync(cancellationToken);
@@ -55,6 +56,7 @@ public sealed class MediaWidget : WidgetBase
     public override Task StopAsync()
     {
         Context.Visibility.Changed -= OnVisibilityChanged;
+        _viewModel.PropertyChanged -= OnViewChanged;
         StopTick();
         _wantLine?.Dispose();
         _wantLine = null;
@@ -94,16 +96,23 @@ public sealed class MediaWidget : WidgetBase
         WantLine();
     }
 
+    // The middle of the small notch came or went, such as on a move to a side edge, where it is left out.
+    private void OnViewChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(MediaViewModel.IsCompactMiddleShown))
+            OnVisibilityChanged(sender, e);
+    }
+
     private void OnLineChanged(object? sender, EventArgs e)
     {
         if (_line?.Value is { } line)
             _viewModel.LyricLine = line.Text;
     }
 
-    /// <summary>The lyric line moves on its own only while the small notch shows it, so a hidden notch costs nothing.</summary>
+    /// <summary>The lyric line moves on its own only while the small notch shows it, so a hidden one costs nothing.</summary>
     private void WantLine()
     {
-        if (_line?.Value is { } line && Context.Visibility.Value == WidgetVisibility.Compact)
+        if (_line?.Value is { } line && CompactMiddleShown)
         {
             _wantLine ??= line.Want();
             return;
@@ -145,8 +154,8 @@ public sealed class MediaWidget : WidgetBase
             return;
         }
         UpdateProgress();
-        // The small notch has its own thin progress line, so it ticks there too.
-        var shown = Context.Visibility.Value is WidgetVisibility.Compact or WidgetVisibility.Expanded or WidgetVisibility.Panel;
+        // The small notch has its own thin progress line, so it ticks there too, but not on a side edge without it.
+        var shown = Context.Visibility.Value is WidgetVisibility.Expanded or WidgetVisibility.Panel || CompactMiddleShown;
         if (shown && PlaybackProgress.Moves(source.Position, source.Duration))
             _tick ??= Context.Scheduler.EverySecond(UpdateProgress);
         else
@@ -158,6 +167,9 @@ public sealed class MediaWidget : WidgetBase
         if (_source?.Value is { } source)
             _viewModel.SetProgress(PlaybackProgress.Fraction(source.Position, source.Duration, Context.Time.GetUtcNow()));
     }
+
+    /// <summary>The small notch shows the title and the progress line now. Never on a side edge.</summary>
+    private bool CompactMiddleShown => Context.Visibility.Value == WidgetVisibility.Compact && _viewModel.IsCompactMiddleShown;
 
     private void StopTick()
     {

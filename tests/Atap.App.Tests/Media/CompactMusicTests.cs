@@ -114,6 +114,38 @@ public sealed class CompactMusicTests : IDisposable
     });
 
     [Fact]
+    public void TheMiddle_ReportsWhenItIsLeftOut_SoNothingTicksForIt() => Sta.Run(() =>
+    {
+        using var model = Model();
+        var middle = new System.Windows.Controls.Border { DataContext = model };
+        MediaShownReport.SetIsOn(middle, true);
+        var window = new System.Windows.Window
+        {
+            Content = middle,
+            ShowActivated = false,
+            ShowInTaskbar = false,
+            WindowStyle = System.Windows.WindowStyle.None,
+            Left = -20000,
+            Top = -20000,
+            Width = 10,
+            Height = 10,
+        };
+        window.Show();
+        try
+        {
+            Assert.True(model.IsCompactMiddleShown);
+
+            // A side edge collapses the middle.
+            middle.Visibility = System.Windows.Visibility.Collapsed;
+            Assert.False(model.IsCompactMiddleShown);
+        }
+        finally
+        {
+            window.Close();
+        }
+    });
+
+    [Fact]
     public void TheMiddleOfTheSmallNotch_OnlyTakesAViewMadeForIt()
     {
         var gap = new PlacementViewModel("battery", "battery", new object(), NotchState.Compact, WidgetSize.Small, PlacementSlot.Center) { IsGap = true };
