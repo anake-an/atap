@@ -63,9 +63,9 @@
 
       <!-- A size, as a box as wide as the widget is at that size. -->
       <DataTemplate x:Key="Editor.SizeMark">
-        <Border Width="{Binding Width}" Height="14" CornerRadius="6" Margin="0,0,4,0" BorderThickness="1"
+        <Border Width="{Binding Width}" Height="20" CornerRadius="6" Margin="0,0,4,0" BorderThickness="1"
                 BorderBrush="{DynamicResource InkMutedBrush}" ToolTip="{Binding Name}">
-          <TextBlock Text="{Binding Label}" FontSize="9" Foreground="{DynamicResource InkSecondaryBrush}" HorizontalAlignment="Center"
+          <TextBlock Text="{Binding Label}" FontSize="10" Foreground="{DynamicResource InkSecondaryBrush}" HorizontalAlignment="Center"
                      VerticalAlignment="Center" />
         </Border>
       </DataTemplate>

@@ -43,7 +43,9 @@ internal static class Program
         using var instanceMutex = new Mutex(initiallyOwned: true, SingleInstanceMutexName, out var isFirstInstance);
         if (!isFirstInstance)
         {
-            // Already running: ask it to open Settings, then exit quietly.
+            // Already running: ask it to open Settings, then exit quietly. This launch came from the user, so it
+            // may bring a window to the front. It hands that on, or Windows keeps Settings behind other windows.
+            Interop.NativeMethods.AllowSetForegroundWindow(Interop.NativeMethods.ASFW_ANY);
             SecondInstance.Signal();
             return 0;
         }

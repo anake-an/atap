@@ -63,6 +63,22 @@ public sealed class AudioSessionRulesTests : IDisposable
     }
 
     [Fact]
+    public void Merge_PutsAStoreAppHelperUnderItsApp_EvenWithItsOwnProductName()
+    {
+        const string package = @"C:\Program Files\WindowsApps\AppleInc.AppleMusicWin_1.1540.23042.0_x64__nzyj5cx40ttqa\";
+        var rows = AudioSessionRules.Merge(
+        [
+            Session("agent", description: "AMPLibraryAgent", product: "AMPLibraryAgent", process: "AMPLibraryAgent", exe: package + "AMPLibraryAgent.exe"),
+            Session("music", description: "Apple Music", product: "Apple Music", process: "AppleMusic", exe: package + "AppleMusic.exe", volume: 70),
+            Session("other", description: "Other", product: "Other", process: "Other", exe: @"C:\Program Files\WindowsApps\Other.App_2.0.0.0_x64__abc\Other.exe"),
+        ]);
+
+        Assert.Equal(["Apple Music", "Other"], rows.Select(r => r.Name));
+        Assert.Equal(["agent", "music"], AudioSessionRules.SplitIds(rows[0].Id));
+        Assert.Equal(70, rows[0].VolumePercent);
+    }
+
+    [Fact]
     public void Merge_JoinsSessionsOfOneProgram_ButNotWindowsPrograms()
     {
         const string windows = "Microsoft® Windows® Operating System";

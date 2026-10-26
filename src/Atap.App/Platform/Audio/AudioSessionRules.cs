@@ -49,7 +49,8 @@ internal static class AudioSessionRules
             .Select(group =>
             {
                 var members = group.ToList();
-                var first = members[0];
+                // The app's own session sets the volume shown, not a helper's.
+                var first = members.FirstOrDefault(m => !LooksLikeHelper(m)) ?? members[0];
                 return new AppAudio(
                     JoinIds(members.Select(s => s.Id)),
                     GroupName(members),
@@ -73,18 +74,41 @@ internal static class AudioSessionRules
         if (members.Select(m => Usable(m.DisplayName)).FirstOrDefault(n => n is not null) is { } displayName)
             return displayName;
         var programs = members.Select(m => m.ExePath ?? m.ProcessName ?? m.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count();
-        if (programs > 1 && UsableProduct(members[0].ProductName) is { } product)
-            return product;
-        return NameOf(members[0]);
+        if (programs == 1)
+            return NameOf(members[0]);
+        var app = members.FirstOrDefault(m => !LooksLikeHelper(m)) ?? members[0];
+        return UsableProduct(app.ProductName) ?? NameOf(app);
     }
+
+    // A helper often has no name of its own, only its process name, such as "AMPLibraryAgent".
+    private static bool LooksLikeHelper(AudioSessionInfo session) =>
+        string.Equals(NameOf(session), session.ProcessName?.Trim(), StringComparison.OrdinalIgnoreCase);
 
     private static string KeyOf(AudioSessionInfo session)
     {
         if (session.IsSystemSounds)
             return "system";
+        // Programs of one Store app share its package folder, even when their product names differ.
+        if (PackageOf(session.ExePath) is { } package)
+            return "package:" + package;
         if (UsableProduct(session.ProductName) is { } product)
             return "product:" + product;
         return "program:" + (Usable(session.ExePath) ?? Usable(session.ProcessName) ?? session.Id);
+    }
+
+    // "...\WindowsApps\AppleInc.AppleMusicWin_1.1540.0_x64__nzyj5cx40ttqa\AMPLibraryAgent.exe" is "AppleInc.AppleMusicWin".
+    private static string? PackageOf(string? exePath)
+    {
+        const string marker = @"\WindowsApps\";
+        var at = exePath?.IndexOf(marker, StringComparison.OrdinalIgnoreCase) ?? -1;
+        if (at < 0)
+            return null;
+        var rest = exePath![(at + marker.Length)..];
+        var slash = rest.IndexOf('\\', StringComparison.Ordinal);
+        if (slash <= 0)
+            return null;
+        var name = rest[..slash].Split('_')[0];
+        return name.Length > 0 ? name : null;
     }
 
     // Windows' own programs all say "Microsoft Windows Operating System", which is not one app.

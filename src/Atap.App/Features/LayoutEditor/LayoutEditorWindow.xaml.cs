@@ -26,6 +26,9 @@ internal partial class LayoutEditorWindow : Window, ILayoutEditorWindow
     private readonly EditorScreen? _screen;
     private bool _placed;
 
+    // The size from the XAML, in DIPs. Width and Height change when WPF reads the first move at the old scale.
+    private readonly Size _designSize;
+
     // A press that may become a drag.
     private Point _pressAt;
     private EditorDrag? _pressDrag;
@@ -37,6 +40,7 @@ internal partial class LayoutEditorWindow : Window, ILayoutEditorWindow
     private LayoutEditorWindow(LayoutEditorViewModel viewModel, EditorScreen? screen)
     {
         InitializeComponent();
+        _designSize = new Size(Width, Height);
         _viewModel = viewModel;
         _screen = screen;
         DataContext = viewModel;
@@ -141,7 +145,7 @@ internal partial class LayoutEditorWindow : Window, ILayoutEditorWindow
         if (hwnd == IntPtr.Zero || _screen is not { } screen || screen.WorkArea.Width < 200 || screen.WorkArea.Height < 200)
             return;
 
-        var rect = EditorWindowPlacement.Compute(screen.WorkArea, screen.Notch, screen.Scale, Width, Height, ScreenMargin);
+        var rect = EditorWindowPlacement.Compute(screen.WorkArea, screen.Notch, screen.Scale, _designSize.Width, _designSize.Height, ScreenMargin);
         // A small screen gets a smaller window. Let WPF keep it at that size.
         MinWidth = Math.Min(MinWidth, rect.Width / screen.Scale);
         MinHeight = Math.Min(MinHeight, rect.Height / screen.Scale);
