@@ -21,14 +21,15 @@
     </Style.Triggers>
   </Style>
 
-  <!-- Stop and start over, shown only once the timer has started (running or paused). -->
+  <!-- Stop and start over, shown only once the timer has started (running or paused). Hidden keeps its room, so
+       Start does not move and a double click on Start does not stop the timer. -->
   <Style x:Key="focus-timer.reset" TargetType="controls:IconButton" BasedOn="{StaticResource {x:Type controls:IconButton}}">
     <Setter Property="Icon" Value="{DynamicResource icon.stop}" />
     <Setter Property="Label" Value="{loc:T focus.reset}" />
     <Setter Property="Command" Value="{Binding ResetCommand}" />
     <Style.Triggers>
       <DataTrigger Binding="{Binding IsIdle}" Value="True">
-        <Setter Property="Visibility" Value="Collapsed" />
+        <Setter Property="Visibility" Value="Hidden" />
       </DataTrigger>
     </Style.Triggers>
   </Style>

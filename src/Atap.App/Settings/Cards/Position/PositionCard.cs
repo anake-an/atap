@@ -225,7 +225,10 @@ internal sealed class PositionCardViewModel : ObservableObject, IDisposable
             screens.Add(new($"monitor:{selection.DeviceId}", _text.Format("position.screen.notConnected", ("name", name)), Selection: null));
         }
         screens.Add(new("all", _text["position.screen.all"], MonitorSelection.All()));
-        Screens = screens;
+        // A new list makes the box drop its selection, so it is kept when the same screens are listed. Moving
+        // the notch to another spot left "Which screen" blank before.
+        if (!screens.Select(s => (s.Id, s.Label)).SequenceEqual(_screens.Select(s => (s.Id, s.Label))))
+            Screens = screens;
         Refresh();
     }
 

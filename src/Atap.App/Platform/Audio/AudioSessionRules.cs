@@ -49,7 +49,8 @@ internal static class AudioSessionRules
             .Select(group =>
             {
                 var members = group.ToList();
-                var first = members[0];
+                // The app's own session sets the volume shown, not a helper's.
+                var first = AppOf(members);
                 return new AppAudio(
                     JoinIds(members.Select(s => s.Id)),
                     GroupName(members),
@@ -73,18 +74,52 @@ internal static class AudioSessionRules
         if (members.Select(m => Usable(m.DisplayName)).FirstOrDefault(n => n is not null) is { } displayName)
             return displayName;
         var programs = members.Select(m => m.ExePath ?? m.ProcessName ?? m.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count();
-        if (programs > 1 && UsableProduct(members[0].ProductName) is { } product)
-            return product;
-        return NameOf(members[0]);
+        if (programs == 1)
+            return NameOf(members[0]);
+        var app = AppOf(members);
+        return UsableProduct(app.ProductName) ?? NameOf(app);
+    }
+
+    // The member that names a row and sets its volume: not a helper by its process name ("AMPLibraryAgent",
+    // "steamwebhelper"), then one with a name of its own over one named only by its process.
+    private static AudioSessionInfo AppOf(List<AudioSessionInfo> members) =>
+        members.OrderBy(HelperRank).First();
+
+    private static readonly string[] HelperWords = ["helper", "agent", "service", "host", "webview", "crashpad"];
+
+    private static int HelperRank(AudioSessionInfo session)
+    {
+        var process = session.ProcessName?.Trim() ?? string.Empty;
+        if (HelperWords.Any(word => process.Contains(word, StringComparison.OrdinalIgnoreCase)))
+            return 2;
+        return string.Equals(NameOf(session), process, StringComparison.OrdinalIgnoreCase) ? 1 : 0;
     }
 
     private static string KeyOf(AudioSessionInfo session)
     {
         if (session.IsSystemSounds)
             return "system";
+        // Programs of one Store app share its package folder, even when their product names differ.
+        if (PackageOf(session.ExePath) is { } package)
+            return "package:" + package;
         if (UsableProduct(session.ProductName) is { } product)
             return "product:" + product;
         return "program:" + (Usable(session.ExePath) ?? Usable(session.ProcessName) ?? session.Id);
+    }
+
+    // "...\WindowsApps\AppleInc.AppleMusicWin_1.1540.0_x64__nzyj5cx40ttqa\AMPLibraryAgent.exe" is "AppleInc.AppleMusicWin".
+    private static string? PackageOf(string? exePath)
+    {
+        const string marker = @"\WindowsApps\";
+        var at = exePath?.IndexOf(marker, StringComparison.OrdinalIgnoreCase) ?? -1;
+        if (at < 0)
+            return null;
+        var rest = exePath![(at + marker.Length)..];
+        var slash = rest.IndexOf('\\', StringComparison.Ordinal);
+        if (slash <= 0)
+            return null;
+        var name = rest[..slash].Split('_')[0];
+        return name.Length > 0 ? name : null;
     }
 
     // Windows' own programs all say "Microsoft Windows Operating System", which is not one app.

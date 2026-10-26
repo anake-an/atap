@@ -94,9 +94,16 @@ internal sealed class LayoutCardViewModel : ObservableObject, IDisposable
     {
         var active = _layout.Active;
         var pages = active.PanelPages;
-        var panel = NotchPreviews.Picture(_catalog, NotchState.Panel, pages.Count > 0 ? pages[0].Placements : [], _text);
-        if (pages.Count > 1)
-            panel = panel with { Note = _text.Format("preview.pageOf", ("count", pages.Count.ToString(CultureInfo.CurrentCulture))) };
+        // The same first page a click opens: an unfilled panel shows the hover widgets, a size up.
+        // There the missed alerts only show once something is missed, so the picture leaves them out.
+        var followsHover = PanelContent.FollowsHover(pages);
+        var shown = PanelContent.Pages(
+            active,
+            id => _catalog.TryResolve(id, out var descriptor) ? descriptor : null,
+            id => !followsHover || id != DefaultLayout.MissedAlertsWidgetId);
+        var panel = NotchPreviews.Picture(_catalog, NotchState.Panel, shown.Count > 0 ? shown[0] : [], _text);
+        if (shown.Count > 1)
+            panel = panel with { Note = _text.Format("preview.pageOf", ("count", shown.Count.ToString(CultureInfo.CurrentCulture))) };
         return
         [
             NotchPreviews.Picture(_catalog, NotchState.Idle, active.Idle, _text),

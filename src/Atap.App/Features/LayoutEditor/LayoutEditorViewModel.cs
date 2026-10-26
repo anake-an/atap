@@ -85,7 +85,7 @@ public sealed record PriorityRow(string Rank, string Name, bool CanMoveUp, bool 
 public sealed partial class LayoutEditorViewModel : ObservableObject, IDisposable
 {
     // Widths of the size boxes in the gallery, in the same proportion as the notch's columns.
-    private const double SizeMarkUnit = 14;
+    private const double SizeMarkUnit = 20;
 
     private readonly ILayoutService _layout;
     private readonly WidgetCatalog _catalog;

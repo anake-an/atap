@@ -16,6 +16,7 @@ internal partial class SettingsWindow : Window
     public SettingsWindow()
     {
         InitializeComponent();
+        Atap.Interop.ScreenFit.Attach(this);
         DataContextChanged += OnDataContextChanged;
         Loaded += (_, _) => FocusSelectedPage();
         Closing += (_, _) => SaveFocusedText();

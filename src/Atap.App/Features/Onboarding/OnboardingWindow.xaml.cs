@@ -8,6 +8,7 @@ internal partial class OnboardingWindow : Window, IOnboardingWindow
     private OnboardingWindow(OnboardingViewModel viewModel)
     {
         InitializeComponent();
+        Atap.Interop.ScreenFit.Attach(this);
         DataContext = viewModel;
         viewModel.CloseRequested += (_, _) => Close();
         Closed += (_, _) =>
