@@ -80,6 +80,7 @@ internal sealed class FakeQuietHours : IQuietHours
 internal sealed class FakeForeground : IForegroundState
 {
     private FullScreenKind _fullScreen;
+    private Atap.Core.Placement.PixelRect? _coveredScreen;
 
     public FullScreenKind FullScreen
     {
@@ -87,6 +88,17 @@ internal sealed class FakeForeground : IForegroundState
         set
         {
             _fullScreen = value;
+            Changed?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>The screen a front window covers. Setting it raises Changed.</summary>
+    public Atap.Core.Placement.PixelRect? CoveredScreen
+    {
+        get => _coveredScreen;
+        set
+        {
+            _coveredScreen = value;
             Changed?.Invoke(this, EventArgs.Empty);
         }
     }

@@ -130,12 +130,12 @@ Heavy Windows sources are shared through `ISharedServices.Acquire<T>()`. A sourc
 
 `NotchSurfaceResolver.Resolve` picks what a window shows. The first that applies wins:
 
-1. Hidden: a rule says hide, or a full-screen app is in front
+1. Hidden: a rule says hide, or a game in exclusive full screen or a presentation is in front
 2. Edit
 3. Panel
 4. Expanded: hover or peek, with something to show
 5. Alert
-6. Slim
+6. Slim: the slim setting or an app rule, or a window that covers this notch's screen
 7. Compact: a live widget owns the notch and has a compact placement
 8. Idle
 
@@ -286,7 +286,7 @@ Nothing shows a Windows toast.
 
 `NotchHost` keeps one notch window per target monitor. It lists monitors with a stable id taken from the display device path and reacts to display changes when Windows reports them. Each window has its own hover state and is placed in physical pixels with `SetWindowPos`.
 
-Full-screen detection is system-wide, from the foreground window event. In All mode every notch hides when any app goes full screen.
+Full-screen detection runs from the foreground window event and is never polled. A front window that covers a whole screen, in full screen or borderless, turns only the notch on that screen slim. It goes back when the window closes, is minimized or leaves the front. A maximized window stops at the taskbar, so it does not count. Exclusive full-screen games and presentation mode, which Windows reports for the whole PC, hide every notch. Alerts wait in Missed alerts during any of these.
 
 ## Low-resource rules
 

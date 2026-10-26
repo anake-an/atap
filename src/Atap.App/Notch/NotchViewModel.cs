@@ -48,6 +48,7 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
     private IReadOnlyList<PlacementViewModel> _centerItems = [];
     private IReadOnlyList<PlacementViewModel> _rightItems = [];
     private IReadOnlyList<PlacementViewModel> _gridItems = [];
+    private PixelRect? _screen;
 
     internal NotchViewModel(ILayoutService layout, WidgetHost host, NotchControl control, IForegroundState foreground)
     {
@@ -65,6 +66,21 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
         AttachWidgets();
         UpdateState(force: true);
     }
+
+    /// <summary>
+    /// The screen this notch is on, in physical pixels. A window that covers it, in full screen or borderless,
+    /// turns this notch slim until it closes, is minimized or leaves the front.
+    /// </summary>
+    public void SetScreen(PixelRect screen)
+    {
+        if (_screen == screen)
+            return;
+        _screen = screen;
+        UpdateState();
+    }
+
+    /// <summary>True while the front window fills this notch's screen.</summary>
+    private bool IsScreenCovered => _screen is { } screen && _foreground.CoveredScreen == screen;
 
     /// <summary>Raised after the content has been set. The view resizes (or hides) on this, and fades content in only when it is new.</summary>
     public event EventHandler<NotchContentChangedEventArgs>? ContentChanged;
@@ -306,14 +322,15 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
         var panelOpen = _control.IsSet(NotchFlag.PanelOpen);
         var drag = _isDraggingFiles ? FileDragTarget(hasFiles: true) : NotchDragTarget.None;
         var next = NotchSurfaceResolver.Resolve(new NotchInputs(
-            Hidden: _control.IsSet(NotchFlag.Hide) || _foreground.FullScreen != FullScreenKind.None,
+            // A game in exclusive full screen or a presentation draws over everything, so the notch steps aside.
+            Hidden: _control.IsSet(NotchFlag.Hide) || _foreground.FullScreen is FullScreenKind.Game or FullScreenKind.Presentation,
             Editing: _control.IsSet(NotchFlag.Editing),
             PanelOpen: panelOpen || drag == NotchDragTarget.Panel,
             Hovered: IsHovered || drag == NotchDragTarget.Expanded,
             Peeking: _control.IsSet(NotchFlag.Peek),
             HasExpandedContent: VisiblePlacements(NotchState.Expanded, null).Any() || _control.GetSurfaceContent(NotchSurface.Expanded) is not null,
             HasAlert: _control.GetSurfaceContent(NotchSurface.Alert) is not null,
-            Slim: _control.IsSet(NotchFlag.Slim),
+            Slim: _control.IsSet(NotchFlag.Slim) || IsScreenCovered,
             HasCompactOwner: owner is not null,
             HasCompactContent: owner is not null && VisiblePlacements(NotchState.Compact, owner).Any()));
 

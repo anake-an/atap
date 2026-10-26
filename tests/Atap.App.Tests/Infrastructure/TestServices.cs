@@ -160,6 +160,8 @@ internal sealed class ForegroundStub : Atap.Core.Notch.IForegroundState
 {
     public Atap.Core.Notch.FullScreenKind FullScreen => Atap.Core.Notch.FullScreenKind.None;
 
+    public Atap.Core.Placement.PixelRect? CoveredScreen => null;
+
     public string? ProcessName => null;
 
     public event EventHandler? Changed
