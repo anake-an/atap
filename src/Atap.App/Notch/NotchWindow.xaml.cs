@@ -523,29 +523,8 @@ public partial class NotchWindow : Window, INotchWindow
     private void UpdateOutline()
     {
         var outline = NotchShape.Outline(_anchor, Pill.ActualWidth, Pill.ActualHeight, ShoulderRadius, _appliedShoulderRoom);
-
-        var geometry = new StreamGeometry();
-        using (var context = geometry.Open())
-        {
-            context.BeginFigure(ToPoint(outline.Start), isFilled: true, isClosed: true);
-            foreach (var segment in outline.Segments)
-            {
-                if (segment.IsArc)
-                {
-                    var sweep = segment.Clockwise ? SweepDirection.Clockwise : SweepDirection.Counterclockwise;
-                    context.ArcTo(ToPoint(segment.End), new Size(segment.Radius, segment.Radius), 0, false, sweep, true, false);
-                }
-                else
-                {
-                    context.LineTo(ToPoint(segment.End), true, false);
-                }
-            }
-        }
-        geometry.Freeze();
-        NotchFill.Data = geometry;
+        NotchFill.Data = Atap.Ui.Preview.NotchFrame.Geometry(outline, default);
     }
-
-    private static Point ToPoint(ShapePoint point) => new(point.X, point.Y);
 
     /// <summary>Coalesces content changes into one resize after layout has run. A non-animated request wins.</summary>
     private void QueueResize(bool animate)
@@ -709,6 +688,7 @@ public partial class NotchWindow : Window, INotchWindow
         if (bounds == _appliedBounds)
             return;
         _appliedBounds = bounds;
+        WarnIfOffScreen(bounds, monitor);
         // One move and size in pixels, then WPF's logical size to match, which is then a no-op for the window.
         // Two separate moves could show a frame of the old picture in the wrong place.
         NativeMethods.SetWindowPos(
@@ -725,4 +705,18 @@ public partial class NotchWindow : Window, INotchWindow
     }
 
     private PixelRect _appliedBounds;
+
+    // Once per run is enough to find the cause. The numbers are screen pixels only.
+    private static bool _offScreenLogged;
+
+    /// <summary>Logs once when the notch would land outside its screen, which was seen once and never again.</summary>
+    private static void WarnIfOffScreen(PixelRect bounds, DisplayMonitor monitor)
+    {
+        var screen = monitor.Bounds;
+        var inside = bounds.Left >= screen.Left && bounds.Top >= screen.Top && bounds.Right <= screen.Right && bounds.Bottom <= screen.Bottom;
+        if (inside || _offScreenLogged)
+            return;
+        _offScreenLogged = true;
+        Atap.Diagnostics.Log.Warn($"The notch was placed outside its screen: {bounds.Left},{bounds.Top} {bounds.Width}x{bounds.Height} on a screen at {screen.Left},{screen.Top} {screen.Width}x{screen.Height}.");
+    }
 }

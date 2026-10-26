@@ -54,13 +54,16 @@ internal static class Program
         TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
 
         Log.Info($"Atap {AppInfo.Version} starting on Windows {Environment.OSVersion.Version}.");
+        RunMarker.Start(AtapPaths.Default);
 
         try
         {
             var app = new App();
             app.DispatcherUnhandledException += OnDispatcherUnhandledException;
             app.InitializeComponent();
-            return app.Run();
+            var code = app.Run();
+            RunMarker.Stop(AtapPaths.Default);
+            return code;
         }
         finally
         {

@@ -24,4 +24,7 @@ public sealed record AtapPaths(string Roaming, string Local)
     public string SecretsFile => Path.Combine(Local, "secrets.json");
 
     public string CrashMarker => Path.Combine(Local, "crash.marker");
+
+    /// <summary>Present while Atap runs. Left behind when a run ends without closing.</summary>
+    public string RunMarker => Path.Combine(Local, "running.marker");
 }

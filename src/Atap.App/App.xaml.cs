@@ -309,7 +309,10 @@ public partial class App : Application
         }
         try
         {
-            AtapDataEraser.Erase(paths);
+            // A file another program has open, such as a virus scan reading it, is usually free again within a
+            // second, so it is tried a few times before it is left.
+            for (var attempt = 0; attempt < 4 && AtapDataEraser.Erase(paths).Left > 0; attempt++)
+                Thread.Sleep(500);
         }
         catch (InvalidOperationException)
         {
