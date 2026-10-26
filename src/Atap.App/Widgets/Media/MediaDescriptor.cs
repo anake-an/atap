@@ -14,6 +14,9 @@ namespace Atap.Widgets.Media;
 public sealed class MediaDescriptor : IWidgetDescriptor
 {
     public const string TypeIdValue = DefaultLayout.MediaWidgetId;
+    public const string CompactShowsKey = "compactShows";
+    public const string ShowTitle = "title";
+    public const string ShowLyric = "lyric";
 
     public string TypeId => TypeIdValue;
 
@@ -27,7 +30,14 @@ public sealed class MediaDescriptor : IWidgetDescriptor
 
     public IReadOnlyList<NotchState> SupportedStates { get; } = [NotchState.Compact, NotchState.Expanded, NotchState.Panel];
 
-    public IReadOnlyList<SettingDefinition> Settings { get; } = [];
+    // The lyric line comes from the lyrics widget through the shared LyricLine, so this stays constants only.
+    public IReadOnlyList<SettingDefinition> Settings { get; } =
+    [
+        new(CompactShowsKey, "media.compactShows", SettingType.Choice, ShowTitle, [ShowTitle, ShowLyric])
+        {
+            DescriptionKey = "media.compactShowsHint",
+        },
+    ];
 
     public WidgetCapabilities Capabilities => WidgetCapabilities.None;
 

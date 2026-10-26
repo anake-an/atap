@@ -226,6 +226,31 @@ public sealed class LyricsWidgetTests : IDisposable
             [LyricsDescriptor.TranslateToKey] = JsonSerializer.SerializeToElement("ms"),
         });
 
+    [Fact]
+    public async Task TheLinePlayingNow_IsShared_AndMovesWhileTheSmallNotchShowsIt()
+    {
+        _visibility.Value = WidgetVisibility.Hidden;
+        _player.Play("Song", "Band", new PlaybackSnapshot(TimeSpan.Zero, _services.Time.GetUtcNow(), true));
+        var widget = Create(new FakeLrclib(get: Synced));
+        await widget.StartAsync(SettingValues.Empty);
+        await widget.Loading;
+        using var shared = _services.Shared.Acquire<LyricLine>();
+
+        // Closed and nobody shows the line, so nothing ticks.
+        Assert.Equal(0, _services.Scheduler.Stats.ArmedItems);
+
+        using (shared.Value.Want())
+        {
+            Assert.Equal(1, _services.Scheduler.Stats.ArmedItems);
+            _services.Time.Advance(TimeSpan.FromSeconds(1.1));
+            Assert.Equal("one", shared.Value.Text);
+        }
+        Assert.Equal(0, _services.Scheduler.Stats.ArmedItems);
+
+        await widget.StopAsync();
+        Assert.Equal(string.Empty, shared.Value.Text);
+    }
+
     private static string Query(Uri url, string name) =>
         url.Query.TrimStart('?').Split('&').Select(p => p.Split('=', 2)).First(p => p[0] == name)[1];
 

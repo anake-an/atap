@@ -1,7 +1,9 @@
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Atap.Core.Localization;
+using Atap.Core.Media;
 using Atap.Notch.Automation;
 
 namespace Atap.Widgets.Media;
@@ -14,12 +16,15 @@ public sealed class MediaViewModel : ObservableObject, IAccessibleSummary, IDisp
     private string? _trackTitle;
     private string _artist = string.Empty;
     private ImageSource? _albumArt;
+    private Brush? _albumBrush;
     private bool _isPlaying;
     private bool _hasSession;
     private bool _canSkipPrevious;
     private bool _canSkipNext;
     private double _progress;
     private bool _hasProgress;
+    private bool _prefersLyricLine;
+    private string _lyricLine = string.Empty;
 
     public MediaViewModel(ILocalizer text, Func<Task> skipPrevious, Func<Task> togglePlayPause, Func<Task> skipNext)
     {
@@ -48,8 +53,10 @@ public sealed class MediaViewModel : ObservableObject, IAccessibleSummary, IDisp
         get => _artist;
         private set
         {
-            if (SetProperty(ref _artist, value))
-                OnPropertyChanged(nameof(AccessibleSummary));
+            if (!SetProperty(ref _artist, value))
+                return;
+            OnPropertyChanged(nameof(AccessibleSummary));
+            OnPropertyChanged(nameof(CompactDetail));
         }
     }
 
@@ -60,12 +67,65 @@ public sealed class MediaViewModel : ObservableObject, IAccessibleSummary, IDisp
             ? _text.Format("media.accessible", ("title", Title))
             : _text.Format("media.accessibleWithArtist", ("title", Title), ("artist", Artist));
 
+    /// <summary>
+    /// What the small notch shows in the middle: the song title, or the lyric line playing now when that is chosen
+    /// and there is one. Without a line it falls back to the title.
+    /// </summary>
+    public string CompactText => ShowsLyricLine ? _lyricLine : Title;
+
+    /// <summary>The muted part after the title, " · Artist". Empty with no artist, or while a lyric line shows.</summary>
+    public string CompactDetail => ShowsLyricLine || string.IsNullOrWhiteSpace(Artist) ? string.Empty : $" · {Artist}";
+
+    /// <summary>The media setting: the small notch shows the lyric line in place of the title when there is one.</summary>
+    public bool PrefersLyricLine
+    {
+        get => _prefersLyricLine;
+        set
+        {
+            if (_prefersLyricLine == value)
+                return;
+            _prefersLyricLine = value;
+            OnCompactChanged();
+        }
+    }
+
+    /// <summary>The lyric line playing now, shared by the lyrics widget. Empty when there is none.</summary>
+    public string LyricLine
+    {
+        get => _lyricLine;
+        set
+        {
+            value = string.IsNullOrWhiteSpace(value) ? string.Empty : value;
+            if (_lyricLine == value)
+                return;
+            _lyricLine = value;
+            OnCompactChanged();
+        }
+    }
+
+    /// <summary>True while the small notch shows a lyric line and not the title.</summary>
+    public bool ShowsLyricLine => _prefersLyricLine && _trackTitle is not null && _lyricLine.Length > 0;
+
     /// <summary>Null when the app gives no thumbnail; the view shows a placeholder.</summary>
     public ImageSource? AlbumArt
     {
         get => _albumArt;
-        set => SetProperty(ref _albumArt, value);
+        set
+        {
+            if (!SetProperty(ref _albumArt, value))
+                return;
+            if (SetProperty(ref _albumBrush, BrushOf(value), nameof(AlbumBrush)))
+                OnPropertyChanged(nameof(HasAlbumColour));
+        }
     }
+
+    /// <summary>
+    /// The cover's main colour, lifted to read on black, for the playing bars and the small notch's line. Null
+    /// without a cover, so the view keeps the music accent. In high contrast the view uses system colours instead.
+    /// </summary>
+    public Brush? AlbumBrush => _albumBrush;
+
+    public bool HasAlbumColour => _albumBrush is not null;
 
     public bool IsPlaying
     {
@@ -145,6 +205,32 @@ public sealed class MediaViewModel : ObservableObject, IAccessibleSummary, IDisp
 
     public void Dispose() => _text.LanguageChanged -= OnLanguageChanged;
 
+    /// <summary>A frozen brush in the cover's main colour, or null when there is no cover to read.</summary>
+    internal static Brush? BrushOf(ImageSource? art)
+    {
+        if (art is not BitmapSource bitmap || bitmap.PixelWidth == 0 || bitmap.PixelHeight == 0)
+            return null;
+        try
+        {
+            // The covers Atap decodes are already 32 bit, so this copies nothing more than the small picture.
+            BitmapSource pixels = bitmap.Format == PixelFormats.Pbgra32 || bitmap.Format == PixelFormats.Bgra32
+                ? bitmap
+                : new FormatConvertedBitmap(bitmap, PixelFormats.Bgra32, null, 0);
+            var stride = pixels.PixelWidth * 4;
+            var buffer = new byte[stride * pixels.PixelHeight];
+            pixels.CopyPixels(buffer, stride, 0);
+            if (AlbumColour.From(buffer) is not { } colour)
+                return null;
+            var brush = new SolidColorBrush(Color.FromRgb(colour.R, colour.G, colour.B));
+            brush.Freeze();
+            return brush;
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or NotSupportedException or ArgumentException)
+        {
+            return null;
+        }
+    }
+
     private void SetTitle(string? title)
     {
         if (string.Equals(_trackTitle, title, StringComparison.Ordinal))
@@ -152,11 +238,20 @@ public sealed class MediaViewModel : ObservableObject, IAccessibleSummary, IDisp
         _trackTitle = title;
         OnPropertyChanged(nameof(Title));
         OnPropertyChanged(nameof(AccessibleSummary));
+        OnCompactChanged();
+    }
+
+    private void OnCompactChanged()
+    {
+        OnPropertyChanged(nameof(ShowsLyricLine));
+        OnPropertyChanged(nameof(CompactText));
+        OnPropertyChanged(nameof(CompactDetail));
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
         OnPropertyChanged(nameof(Title));
         OnPropertyChanged(nameof(AccessibleSummary));
+        OnPropertyChanged(nameof(CompactText));
     }
 }

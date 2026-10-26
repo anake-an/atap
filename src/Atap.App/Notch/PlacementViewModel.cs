@@ -23,12 +23,20 @@ public sealed record PlacementViewModel(
     public string? NameKey { get; init; }
 
     /// <summary>
+    /// True for the middle of the small notch, between the compact owner's left and right placements. The notch
+    /// makes it itself, so it shows only a view made for it ("media.Compact.Center") and nothing otherwise.
+    /// </summary>
+    public bool IsGap { get; init; }
+
+    /// <summary>
     /// Resource keys to try, most specific first, for example
     /// "media.Compact.Left", "media.Compact.Small", "media.Compact", "media".
     /// </summary>
     public IEnumerable<string> TemplateKeys()
     {
         yield return $"{TypeId}.{State}.{Slot}";
+        if (IsGap)
+            yield break;
         yield return $"{TypeId}.{State}.{Size}";
         yield return $"{TypeId}.{State}";
         yield return TypeId;
