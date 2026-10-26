@@ -50,7 +50,7 @@ internal static class AudioSessionRules
             {
                 var members = group.ToList();
                 // The app's own session sets the volume shown, not a helper's.
-                var first = members.FirstOrDefault(m => !LooksLikeHelper(m)) ?? members[0];
+                var first = AppOf(members);
                 return new AppAudio(
                     JoinIds(members.Select(s => s.Id)),
                     GroupName(members),
@@ -76,13 +76,24 @@ internal static class AudioSessionRules
         var programs = members.Select(m => m.ExePath ?? m.ProcessName ?? m.Id).Distinct(StringComparer.OrdinalIgnoreCase).Count();
         if (programs == 1)
             return NameOf(members[0]);
-        var app = members.FirstOrDefault(m => !LooksLikeHelper(m)) ?? members[0];
+        var app = AppOf(members);
         return UsableProduct(app.ProductName) ?? NameOf(app);
     }
 
-    // A helper often has no name of its own, only its process name, such as "AMPLibraryAgent".
-    private static bool LooksLikeHelper(AudioSessionInfo session) =>
-        string.Equals(NameOf(session), session.ProcessName?.Trim(), StringComparison.OrdinalIgnoreCase);
+    // The member that names a row and sets its volume: not a helper by its process name ("AMPLibraryAgent",
+    // "steamwebhelper"), then one with a name of its own over one named only by its process.
+    private static AudioSessionInfo AppOf(List<AudioSessionInfo> members) =>
+        members.OrderBy(HelperRank).First();
+
+    private static readonly string[] HelperWords = ["helper", "agent", "service", "host", "webview", "crashpad"];
+
+    private static int HelperRank(AudioSessionInfo session)
+    {
+        var process = session.ProcessName?.Trim() ?? string.Empty;
+        if (HelperWords.Any(word => process.Contains(word, StringComparison.OrdinalIgnoreCase)))
+            return 2;
+        return string.Equals(NameOf(session), process, StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+    }
 
     private static string KeyOf(AudioSessionInfo session)
     {

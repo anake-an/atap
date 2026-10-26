@@ -50,7 +50,11 @@ internal static class ScreenFit
         if (rect.Left >= w.Left && rect.Top >= w.Top && rect.Right <= w.Right && rect.Bottom <= w.Bottom)
             return;
 
-        var fitted = EditorWindowPlacement.Compute(work, null, MonitorEnumerator.GetScale(work), size.Width, size.Height, Margin);
+        var scale = MonitorEnumerator.GetScale(work);
+        var fitted = EditorWindowPlacement.Compute(work, null, scale, size.Width, size.Height, Margin);
+        // A small screen gets a smaller window. Let WPF keep it at that size.
+        window.MinWidth = Math.Min(window.MinWidth, fitted.Width / scale);
+        window.MinHeight = Math.Min(window.MinHeight, fitted.Height / scale);
         NativeMethods.SetWindowPos(hwnd, IntPtr.Zero, fitted.Left, fitted.Top, fitted.Width, fitted.Height,
             NativeMethods.SWP_NOZORDER | NativeMethods.SWP_NOOWNERZORDER | NativeMethods.SWP_NOACTIVATE);
     }

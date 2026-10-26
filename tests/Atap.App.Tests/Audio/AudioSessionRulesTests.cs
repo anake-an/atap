@@ -79,6 +79,19 @@ public sealed class AudioSessionRulesTests : IDisposable
     }
 
     [Fact]
+    public void Merge_NamesARowAfterTheApp_NotItsWebHelper()
+    {
+        var rows = AudioSessionRules.Merge(
+        [
+            Session("web", description: "Steam Client WebHelper", product: "Steam", process: "steamwebhelper", exe: @"C:\Steam\steamwebhelper.exe", volume: 30),
+            Session("steam", description: "Steam", product: "Steam", process: "steam", exe: @"C:\Steam\steam.exe", volume: 80),
+        ]);
+
+        Assert.Equal("Steam", Assert.Single(rows).Name);
+        Assert.Equal(80, rows[0].VolumePercent);
+    }
+
+    [Fact]
     public void Merge_JoinsSessionsOfOneProgram_ButNotWindowsPrograms()
     {
         const string windows = "Microsoft® Windows® Operating System";

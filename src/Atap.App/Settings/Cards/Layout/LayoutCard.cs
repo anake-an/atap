@@ -102,8 +102,8 @@ internal sealed class LayoutCardViewModel : ObservableObject, IDisposable
             id => _catalog.TryResolve(id, out var descriptor) ? descriptor : null,
             id => !followsHover || id != DefaultLayout.MissedAlertsWidgetId);
         var panel = NotchPreviews.Picture(_catalog, NotchState.Panel, shown.Count > 0 ? shown[0] : [], _text);
-        if (pages.Count > 1)
-            panel = panel with { Note = _text.Format("preview.pageOf", ("count", pages.Count.ToString(CultureInfo.CurrentCulture))) };
+        if (shown.Count > 1)
+            panel = panel with { Note = _text.Format("preview.pageOf", ("count", shown.Count.ToString(CultureInfo.CurrentCulture))) };
         return
         [
             NotchPreviews.Picture(_catalog, NotchState.Idle, active.Idle, _text),
