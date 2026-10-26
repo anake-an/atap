@@ -35,7 +35,8 @@ internal static class AppCommands
             return;
         commands.Register(new AtapCommand(CheckForUpdates, "app.command.checkUpdates", _ => updates.CheckNowAsync())
         {
-            IsAvailable = () => updates is { IsSupported: true, Status: UpdateStatus.Idle or UpdateStatus.UpToDate },
+            // Also while an update is ready, because pressing it then installs the update at once.
+            IsAvailable = () => updates is { IsSupported: true, Status: UpdateStatus.Idle or UpdateStatus.UpToDate or UpdateStatus.ReadyToInstall },
         });
     }
 }

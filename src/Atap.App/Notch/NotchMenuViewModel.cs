@@ -81,6 +81,7 @@ public sealed class NotchMenuViewModel : ObservableObject
         UpdateStatus.Checking => "notch.update.checking",
         UpdateStatus.Downloading => "notch.update.downloading",
         UpdateStatus.ReadyToInstall => "notch.update.ready",
+        UpdateStatus.Installing => "notch.update.installing",
         UpdateStatus.UpToDate => "notch.update.upToDate",
         _ => "notch.update.check",
     }];
@@ -125,7 +126,7 @@ public sealed class NotchMenuViewModel : ObservableObject
     }
 
     private bool CanCheckForUpdates() =>
-        _updates is { IsSupported: true, Status: UpdateStatus.Idle or UpdateStatus.UpToDate };
+        _updates is { IsSupported: true, Status: UpdateStatus.Idle or UpdateStatus.UpToDate or UpdateStatus.ReadyToInstall };
 
     private Task CheckForUpdatesAsync() => _updates?.CheckNowAsync() ?? Task.CompletedTask;
 

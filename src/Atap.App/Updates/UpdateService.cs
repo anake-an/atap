@@ -25,6 +25,10 @@ internal sealed class UpdateService : IUpdateService
     private VelopackAsset? _pending;
     private UpdateStatus _status;
     private int _checking;
+    private bool _restart;
+
+    // Long enough to read "Installing the update" before Atap closes.
+    private static readonly TimeSpan InstallNotice = TimeSpan.FromSeconds(2);
 
     public UpdateService(Dispatcher dispatcher)
     {
@@ -66,13 +70,24 @@ internal sealed class UpdateService : IUpdateService
     {
         if (_manager is null || _timer is not null)
             return;
-        _timer = new Timer(_ => _ = CheckNowAsync(), null, FirstCheckDelay, CheckInterval);
+        // The schedule never closes Atap. Its update waits until Atap exits.
+        _timer = new Timer(_ => _ = CheckAsync(userAsked: false), null, FirstCheckDelay, CheckInterval);
     }
 
-    public async Task CheckNowAsync()
+    public Task CheckNowAsync() => CheckAsync(userAsked: true);
+
+    private async Task CheckAsync(bool userAsked)
     {
-        // One check at a time; the timer and the menu can race.
-        if (_manager is null || _pending is not null || Interlocked.Exchange(ref _checking, 1) == 1)
+        if (_manager is null || _restart)
+            return;
+        if (_pending is not null)
+        {
+            if (userAsked)
+                InstallNow();
+            return;
+        }
+        // One check at a time. The timer and the menu can race.
+        if (Interlocked.Exchange(ref _checking, 1) == 1)
             return;
 
         try
@@ -88,8 +103,16 @@ internal sealed class UpdateService : IUpdateService
             SetStatus(UpdateStatus.Downloading);
             await _manager.DownloadUpdatesAsync(update).ConfigureAwait(false);
             _pending = update.TargetFullRelease;
-            Log.Info($"Update {update.TargetFullRelease.Version} downloaded; it installs when Atap exits.");
-            SetStatus(UpdateStatus.ReadyToInstall);
+            if (userAsked)
+            {
+                Log.Info($"Update {update.TargetFullRelease.Version} downloaded. Atap restarts to install it.");
+                InstallNow();
+            }
+            else
+            {
+                Log.Info($"Update {update.TargetFullRelease.Version} downloaded. It installs when Atap exits.");
+                SetStatus(UpdateStatus.ReadyToInstall);
+            }
         }
         catch (Exception ex)
         {
@@ -102,14 +125,25 @@ internal sealed class UpdateService : IUpdateService
         }
     }
 
+    /// <summary>Shows that the update installs, then closes Atap the normal way, so settings are saved first.</summary>
+    private void InstallNow()
+    {
+        _restart = true;
+        SetStatus(UpdateStatus.Installing);
+        _ = Task.Delay(InstallNotice).ContinueWith(
+            _ => _dispatcher.BeginInvoke(() => System.Windows.Application.Current?.Shutdown()),
+            TaskScheduler.Default);
+    }
+
     public void ApplyPendingOnExit()
     {
         if (_manager is null || _pending is null)
             return;
         try
         {
-            // The updater waits for this process to exit, installs silently and does not relaunch.
-            _manager.WaitExitThenApplyUpdates(_pending, silent: true, restart: false);
+            // The updater waits for this process to exit and installs silently. It opens Atap again only when the
+            // user asked for the update. An update found by the schedule waits for the next start.
+            _manager.WaitExitThenApplyUpdates(_pending, silent: true, restart: _restart);
         }
         catch (Exception ex)
         {
