@@ -61,6 +61,21 @@ public sealed class FullScreenSlimTests : IDisposable
         Assert.NotEqual(NotchSurface.Slim, main.Surface);
     }
 
+    [Fact]
+    public async Task ABrowserReportedAsAGame_TurnsOnlyItsScreenSlim()
+    {
+        await using var widgets = _services.CreateWidgetHost(WidgetCatalog.FromDescriptors([]));
+        using var side = Model(widgets, Side);
+        using var main = Model(widgets, Main);
+
+        _foreground.CoveredScreen = Side;
+        _foreground.FullScreen = FullScreenKind.Game;
+
+        Assert.Equal(NotchSurface.Slim, side.Surface);
+        Assert.NotEqual(NotchSurface.Hidden, main.Surface);
+        Assert.NotEqual(NotchSurface.Slim, main.Surface);
+    }
+
     [Theory]
     [InlineData(FullScreenKind.Game)]
     [InlineData(FullScreenKind.Presentation)]

@@ -82,6 +82,18 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
     /// <summary>True while the front window fills this notch's screen.</summary>
     private bool IsScreenCovered => _screen is { } screen && _foreground.CoveredScreen == screen;
 
+    /// <summary>
+    /// A presentation hides every notch. Windows also reports browsers and videos in full screen as a Direct3D game,
+    /// so a game hides the notch only when no front window is seen filling a screen. When one is, the notch on that
+    /// screen turns slim and the others stay as they are.
+    /// </summary>
+    private bool HidesForFullScreen => _foreground.FullScreen switch
+    {
+        FullScreenKind.Presentation => true,
+        FullScreenKind.Game => _foreground.CoveredScreen is null,
+        _ => false,
+    };
+
     /// <summary>Raised after the content has been set. The view resizes (or hides) on this, and fades content in only when it is new.</summary>
     public event EventHandler<NotchContentChangedEventArgs>? ContentChanged;
 
@@ -322,8 +334,7 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
         var panelOpen = _control.IsSet(NotchFlag.PanelOpen);
         var drag = _isDraggingFiles ? FileDragTarget(hasFiles: true) : NotchDragTarget.None;
         var next = NotchSurfaceResolver.Resolve(new NotchInputs(
-            // A game in exclusive full screen or a presentation draws over everything, so the notch steps aside.
-            Hidden: _control.IsSet(NotchFlag.Hide) || _foreground.FullScreen is FullScreenKind.Game or FullScreenKind.Presentation,
+            Hidden: _control.IsSet(NotchFlag.Hide) || HidesForFullScreen,
             Editing: _control.IsSet(NotchFlag.Editing),
             PanelOpen: panelOpen || drag == NotchDragTarget.Panel,
             Hovered: IsHovered || drag == NotchDragTarget.Expanded,
