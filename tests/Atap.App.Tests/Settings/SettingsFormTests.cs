@@ -413,9 +413,14 @@ public sealed class SettingsFormTests : IDisposable
         var host = SettingsUi.Render(form);
         var list = Assert.Single(SettingsUi.Visible<ListBox>(host));
         var field = Assert.IsType<ChoiceField>(form.Fields[0]);
+        var options = field.Options;
 
         list.SelectedItem = field.Options.Single(o => o.Value == Localizer.Malay);
         SettingsUi.Layout(host);
+
+        // Relabelled in place: the control keeps its buttons, so nothing flickers or seems to reload.
+        Assert.Same(options, field.Options);
+        Assert.Same(options, list.ItemsSource);
 
         Assert.Equal(Localizer.Malay, _services.Settings.Values.GetString("language.choice"));
         Assert.Equal(Localizer.Malay, text.Language);

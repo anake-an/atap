@@ -1,4 +1,5 @@
 using System.Globalization;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Atap.Core.Settings;
 using Atap.Core.Widgets;
@@ -92,8 +93,19 @@ internal sealed class NumberField : SettingField
 }
 
 /// <summary>One choice with its label, "&lt;Label&gt;.&lt;choice&gt;" in the strings.</summary>
-internal sealed record ChoiceOption(string Value, string Label)
+/// <summary>One choice. The label changes in place with the language, so the list keeps its items and selection.</summary>
+internal sealed class ChoiceOption(string value, string label) : ObservableObject
 {
+    private string _label = label;
+
+    public string Value { get; } = value;
+
+    public string Label
+    {
+        get => _label;
+        internal set => SetProperty(ref _label, value);
+    }
+
     public override string ToString() => Label;
 }
 
@@ -139,14 +151,23 @@ internal sealed class ChoiceField : SettingField
         OnPropertyChanged(nameof(Selected));
     }
 
-    // New labels make new option objects, so the selection moves to the new object with the same value.
+    // A new language only changes the labels, so the same options are relabelled in place. A new list would make
+    // the control rebuild every button, which showed as a flicker and a page that seemed to reload.
     protected override void RebuildText()
     {
+        var choices = Definition.Choices ?? [];
+        if (_options.Count == choices.Count && _options.Select(o => o.Value).SequenceEqual(choices))
+        {
+            foreach (var option in _options)
+                option.Label = Strings[$"{Definition.Label}.{option.Value}"];
+            return;
+        }
+
         var value = _selected?.Value;
         _relabelling = true;
         try
         {
-            Options = (Definition.Choices ?? []).Select(c => new ChoiceOption(c, Strings[$"{Definition.Label}.{c}"])).ToList();
+            Options = choices.Select(c => new ChoiceOption(c, Strings[$"{Definition.Label}.{c}"])).ToList();
             _selected = value is null ? null : Options.FirstOrDefault(o => o.Value == value);
             OnPropertyChanged(nameof(Selected));
         }
