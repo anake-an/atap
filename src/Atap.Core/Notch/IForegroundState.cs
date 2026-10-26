@@ -12,8 +12,8 @@ public interface IForegroundState
     FullScreenKind FullScreen { get; }
 
     /// <summary>
-    /// The screen that the front window covers completely, in full screen or as a borderless window, in physical
-    /// pixels. Null while no window covers a whole screen. The notch on that screen turns slim.
+    /// The screen that the front window covers completely (full screen or borderless) or is maximized on, in
+    /// physical pixels. Null otherwise. The notch on that screen turns slim, so it does not cover the app's top.
     /// </summary>
     PixelRect? CoveredScreen { get; }
 

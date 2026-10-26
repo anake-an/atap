@@ -102,7 +102,8 @@ internal sealed class ForegroundState : IForegroundState, IDisposable
     }
 
     /// <summary>
-    /// The screen <paramref name="window"/> fills, or null. A minimized or hidden window fills none, and neither
+    /// The screen <paramref name="window"/> fills or is maximized on, or null. Either way it reaches the top of the
+    /// screen, where the notch sits over its tabs or title bar. A minimized or hidden window fills none, and neither
     /// does the desktop, which always covers its screen.
     /// </summary>
     private static PixelRect? ScreenCoveredBy(IntPtr window)
@@ -117,7 +118,7 @@ internal sealed class ForegroundState : IForegroundState, IDisposable
         var m = info.rcMonitor;
         var screen = new PixelRect(m.Left, m.Top, m.Right - m.Left, m.Bottom - m.Top);
         var bounds = new PixelRect(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
-        return ScreenCover.Covers(bounds, screen) ? screen : null;
+        return ScreenCover.Covers(bounds, screen) || ForegroundNative.IsZoomed(window) ? screen : null;
     }
 
     private static bool IsDesktop(IntPtr window)
