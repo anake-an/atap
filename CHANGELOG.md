@@ -6,6 +6,19 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-10-26
+
+A full-screen or borderless app now turns the notch slim on its own screen, and two small fixes.
+
+### Changed
+
+- A full-screen or borderless app turns the notch slim on its own screen, instead of hiding the notch on every screen. The notch comes back when you close or minimize the app, or switch to another one. Games in exclusive full screen and presentations still hide it.
+
+### Fixed
+
+- The local API keeps all its listeners after a pipe fails to open for a moment, so programs that push progress are not slowed down until Atap restarts.
+- Sync tries a conflict copy again a few seconds later when it could not be opened, such as while a virus scan reads it, instead of waiting for the next change in the folder.
+
 ## [1.1.0] - 2026-10-26
 
 Fixes for what people found in 1.0.0, a new Edit layout with a live picture of your notch, and smoother hovering and clicking. It also uses less memory and works better on a second screen with a different scale.
@@ -237,7 +250,8 @@ First public release of Atap, a free notch for Windows. It is open source under 
 - A sync file cannot turn on the local API, PATH or start with Windows. Secret values never leave the PC, and a synced widget asks for its keys again if another PC changes where it connects.
 - Text in pushes and alerts is cleaned before it is shown, and the `atap` tool prints only short, plain error codes.
 
-[Unreleased]: https://github.com/anake-an/atap/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/anake-an/atap/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/anake-an/atap/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/anake-an/atap/compare/v1.0.0...v1.1.0
 [1.1.0-preview.1]: https://github.com/anake-an/atap/compare/v1.0.0...v1.1.0-preview.1
 [1.0.0]: https://github.com/anake-an/atap/releases/tag/v1.0.0
