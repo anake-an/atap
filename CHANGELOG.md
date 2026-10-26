@@ -6,6 +6,21 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-26
+
+Ask AI arrives: ask a question from the command bar with your own key for Claude, ChatGPT, Gemini, OpenRouter or your own server. It is off until you turn it on.
+
+### Added
+
+- Ask AI, off until you turn it on. Type a question in the command bar and press Enter, and the answer shows right there.
+- Use your own key for Claude, ChatGPT, Gemini or OpenRouter, or your own server such as Ollama. The service bills you, not Atap.
+- Settings walks you through it: pick a service, get a key, paste it and pick Fast or Smarter. Atap checks the key for free.
+- Your key stays on this PC, locked to your Windows account, and never syncs.
+- Stop, Copy and Ask again under each answer. Follow-up questions remember the conversation until you close the bar.
+- Include what I copied sends your copied text with the question, only when you tick it, and shows it first.
+- An optional shortcut opens the command bar ready to ask.
+- What uses the internet lists Ask AI. Clear saved data now removes your Ask AI keys too.
+
 ## [1.1.2] - 2026-10-26
 
 The notch turns slim for full-screen and maximized apps, Edit layout and Settings look and feel better, lyrics are found for Apple Music, and prayer times can play a chime or the azan. Updates you start now install and reopen Atap by themselves.
@@ -278,7 +293,8 @@ First public release of Atap, a free notch for Windows. It is open source under 
 - A sync file cannot turn on the local API, PATH or start with Windows. Secret values never leave the PC, and a synced widget asks for its keys again if another PC changes where it connects.
 - Text in pushes and alerts is cleaned before it is shown, and the `atap` tool prints only short, plain error codes.
 
-[Unreleased]: https://github.com/anake-an/atap/compare/v1.1.2...HEAD
+[Unreleased]: https://github.com/anake-an/atap/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/anake-an/atap/compare/v1.1.2...v1.2.0
 [1.1.2]: https://github.com/anake-an/atap/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/anake-an/atap/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/anake-an/atap/compare/v1.0.0...v1.1.0
