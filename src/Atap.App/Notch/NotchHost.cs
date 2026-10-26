@@ -211,6 +211,7 @@ internal sealed class NotchHost : IDisposable
             return; // Mid-change (for example, all displays asleep); keep the last known layout.
 
         _monitors = monitors;
+        Atap.Diagnostics.Log.Info($"Screens changed. {monitors.Count} connected.");
         ApplyPlacement();
         Changed?.Invoke(this, EventArgs.Empty);
     }

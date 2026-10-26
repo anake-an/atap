@@ -6,6 +6,34 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-10-26
+
+The notch turns slim for full-screen and maximized apps, Edit layout and Settings look and feel better, lyrics are found for Apple Music, and prayer times can play a chime or the azan. Updates you start now install and reopen Atap by themselves.
+
+### Added
+
+- Waktu solat can play a soft chime or your own azan recording at prayer time. The sound plays once, and Stop on the notch ends it.
+- Delete all my Atap data in Settings, Privacy removes everything Atap keeps on this PC, then closes Atap.
+
+### Changed
+
+- A maximized app turns the notch slim on its screen too, so the notch does not cover its tabs or title bar. It comes back when the app is restored, minimized or no longer in front.
+- The notch pictures in Settings and in Edit layout have the same shape as the real notch, with its curved shoulders under the screen edge.
+- Edit layout uses plainer words, and an empty "When you click it" page says what a click shows right now.
+- Scrolling in Settings and in the Add widgets list is smooth and keeps up when you scroll fast. It no longer stops when the pointer passes over a list or text box.
+- The Privacy page says plainly which parts of Atap use the internet, what they send, and whether each one is on.
+- The prayer time alert is now a choice: Notch only, Soft chime, Azan or No alert. If you had the alert off, it stays off.
+- When you press Check for updates and there is a new version, Atap installs it and opens again by itself. You no longer need to quit Atap. An update found in the background still waits until Atap closes, so Atap never restarts while you work.
+
+### Fixed
+
+- Delete all my Atap data tries again for a moment when a file is in use, so it leaves nothing behind in nearly every case.
+- The Privacy page names the right server for Home Assistant set-ups that use a separate message server.
+- A browser or video in full screen turns the notch slim on its screen instead of hiding it. Windows reports these like a game, which hid the notch before.
+- Changing the language in Settings no longer makes the choice buttons flicker or the page seem to reload. The labels change in place.
+- Lyrics are found for songs from Apple Music, which puts the artist and album together in one field.
+- Lyrics are found for more songs: the album loses " - EP" and " - Single", and a song with extras such as "(feat. Someone)" or " - Remastered" is searched without them too.
+
 ## [1.1.1] - 2026-10-26
 
 A full-screen or borderless app now turns the notch slim on its own screen, and two small fixes.
@@ -250,7 +278,8 @@ First public release of Atap, a free notch for Windows. It is open source under 
 - A sync file cannot turn on the local API, PATH or start with Windows. Secret values never leave the PC, and a synced widget asks for its keys again if another PC changes where it connects.
 - Text in pushes and alerts is cleaned before it is shown, and the `atap` tool prints only short, plain error codes.
 
-[Unreleased]: https://github.com/anake-an/atap/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/anake-an/atap/compare/v1.1.2...HEAD
+[1.1.2]: https://github.com/anake-an/atap/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/anake-an/atap/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/anake-an/atap/compare/v1.0.0...v1.1.0
 [1.1.0-preview.1]: https://github.com/anake-an/atap/compare/v1.0.0...v1.1.0-preview.1
