@@ -30,7 +30,8 @@ internal sealed class LayoutEditorDescriptor : IFeatureDescriptor
         context.Notch,
         () => LayoutEditorWindow.Open(
             new LayoutEditorViewModel(context.Layout, context.Services.Catalog, context.Text, new LayoutBackup(context.Paths.LayoutFile)),
-            EditorScreen.ForNotch(context.Services.NotchHost)));
+            EditorScreen.ForNotch(context.Services.NotchHost),
+            context.Settings.Values.GetBool(Atap.Features.Accessibility.AccessibilityDescriptor.LessMotionKey)));
 }
 
 /// <summary>Opens one editor at a time and puts the notch in edit mode while it is open.</summary>

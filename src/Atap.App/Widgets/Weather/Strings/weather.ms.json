@@ -1,7 +1,7 @@
 {
   "weather.name": "Cuaca",
   "weather.description": "Ramalan cuaca MET Malaysia untuk negeri anda, hari ini dan tiga hari seterusnya.",
-  "weather.privacy": "Mengambil ramalan negeri anda daripada api.data.gov.my setiap 3 jam. Hanya id ramalan negeri dihantar.",
+  "weather.privacy": "Mendapatkan ramalan negeri anda daripada api.data.gov.my setiap 3 jam. Hanya kod ramalan untuk negeri anda dihantar.",
   "weather.needsArea": "Pilih kawasan anda di halaman Waktu solat dalam Tetapan.",
   "weather.loading": "Mendapatkan ramalan…",
   "weather.failed": "Ramalan tidak dapat diambil. Atap akan cuba lagi nanti.",

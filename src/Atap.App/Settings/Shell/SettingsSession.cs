@@ -1,7 +1,10 @@
 using System.Windows;
 using Atap.Composition;
+using Atap.Core.Settings;
+using Atap.Features.Accessibility;
 using Atap.Platform.Diagnostics;
 using Atap.Settings.Form;
+using Atap.Ui.Controls;
 
 namespace Atap.Settings.Shell;
 
@@ -25,12 +28,16 @@ internal sealed class SettingsSession : ISettingsSession
 {
     private readonly SettingsWindow _window;
     private readonly SettingsWindowViewModel _model;
+    private readonly IAppSettings _settings;
 
-    private SettingsSession(SettingsWindow window, SettingsWindowViewModel model)
+    private SettingsSession(SettingsWindow window, SettingsWindowViewModel model, IAppSettings settings)
     {
         _window = window;
         _model = model;
+        _settings = settings;
         _window.Closed += OnClosed;
+        _settings.Changed += OnSettingsChanged;
+        ApplyLessMotion();
     }
 
     public event EventHandler? Closed;
@@ -57,7 +64,7 @@ internal sealed class SettingsSession : ISettingsSession
         model.Show(pageOrSection);
         window.DataContext = model;
 
-        var session = new SettingsSession(window, model);
+        var session = new SettingsSession(window, model, services.Settings);
         window.Show();
         session.BringToFront();
         return session;
@@ -86,9 +93,20 @@ internal sealed class SettingsSession : ISettingsSession
         _window.FocusSelectedPage();
     }
 
+    // Less motion also makes the page jump on the wheel instead of gliding. It follows the setting while open.
+    private void OnSettingsChanged(object? sender, SettingsChangedEventArgs e)
+    {
+        if (e.Keys.Contains(AccessibilityDescriptor.LessMotionKey))
+            ApplyLessMotion();
+    }
+
+    private void ApplyLessMotion() =>
+        SmoothWheelScroll.SetLessMotion(_window, _settings.Values.GetBool(AccessibilityDescriptor.LessMotionKey));
+
     private void OnClosed(object? sender, EventArgs e)
     {
         _window.Closed -= OnClosed;
+        _settings.Changed -= OnSettingsChanged;
         _window.DataContext = null;
         _model.Dispose();
         Closed?.Invoke(this, EventArgs.Empty);

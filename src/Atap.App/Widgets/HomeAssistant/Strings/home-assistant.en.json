@@ -1,7 +1,7 @@
 {
   "home-assistant.name": "Home Assistant",
   "home-assistant.description": "One reading from Home Assistant, such as a room temperature or whether a door is open. It shows on the notch when the value needs your attention.",
-  "home-assistant.privacy": "Atap connects to the MQTT broker you name and listens to the topic you pick. Messages stay in memory. Your password is kept locked on this PC.",
+  "home-assistant.privacy": "Atap connects to your Home Assistant server at the address you give and listens to the topic you pick. Messages stay in memory only. Your password is kept locked on this PC.",
   "home-assistant.broker": "Broker address",
   "home-assistant.brokerHint": "The computer that runs your MQTT broker, such as homeassistant.local or 192.168.1.10.",
   "home-assistant.topic": "Topic",

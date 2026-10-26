@@ -96,15 +96,33 @@ public sealed class SettingsCardsTests : IDisposable
         Assert.Equal(2, card.Items.Count);
         var weather = card.Items.Single(i => i.Detail.Contains("api.data.gov.my", StringComparison.Ordinal));
         Assert.False(weather.IsOn);
-        Assert.Equal("Connects to api.data.gov.my.", weather.Detail);
+        Assert.Equal("Uses the internet: api.data.gov.my", weather.Detail);
         Assert.True(weather.HasNote);
-        var json = card.Items.Single(i => i.Detail == "Connects to addresses you type in.");
+        Assert.Equal("Off", weather.StateText);
+        Assert.Equal("Turn on in What it shows", weather.TurnOnHint);
+        var json = card.Items.Single(i => i.Detail == "Uses the internet: addresses you type in");
         Assert.True(json.IsOn);
         Assert.Equal("On", json.StateText);
+        Assert.False(json.HasTurnOnHint);
 
         _services.Layout.Update(d => d.EnabledWidgets = ["weather"]);
         Assert.True(card.Items.Single(i => i.Detail.Contains("api.data.gov.my", StringComparison.Ordinal)).IsOn);
-        Assert.False(card.Items.Single(i => i.Detail == "Connects to addresses you type in.").IsOn);
+        Assert.False(card.Items.Single(i => i.Detail == "Uses the internet: addresses you type in").IsOn);
+    }
+
+    [Fact]
+    public void Network_NamesSitesAndTypedAddresses_OnOneLine()
+    {
+        var catalog = WidgetCatalog.FromDescriptors(
+        [
+            new SettingsTestDescriptor("lyrics", capabilities: new WidgetCapabilities(WidgetPermissions.Network | WidgetPermissions.UserUrls, ["lrclib.net"])),
+            new SettingsTestDescriptor("plain", capabilities: new WidgetCapabilities(WidgetPermissions.Network, [])),
+        ]);
+        using var card = new NetworkFeaturesViewModel(catalog, _services.Layout, updateChecks: null, _services.Text);
+
+        Assert.Equal(
+            new[] { "Uses the internet: lrclib.net and addresses you type in", "Uses the internet" },
+            card.Items.Select(i => i.Detail));
     }
 
     [Fact]

@@ -3,7 +3,7 @@
   "next-meeting.description": "Mesyuarat seterusnya daripada kalendar anda, dengan butang Sertai. Ia muncul pada notch 5 minit sebelum bermula.",
   "next-meeting.url": "Pautan kalendar",
   "next-meeting.urlHint": "Pautan iCal atau .ics peribadi daripada Google Calendar, Outlook atau iCloud. Atap menyimpannya dengan selamat pada PC ini dan tidak menunjukkannya lagi.",
-  "next-meeting.privacy": "Atap memuat turun kalendar anda daripada pautan yang anda berikan, setiap 15 minit. Kalendar disimpan dalam memori sahaja dan tidak pernah disimpan ke cakera.",
+  "next-meeting.privacy": "Atap memuat turun kalendar anda daripada pautan yang anda berikan, setiap 15 minit. Kalendar disimpan dalam memori sahaja dan tidak pernah disimpan pada PC anda.",
   "next-meeting.noLink": "Tambah pautan kalendar anda dalam tetapan widget ini.",
   "next-meeting.failed": "Kalendar anda tidak dapat dimuatkan. Semak pautan dan sambungan anda.",
   "next-meeting.loading": "Memuatkan kalendar anda…",
