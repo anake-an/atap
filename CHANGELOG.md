@@ -6,6 +6,14 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 
 ## [Unreleased]
 
+## [1.2.3] - 2026-10-26
+
+A safety net while a crash during music playback is tracked down.
+
+### Fixed
+
+- If Atap ever crashes, Windows opens it again by itself, so the notch does not stay gone until you start Atap by hand.
+
 ## [1.2.2] - 2026-10-26
 
 Ask AI answers now show in the notch, and a chat window carries the conversation on. The memory number in Settings matches Task Manager.
@@ -324,7 +332,8 @@ First public release of Atap, a free notch for Windows. It is open source under 
 - A sync file cannot turn on the local API, PATH or start with Windows. Secret values never leave the PC, and a synced widget asks for its keys again if another PC changes where it connects.
 - Text in pushes and alerts is cleaned before it is shown, and the `atap` tool prints only short, plain error codes.
 
-[Unreleased]: https://github.com/anake-an/atap/compare/v1.2.2...HEAD
+[Unreleased]: https://github.com/anake-an/atap/compare/v1.2.3...HEAD
+[1.2.3]: https://github.com/anake-an/atap/compare/v1.2.2...v1.2.3
 [1.2.2]: https://github.com/anake-an/atap/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/anake-an/atap/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/anake-an/atap/compare/v1.1.2...v1.2.0
