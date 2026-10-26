@@ -88,13 +88,14 @@ internal sealed class ResourceMeterViewModel : ObservableObject, IDisposable
 
     /// <summary>The one line most people want: memory and processor.</summary>
     public string Summary => _usage is { } usage
-        ? _text.Format("meter.summary", ("mb", ResourceUsage.Megabytes(usage.PrivateBytes)), ("cpu", Percent(usage.CpuPercent)))
+        ? _text.Format("meter.summary", ("mb", ResourceUsage.Megabytes(usage.Memory)), ("cpu", Percent(usage.CpuPercent)))
         : _text["meter.measuring"];
 
     public IReadOnlyList<MeterRow> Rows => _usage is not { } usage
         ? []
         :
         [
+            new(_text["meter.memory"], Megabytes(usage.Memory)),
             new(_text["meter.privateBytes"], Megabytes(usage.PrivateBytes)),
             new(_text["meter.workingSet"], Megabytes(usage.WorkingSet)),
             new(_text["meter.managedHeap"], Megabytes(usage.ManagedHeap)),

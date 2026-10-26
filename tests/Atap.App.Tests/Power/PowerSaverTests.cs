@@ -209,7 +209,7 @@ public sealed class PowerSaverTests : IDisposable
         meter.SetShown(true);
 
         Assert.Equal(_services.Text.Format("meter.summary", ("mb", 45), ("cpu", 0.2.ToString("0.0", System.Globalization.CultureInfo.CurrentCulture))), meter.Summary);
-        Assert.Equal(11, meter.Rows.Count);
+        Assert.Equal(12, meter.Rows.Count);
     }
 
     [Fact]
@@ -227,7 +227,7 @@ public sealed class PowerSaverTests : IDisposable
         meter.CopyCommand.Execute(null);
 
         Assert.StartsWith("Atap 1.0.0", copied);
-        Assert.Contains("Memory (private): 45 MB", copied);
+        Assert.Contains("Memory (as in Task Manager): 45 MB", copied);
         Assert.Equal(_services.Text["meter.copied"], meter.CopyStatus);
     }
 
