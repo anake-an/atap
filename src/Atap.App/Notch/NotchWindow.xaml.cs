@@ -136,6 +136,7 @@ public partial class NotchWindow : Window, INotchWindow
         TargetMonitor = monitor;
         _anchor = anchor;
         _offset = offset;
+        _viewModel.SetScreen(monitor.Bounds);
 
         if (anchorChanged)
         {

@@ -1,10 +1,11 @@
 using Atap.Core.Notch;
+using Atap.Core.Placement;
 
 namespace Atap.Platform.Foreground;
 
 /// <summary>
-/// Reports when a full-screen app (game, video, presentation) is in front, and the front app's exe name while
-/// someone holds <see cref="WantProcessNames"/>.
+/// Reports when a full-screen app (game, video, presentation) is in front, which screen the front window covers
+/// completely, and the front app's exe name while someone holds <see cref="WantProcessNames"/>.
 /// Event-driven: re-checks when the foreground window changes, and when that window moves or resizes, so a
 /// window that goes full screen by itself (F11, a video's full screen button) is noticed too.
 /// </summary>
@@ -34,11 +35,15 @@ internal sealed class ForegroundState : IForegroundState, IDisposable
             0,
             0,
             ForegroundNative.WINEVENT_OUTOFCONTEXT | ForegroundNative.WINEVENT_SKIPOWNPROCESS);
-        WatchMoves(ForegroundNative.GetForegroundWindow());
+        var front = ForegroundNative.GetForegroundWindow();
+        WatchMoves(front);
         FullScreen = QueryFullScreen();
+        CoveredScreen = ScreenCoveredBy(front);
     }
 
     public FullScreenKind FullScreen { get; private set; }
+
+    public PixelRect? CoveredScreen { get; private set; }
 
     public string? ProcessName { get; private set; }
 
@@ -67,9 +72,7 @@ internal sealed class ForegroundState : IForegroundState, IDisposable
         if (_hook == IntPtr.Zero)
             return;
         WatchMoves(hwnd);
-        var fullScreen = QueryFullScreen();
-        var changed = fullScreen != FullScreen;
-        FullScreen = fullScreen;
+        var changed = UpdateFullScreen(hwnd);
         if (_nameLeases > 0)
             changed |= UpdateName(hwnd, raise: false);
         if (changed)
@@ -82,11 +85,47 @@ internal sealed class ForegroundState : IForegroundState, IDisposable
     {
         if (hwnd != _front || idObject != ForegroundNative.OBJID_WINDOW || idChild != ForegroundNative.CHILDID_SELF || _hook == IntPtr.Zero)
             return;
+        if (UpdateFullScreen(hwnd))
+            Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>Reads both full-screen answers again. True when either changed.</summary>
+    private bool UpdateFullScreen(IntPtr front)
+    {
         var fullScreen = QueryFullScreen();
-        if (fullScreen == FullScreen)
-            return;
+        var covered = ScreenCoveredBy(front);
+        if (fullScreen == FullScreen && covered == CoveredScreen)
+            return false;
         FullScreen = fullScreen;
-        Changed?.Invoke(this, EventArgs.Empty);
+        CoveredScreen = covered;
+        return true;
+    }
+
+    /// <summary>
+    /// The screen <paramref name="window"/> fills, or null. A minimized or hidden window fills none, and neither
+    /// does the desktop, which always covers its screen.
+    /// </summary>
+    private static PixelRect? ScreenCoveredBy(IntPtr window)
+    {
+        if (window == IntPtr.Zero || ForegroundNative.IsIconic(window) || !ForegroundNative.IsWindowVisible(window)
+            || IsDesktop(window) || !ForegroundNative.GetWindowRect(window, out var rect))
+            return null;
+        var monitor = ForegroundNative.MonitorFromWindow(window, ForegroundNative.MONITOR_DEFAULTTONULL);
+        var info = new ForegroundNative.MONITORINFO { cbSize = System.Runtime.InteropServices.Marshal.SizeOf<ForegroundNative.MONITORINFO>() };
+        if (monitor == IntPtr.Zero || !ForegroundNative.GetMonitorInfo(monitor, ref info))
+            return null;
+        var m = info.rcMonitor;
+        var screen = new PixelRect(m.Left, m.Top, m.Right - m.Left, m.Bottom - m.Top);
+        var bounds = new PixelRect(rect.Left, rect.Top, rect.Right - rect.Left, rect.Bottom - rect.Top);
+        return ScreenCover.Covers(bounds, screen) ? screen : null;
+    }
+
+    private static bool IsDesktop(IntPtr window)
+    {
+        var buffer = new char[32];
+        var length = ForegroundNative.GetClassName(window, buffer, buffer.Length);
+        var name = new string(buffer, 0, Math.Max(0, length));
+        return name is "Progman" or "WorkerW";
     }
 
     /// <summary>

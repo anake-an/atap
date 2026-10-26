@@ -105,6 +105,8 @@ public sealed class ProfilesFeatureTests : IDisposable
 
         public FullScreenKind FullScreen => FullScreenKind.None;
 
+        public Atap.Core.Placement.PixelRect? CoveredScreen => null;
+
         public string? ProcessName => Leases > 0 ? _name : null;
 
         public event EventHandler? Changed;
