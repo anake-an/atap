@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using Atap.Core.Diagnostics;
 using Atap.Core.Scheduling;
 
@@ -43,6 +44,37 @@ internal sealed class ProcessSampler(TimeProvider time, Func<SchedulerStats> sch
             stats.WakesLastHour,
             runningWidgets(),
             sharedSources(),
-            AppDomain.CurrentDomain.GetAssemblies().Length);
+            AppDomain.CurrentDomain.GetAssemblies().Length,
+            PrivateWorkingSet(process.Handle));
+    }
+
+    /// <summary>What Task Manager shows as memory: private pages in RAM. 0 when Windows does not report it.</summary>
+    private static long PrivateWorkingSet(IntPtr process)
+    {
+        var counters = new ProcessMemoryCountersEx2 { Size = (uint)Marshal.SizeOf<ProcessMemoryCountersEx2>() };
+        return GetProcessMemoryInfo(process, ref counters, counters.Size) ? (long)counters.PrivateWorkingSetSize : 0;
+    }
+
+    [DllImport("psapi.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool GetProcessMemoryInfo(IntPtr process, ref ProcessMemoryCountersEx2 counters, uint size);
+
+    // PROCESS_MEMORY_COUNTERS_EX2, Windows 10 1809 and later. Older Windows fills the shorter part and leaves the rest 0.
+    [StructLayout(LayoutKind.Sequential)]
+    private struct ProcessMemoryCountersEx2
+    {
+        public uint Size;
+        public uint PageFaultCount;
+        public UIntPtr PeakWorkingSetSize;
+        public UIntPtr WorkingSetSize;
+        public UIntPtr QuotaPeakPagedPoolUsage;
+        public UIntPtr QuotaPagedPoolUsage;
+        public UIntPtr QuotaPeakNonPagedPoolUsage;
+        public UIntPtr QuotaNonPagedPoolUsage;
+        public UIntPtr PagefileUsage;
+        public UIntPtr PeakPagefileUsage;
+        public UIntPtr PrivateUsage;
+        public UIntPtr PrivateWorkingSetSize;
+        public ulong SharedCommitUsage;
     }
 }
