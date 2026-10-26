@@ -218,7 +218,7 @@ public sealed class LyricsWidget : WidgetBase
             {
                 _viewModel.ShowState(LyricsState.Loading);
                 _loading = CancellationTokenSource.CreateLinkedTokenSource(_stopping!.Token);
-                Loading = LoadAsync(new LyricsQuery(s.Item1, s.Item2, player.Album, player.Duration), _loading.Token);
+                Loading = LoadAsync(SongTags.Query(s.Item1, s.Item2, player.Album, player.Duration), _loading.Token);
             }
             else
             {
@@ -256,6 +256,16 @@ public sealed class LyricsWidget : WidgetBase
                 answered = Answered(result);
                 if (!result.Body.IsEmpty)
                     track = LrclibApi.PickBest(LrclibApi.ParseSearch(result.Body.Span), query);
+            }
+            // Last, the title without extras such as "(feat. Someone)" or " - Remastered", which LRCLIB rarely has.
+            var plainTitle = SongTags.PlainTitle(query.Title);
+            if ((track is null || track.Kind == LyricsKind.None) && plainTitle != query.Title
+                && LrclibApi.SearchUri(query with { Title = plainTitle }) is { } plainUri)
+            {
+                var result = await Context.Http.GetAsync(new FetchRequest(plainUri, LyricsDescriptor.CacheFor), token);
+                answered = Answered(result);
+                if (!result.Body.IsEmpty)
+                    track = LrclibApi.PickBest(LrclibApi.ParseSearch(result.Body.Span), query with { Title = plainTitle });
             }
             if (token.IsCancellationRequested)
                 return;

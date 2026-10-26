@@ -32,6 +32,12 @@ public sealed class AppCommandsTests
 
         updates.Status = UpdateStatus.Downloading;
         Assert.False(command.IsAvailable!());
+        updates.Status = UpdateStatus.Installing;
+        Assert.False(command.IsAvailable!());
+
+        // A downloaded update: pressing Check installs it now.
+        updates.Status = UpdateStatus.ReadyToInstall;
+        Assert.True(command.IsAvailable!());
         updates.IsSupported = false;
         updates.Status = UpdateStatus.Idle;
         Assert.False(command.IsAvailable!());

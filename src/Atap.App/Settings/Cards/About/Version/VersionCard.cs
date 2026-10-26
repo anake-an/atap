@@ -75,6 +75,7 @@ internal sealed class VersionCardViewModel : ObservableObject, IDisposable
         { Status: UpdateStatus.Checking } => "version.status.checking",
         { Status: UpdateStatus.Downloading } => "version.status.downloading",
         { Status: UpdateStatus.ReadyToInstall } => "version.status.ready",
+        { Status: UpdateStatus.Installing } => "version.status.installing",
         { Status: UpdateStatus.UpToDate } => "version.status.upToDate",
         _ => "version.status.idle",
     }];
