@@ -179,17 +179,22 @@ internal sealed class AiCardViewModel : ObservableObject, IDisposable
 
     public string BillingText => _text.Format("ai.billing", ("service", ServiceName));
 
-    public string KeyHint => UsesOwnServer ? _text["ai.keyOptional"] : _text.Format("ai.keyHint", ("service", ServiceName));
+    public string KeyHint => UsesOwnServer ? _text["ai.keyOptional"]
+        : HasKey ? _text.Format("ai.keyHint.replace", ("service", ServiceName))
+        : _text.Format("ai.keyHint", ("service", ServiceName));
 
     public bool HasKey => AiSetup.HasKey(_settings.Values, _secrets, Provider);
 
     public bool HasKeyFromOtherPc => AiSetup.HasKeyFromOtherPc(_settings.Values, _secrets, Provider);
 
-    public string KeyState => _text[
-        !_secrets.IsAvailable ? "ai.keyState.unavailable"
-        : HasKey ? "ai.keyState.saved"
-        : HasKeyFromOtherPc ? "ai.keyState.otherPc"
-        : "ai.keyState.none"];
+    public string KeyState =>
+        HasKey && AiSetup.KeyEnding(_settings.Values, _secrets, Provider) is { } ending
+            ? _text.Format("ai.keyState.savedEnding", ("end", ending))
+            : _text[
+                !_secrets.IsAvailable ? "ai.keyState.unavailable"
+                : HasKey ? "ai.keyState.saved"
+                : HasKeyFromOtherPc ? "ai.keyState.otherPc"
+                : "ai.keyState.none"];
 
     /// <summary>What the last save, check or remove did.</summary>
     public string? Message => _message?.Invoke();
@@ -397,6 +402,7 @@ internal sealed class AiCardViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(HasKey));
         OnPropertyChanged(nameof(HasKeyFromOtherPc));
         OnPropertyChanged(nameof(KeyState));
+        OnPropertyChanged(nameof(KeyHint));
         RemoveKeyCommand.NotifyCanExecuteChanged();
     }
 
