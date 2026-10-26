@@ -104,17 +104,31 @@
     </Style.Triggers>
   </Style>
 
+  <!-- The notch in every picture: the real outline with its shoulders, hanging from a strip for the top of the screen.
+       In high contrast the notch takes the window colour, so a thin outline shows where it ends. -->
+  <Style x:Key="Preview.Notch" TargetType="preview:NotchFrame">
+    <Setter Property="Fill" Value="{DynamicResource NotchSurfaceBrush}" />
+    <Setter Property="EdgeBrush" Value="{DynamicResource NotchSurfaceBrush}" />
+    <Setter Property="Padding" Value="10,10,10,14" />
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding IsHigh, Source={x:Static controls:Contrast.Current}}" Value="True">
+        <Setter Property="Stroke" Value="{DynamicResource TextBrush}" />
+        <Setter Property="EdgeBrush" Value="{DynamicResource TextBrush}" />
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
+
   <!-- One state of the notch as a picture, for the Settings summary. -->
   <DataTemplate DataType="{x:Type preview:NotchPicture}">
-    <Border Background="{DynamicResource NotchSurfaceBrush}" CornerRadius="0,0,26,26" Padding="10,10,10,14" MinWidth="220" MinHeight="56"
-            HorizontalAlignment="Center" VerticalAlignment="Top" AutomationProperties.Name="{Binding AutomationName}">
+    <preview:NotchFrame Style="{StaticResource Preview.Notch}" State="{Binding State}" NotchMinWidth="220" NotchMinHeight="56" VerticalAlignment="Top"
+                        AutomationProperties.Name="{Binding AutomationName}">
       <Grid>
         <ItemsControl ItemsSource="{Binding Tiles}" Style="{StaticResource Preview.Tiles}" HorizontalAlignment="Center" />
         <TextBlock Text="{Binding EmptyText}" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"
                    VerticalAlignment="Center"
                    Visibility="{Binding IsEmpty, Converter={StaticResource Preview.BoolToVisibility}}" />
       </Grid>
-    </Border>
+    </preview:NotchFrame>
   </DataTemplate>
 
 </ResourceDictionary>
