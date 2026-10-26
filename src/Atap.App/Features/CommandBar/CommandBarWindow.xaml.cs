@@ -71,9 +71,14 @@ public partial class CommandBarWindow : Window
     protected override void OnDeactivated(EventArgs e)
     {
         base.OnDeactivated(e);
+        // An answer stays while you look at something else. Esc or Close ends it.
+        if (DataContext is CommandBarViewModel { Ai.HasConversation: true })
+            return;
         // A click on another window already moved the keyboard there.
         CloseOnce(restoreFocus: false);
     }
+
+    private void OnCloseAnswer(object sender, RoutedEventArgs e) => CloseOnce(restoreFocus: true);
 
     internal void CloseOnce(bool restoreFocus)
     {

@@ -62,6 +62,7 @@
   "ai.copy": "Salin",
   "ai.copiedDone": "Disalin",
   "ai.again": "Tanya lagi",
+  "ai.close": "Tutup",
   "ai.capped": "Jawapannya terlalu panjang, jadi ia berhenti di sini.",
   "ai.done": "Jawapan daripada {service}. Taip soalan susulan dan tekan Enter.",
   "ai.error.key": "{service} tidak menerima kunci anda. Semak kunci itu dalam Tetapan.",

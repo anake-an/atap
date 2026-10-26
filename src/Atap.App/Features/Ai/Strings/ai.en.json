@@ -62,6 +62,7 @@
   "ai.copy": "Copy",
   "ai.copiedDone": "Copied",
   "ai.again": "Ask again",
+  "ai.close": "Close",
   "ai.capped": "The answer was very long, so it stops here.",
   "ai.done": "Answer from {service}. Type a follow-up and press Enter.",
   "ai.error.key": "{service} did not accept your key. Check it in Settings.",
