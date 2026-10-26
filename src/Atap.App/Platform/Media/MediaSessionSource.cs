@@ -37,6 +37,15 @@ internal sealed class MediaSessionSource : ISharedService<MediaSessionSource>, I
     private GlobalSystemMediaTransportControlsSession? _session;
     private bool _disposed;
 
+    // Every session Atap has subscribed to, kept for the whole run and never unsubscribed. Unsubscribing and letting
+    // .NET clean a session up later released the same Windows object twice on the finalizer thread, which crashed Atap
+    // while music played (seen in a crash dump of 1.2.1). There are only a few sessions, one per app or browser tab.
+    private readonly List<GlobalSystemMediaTransportControlsSession> _subscribed = [];
+
+    // The same holds for the session manager and every source that ever subscribed: they live until Atap exits, so
+    // a media source that stops (for example when the last media widget is removed) never has them released.
+    private static readonly List<object> KeepAlive = [];
+
     // Bumped on every track refresh so a slow, stale thumbnail load cannot overwrite a newer one.
     private int _trackVersion;
 
@@ -73,12 +82,8 @@ internal sealed class MediaSessionSource : ISharedService<MediaSessionSource>, I
 
     public void Dispose()
     {
+        // Nothing is unsubscribed or released here, see KeepAlive. Events that still arrive are ignored.
         _disposed = true;
-        if (_manager is not null)
-        {
-            _manager.CurrentSessionChanged -= OnCurrentSessionChanged;
-            _manager = null;
-        }
         DetachSession();
     }
 
@@ -96,6 +101,8 @@ internal sealed class MediaSessionSource : ISharedService<MediaSessionSource>, I
             if (_disposed)
                 return;
             _manager = manager;
+            lock (KeepAlive)
+                KeepAlive.Add(this);
             manager.CurrentSessionChanged += OnCurrentSessionChanged;
             await AttachSessionAsync(manager.GetCurrentSession());
         }
@@ -106,22 +113,42 @@ internal sealed class MediaSessionSource : ISharedService<MediaSessionSource>, I
         }
     }
 
-    // SMTC events arrive on thread-pool threads; everything below runs on the UI thread.
+    // SMTC events arrive on thread-pool threads. Everything below runs on the UI thread. Events from a session that is
+    // no longer current are ignored, because those sessions stay subscribed.
     private void OnCurrentSessionChanged(GlobalSystemMediaTransportControlsSessionManager sender, CurrentSessionChangedEventArgs args) =>
         _ui.Post(_ =>
         {
-            if (_manager is not null)
+            if (_manager is not null && !_disposed)
                 _ = AttachSessionAsync(_manager.GetCurrentSession());
         }, null);
 
     private void OnMediaPropertiesChanged(GlobalSystemMediaTransportControlsSession sender, MediaPropertiesChangedEventArgs args) =>
-        _ui.Post(_ => _ = RefreshTrackAsync(), null);
+        _ui.Post(_ =>
+        {
+            if (IsCurrent(sender))
+                _ = RefreshTrackAsync();
+        }, null);
 
     private void OnPlaybackInfoChanged(GlobalSystemMediaTransportControlsSession sender, PlaybackInfoChangedEventArgs args) =>
-        _ui.Post(_ => RefreshPlayback(), null);
+        _ui.Post(_ =>
+        {
+            if (IsCurrent(sender))
+                RefreshPlayback();
+        }, null);
 
     private void OnTimelineChanged(GlobalSystemMediaTransportControlsSession sender, TimelinePropertiesChangedEventArgs args) =>
-        _ui.Post(_ => RefreshPosition(), null);
+        _ui.Post(_ =>
+        {
+            if (IsCurrent(sender))
+                RefreshPosition();
+        }, null);
+
+    private bool IsCurrent(GlobalSystemMediaTransportControlsSession sender) =>
+        !_disposed && _session is { } session && SameSession(session, sender);
+
+    // Windows may hand back a new wrapper for the same session, so sessions are compared by the Windows object.
+    private static bool SameSession(GlobalSystemMediaTransportControlsSession a, GlobalSystemMediaTransportControlsSession b) =>
+        ReferenceEquals(a, b) || ((WinRT.IWinRTObject)a).NativeObject.ThisPtr == ((WinRT.IWinRTObject)b).NativeObject.ThisPtr;
 
     private async Task AttachSessionAsync(GlobalSystemMediaTransportControlsSession? session)
     {
@@ -138,21 +165,23 @@ internal sealed class MediaSessionSource : ISharedService<MediaSessionSource>, I
             return;
         }
 
-        session.MediaPropertiesChanged += OnMediaPropertiesChanged;
-        session.PlaybackInfoChanged += OnPlaybackInfoChanged;
-        session.TimelinePropertiesChanged += OnTimelineChanged;
+        if (!_subscribed.Exists(s => SameSession(s, session)))
+        {
+            _subscribed.Add(session);
+            session.MediaPropertiesChanged += OnMediaPropertiesChanged;
+            session.PlaybackInfoChanged += OnPlaybackInfoChanged;
+            session.TimelinePropertiesChanged += OnTimelineChanged;
+        }
         Publish(Current with { HasSession = true });
         RefreshPlayback();
         await RefreshTrackAsync();
     }
 
+    // The session stays subscribed and referenced in _subscribed. See there for why.
     private void DetachSession()
     {
         if (_session is null)
             return;
-        _session.MediaPropertiesChanged -= OnMediaPropertiesChanged;
-        _session.PlaybackInfoChanged -= OnPlaybackInfoChanged;
-        _session.TimelinePropertiesChanged -= OnTimelineChanged;
         _session = null;
         Duration = null;
         Position = null;
