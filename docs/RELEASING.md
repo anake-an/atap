@@ -35,6 +35,14 @@ The release workflow is `.github/workflows/release.yml`. It runs when a tag that
    8. Runs `vpk upload github` for the `win` channel, which creates a **draft** release. Then it runs it for `win-arm64` with `--merge`, which adds the Arm64 files to the same draft.
    9. For a stable version, builds the Microsoft Store bundle as a workflow artifact. See [Microsoft Store](#microsoft-store).
 7. Check the draft (see below), then publish it. Copies of Atap from the installer or the portable zip update themselves from published releases.
+8. Publish with an Announcements post, so people can read and comment on each release in Discussions. `gh release edit` cannot find a draft by its tag, so publish it by id:
+
+   ```
+   gh api repos/anake-an/atap/releases --jq '.[] | select(.tag_name == "vX.Y.Z") | .id'
+   gh api -X PATCH repos/anake-an/atap/releases/<id> -F draft=false -f make_latest=true -f discussion_category_name=Announcements
+   ```
+
+   For a prerelease, use `-f make_latest=false` instead, so the newest stable release stays the latest.
 
 ## x64 and Arm64
 
