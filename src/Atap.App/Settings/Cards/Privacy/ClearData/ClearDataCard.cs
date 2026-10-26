@@ -1,8 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Atap.Composition;
+using Atap.Core.Ai;
 using Atap.Core.Localization;
 using Atap.Core.Net;
+using Atap.Core.Settings;
+using Atap.Core.Storage;
+using Atap.Features.Ai;
 using Atap.Settings.Cards.Privacy.ClearData;
 
 [assembly: AtapSettingsCard(typeof(ClearDataCard))]
@@ -25,8 +29,24 @@ internal sealed class ClearDataCard : ISettingsCard
     public object CreateViewModel(SettingsCardContext context)
     {
         var services = context.Services;
-        return new ClearDataViewModel(new SavedData(services.Http, services.Paths.Cache), services.Text);
+        return new ClearDataViewModel(new SavedData(services.Http, services.Paths.Cache), services.Text, keys: new AiKeyCleaner(services.Settings, services.Secrets));
     }
+}
+
+/// <summary>The Ask AI keys, which Clear saved data removes too.</summary>
+internal interface ISavedKeys
+{
+    bool Any();
+
+    /// <summary>The number removed.</summary>
+    int RemoveAll();
+}
+
+internal sealed class AiKeyCleaner(IAppSettings settings, ISecretStore secrets) : ISavedKeys
+{
+    public bool Any() => AiProviders.Ids.Any(id => settings.Values.GetSecretRef(AiDescriptor.KeyPrefix + id) is not null);
+
+    public int RemoveAll() => AiSetup.RemoveAllKeys(settings, secrets);
 }
 
 /// <summary>The cache as the card sees it.</summary>
@@ -54,17 +74,21 @@ internal sealed class ClearDataViewModel : ObservableObject, IDisposable
     private readonly ISavedData _data;
     private readonly ILocalizer _text;
     private readonly Func<Func<ClearResult>, Task<ClearResult>> _run;
+    private readonly ISavedKeys? _keys;
     private long _size;
     private ClearResult? _result;
+    private int _keysRemoved;
 
     /// <param name="data">The cache.</param>
     /// <param name="text">UI text.</param>
     /// <param name="run">Runs the clear off the UI thread. Task.Run when null. Tests run it inline.</param>
-    public ClearDataViewModel(ISavedData data, ILocalizer text, Func<Func<ClearResult>, Task<ClearResult>>? run = null)
+    /// <param name="keys">The Ask AI keys, removed on the UI thread with the cache. None when null.</param>
+    public ClearDataViewModel(ISavedData data, ILocalizer text, Func<Func<ClearResult>, Task<ClearResult>>? run = null, ISavedKeys? keys = null)
     {
         _data = data;
         _text = text;
         _run = run ?? Task.Run;
+        _keys = keys;
         _size = data.Size();
         ClearCommand = new AsyncRelayCommand(ClearAsync);
         _text.LanguageChanged += OnLanguageChanged;
@@ -86,6 +110,16 @@ internal sealed class ClearDataViewModel : ObservableObject, IDisposable
 
     public bool HasResult => _result is not null;
 
+    /// <summary>Said under the hint while Ask AI keys are saved, since the button removes them too.</summary>
+    public bool HasKeys => _keys?.Any() ?? false;
+
+    public string KeysText => _text["cleardata.keys"];
+
+    /// <summary>Said after a clear that removed Ask AI keys.</summary>
+    public string KeysRemovedText => _keysRemoved > 0 ? _text["cleardata.keysRemoved"] : string.Empty;
+
+    public bool HasKeysRemoved => _keysRemoved > 0;
+
     public void Dispose() => _text.LanguageChanged -= OnLanguageChanged;
 
     /// <summary>"350 KB" below a megabyte, rounded up so a small file never shows as 0, else "1.2 MB".</summary>
@@ -102,17 +136,24 @@ internal sealed class ClearDataViewModel : ObservableObject, IDisposable
 
     private async Task ClearAsync()
     {
+        // Settings are written on the UI thread, before the files are cleared off it.
+        _keysRemoved = _keys?.RemoveAll() ?? 0;
         var result = await _run(_data.Clear);
         _size = _data.Size();
         _result = result;
         OnPropertyChanged(nameof(SizeText));
         OnPropertyChanged(nameof(ResultText));
         OnPropertyChanged(nameof(HasResult));
+        OnPropertyChanged(nameof(HasKeys));
+        OnPropertyChanged(nameof(KeysRemovedText));
+        OnPropertyChanged(nameof(HasKeysRemoved));
     }
 
     private void OnLanguageChanged(object? sender, EventArgs e)
     {
         OnPropertyChanged(nameof(SizeText));
         OnPropertyChanged(nameof(ResultText));
+        OnPropertyChanged(nameof(KeysText));
+        OnPropertyChanged(nameof(KeysRemovedText));
     }
 }

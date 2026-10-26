@@ -9,6 +9,9 @@
   "networkuse.hostsAndUserUrls": "Uses the internet: {hosts} and addresses you type in",
   "networkuse.some": "Uses the internet",
   "networkuse.turnOn": "Turn on in What it shows",
+  "networkuse.askAi": "Ask AI",
+  "networkuse.askAiDetail": "Sends what you type, and copied text if you choose, to the service you picked, only when you press Enter. Your key stays on this PC.",
+  "networkuse.askAiTurnOn": "Turn on in Home, under Ask AI",
   "networkuse.updates": "Update checks",
   "networkuse.updatesDetail": "Uses the internet: GitHub, to see if a newer Atap is out"
 }

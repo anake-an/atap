@@ -3,21 +3,30 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Atap.Core.Commands;
 using Atap.Core.Commands.Query;
 using Atap.Core.Localization;
+using Atap.Features.Ai;
 using Atap.Platform.Apps;
 
 namespace Atap.Features.CommandBar;
 
 /// <summary>One row of results: what it is, a word on what Enter does, and the action.</summary>
-internal sealed record CommandBarRow(QueryResultKind Kind, string Title, string Detail, string Glyph, Action Run);
+/// <param name="KeepsOpen">The bar stays open after the row runs, as Ask AI does to show its answer.</param>
+internal sealed record CommandBarRow(QueryResultKind Kind, string Title, string Detail, string Glyph, Action Run, bool KeepsOpen = false);
 
 /// <summary>
 /// What the command bar shows for the text typed: a sum, a unit conversion, Atap commands, apps from Start and,
 /// always last, a web search. Rows are ranked by Core's <see cref="QueryRanker"/>. Nothing runs until Enter or a
 /// click, so typing never opens a browser. Made fresh on every open, and the app list goes with it.
+/// While Ask AI is on, an Ask AI row sits above web search. Only Enter on it sends, and the answer shows in the
+/// bar. The conversation goes when the bar closes.
 /// </summary>
-internal sealed class CommandBarViewModel : ObservableObject
+internal sealed class CommandBarViewModel : ObservableObject, IDisposable
 {
     public const string OpenCommandId = "commandbar.open";
+
+    /// <summary>Opens Settings at the Ask AI card when Ask AI still needs a key.</summary>
+    public const string SettingsCommandId = "settings.open";
+
+    private const string AskAiGlyph = "";
 
     private readonly ICommandRegistry _commands;
     private readonly ILocalizer _text;
@@ -30,7 +39,11 @@ internal sealed class CommandBarViewModel : ObservableObject
     private int _selectedIndex = -1;
 
     /// <param name="searchUrl">The search page, with <c>{q}</c> where the query goes.</param>
-    public CommandBarViewModel(ICommandRegistry commands, ILocalizer text, IAppCatalog catalog, Action<string> openUrl, Func<string, bool> copy, string searchUrl)
+    /// <param name="ai">The answer pane while Ask AI is on, else null.</param>
+    /// <param name="askMode">Opened by the Ask AI shortcut: only the Ask AI row shows.</param>
+    public CommandBarViewModel(
+        ICommandRegistry commands, ILocalizer text, IAppCatalog catalog, Action<string> openUrl, Func<string, bool> copy, string searchUrl,
+        AskAiViewModel? ai = null, bool askMode = false)
     {
         _commands = commands;
         _text = text;
@@ -38,7 +51,22 @@ internal sealed class CommandBarViewModel : ObservableObject
         _openUrl = openUrl;
         _copy = copy;
         _searchUrl = searchUrl;
+        Ai = ai;
+        IsAskMode = askMode && ai is not null;
     }
+
+    /// <summary>The Ask AI pane, or null while Ask AI is off.</summary>
+    public AskAiViewModel? Ai { get; }
+
+    public bool HasAi => Ai is not null;
+
+    /// <summary>Opened ready to ask: only the Ask AI row shows.</summary>
+    public bool IsAskMode { get; }
+
+    /// <summary>The tick box for copied text shows while the Ask AI row is chosen, or once a conversation started.</summary>
+    public bool ShowCopiedOption =>
+        Ai is { Problem: AiSetupProblem.None } ai
+        && (IsAskMode || ai.HasConversation || (_selectedIndex >= 0 && _selectedIndex < Rows.Count && Rows[_selectedIndex].Kind == QueryResultKind.AskAi));
 
     /// <summary>Raised after a row ran, so the window closes.</summary>
     public event EventHandler? Done;
@@ -60,10 +88,17 @@ internal sealed class CommandBarViewModel : ObservableObject
     public int SelectedIndex
     {
         get => _selectedIndex;
-        set => SetProperty(ref _selectedIndex, Rows.Count == 0 ? -1 : Math.Clamp(value, 0, Rows.Count - 1));
+        set
+        {
+            if (SetProperty(ref _selectedIndex, Rows.Count == 0 ? -1 : Math.Clamp(value, 0, Rows.Count - 1)))
+                OnPropertyChanged(nameof(ShowCopiedOption));
+        }
     }
 
-    public string Placeholder => _text["commandbar.placeholder"];
+    public string Placeholder => _text[IsAskMode || Ai is { HasConversation: true } ? "ai.placeholder" : "commandbar.placeholder"];
+
+    /// <summary>Stops an answer and forgets the conversation. The window calls it when it closes.</summary>
+    public void Dispose() => Ai?.Dispose();
 
     /// <summary>Reads the apps from Start once for this open. Typed text before they arrive is ranked again after.</summary>
     public async Task LoadAppsAsync()
@@ -92,23 +127,37 @@ internal sealed class CommandBarViewModel : ObservableObject
     public void Run(CommandBarRow row)
     {
         // The window closes first, so an app or page opened next takes the front.
-        Done?.Invoke(this, EventArgs.Empty);
+        if (!row.KeepsOpen)
+            Done?.Invoke(this, EventArgs.Empty);
         row.Run();
+    }
+
+    /// <summary>Enter on the Ask AI row: sends the question and clears the box for a follow-up.</summary>
+    private void AskAi(string question)
+    {
+        if (Ai is null || !Ai.Ask(question))
+            return;
+        Query = string.Empty;
+        OnPropertyChanged(nameof(Placeholder));
+        OnPropertyChanged(nameof(ShowCopiedOption));
     }
 
     private void Refresh()
     {
         var query = _query.Trim();
-        var actions = new Dictionary<(QueryResultKind, string), (string Detail, string Glyph, Action Run)>();
+        var actions = new Dictionary<(QueryResultKind, string), (string Detail, string Glyph, Action Run, bool KeepsOpen)>();
         var candidates = new List<QueryCandidate>();
 
-        void Add(QueryCandidate candidate, string detail, string glyph, Action run)
+        void Add(QueryCandidate candidate, string detail, string glyph, Action run, bool keepsOpen = false)
         {
-            if (actions.TryAdd((candidate.Kind, candidate.Id), (detail, glyph, run)))
+            if (actions.TryAdd((candidate.Kind, candidate.Id), (detail, glyph, run, keepsOpen)))
                 candidates.Add(candidate);
         }
 
-        if (query.Length > 0)
+        if (query.Length > 0 && IsAskMode)
+            AddAskAi(Add, query);
+
+        if (query.Length > 0 && !IsAskMode)
         {
             var sum = Calculator.Evaluate(query);
             if (sum.Success && !sum.IsTrivial)
@@ -138,6 +187,7 @@ internal sealed class CommandBarViewModel : ObservableObject
             foreach (var app in _apps)
                 Add(new QueryCandidate(app.ParsingName, QueryResultKind.App, app.Name), _text["commandbar.kind.app"], "", () => _catalog.Launch(app));
 
+            AddAskAi(Add, query);
             Add(new QueryCandidate("web", QueryResultKind.WebSearch, _text.Format("commandbar.searchWeb", ("query", query))),
                 _text["commandbar.kind.web"], "", () => _openUrl(_searchUrl.Replace("{q}", Uri.EscapeDataString(query), StringComparison.Ordinal)));
         }
@@ -145,8 +195,8 @@ internal sealed class CommandBarViewModel : ObservableObject
         Rows = QueryRanker.Rank(query, candidates)
             .Select(r =>
             {
-                var (detail, glyph, run) = actions[(r.Candidate.Kind, r.Candidate.Id)];
-                return new CommandBarRow(r.Candidate.Kind, r.Candidate.Title, detail, glyph, run);
+                var (detail, glyph, run, keepsOpen) = actions[(r.Candidate.Kind, r.Candidate.Id)];
+                return new CommandBarRow(r.Candidate.Kind, r.Candidate.Title, detail, glyph, run, keepsOpen);
             })
             .ToList();
         OnPropertyChanged(nameof(Rows));
@@ -154,5 +204,24 @@ internal sealed class CommandBarViewModel : ObservableObject
         _selectedIndex = -1;
         SelectedIndex = 0;
         OnPropertyChanged(nameof(SelectedIndex));
+        OnPropertyChanged(nameof(ShowCopiedOption));
+    }
+
+    /// <summary>
+    /// The Ask AI row. It asks only on Enter or a click, and keeps the bar open for the answer. While a key is
+    /// missing it opens Settings at the Ask AI card instead.
+    /// </summary>
+    private void AddAskAi(Action<QueryCandidate, string, string, Action, bool> add, string query)
+    {
+        if (Ai is null)
+            return;
+        if (Ai.Problem != AiSetupProblem.None)
+        {
+            add(new QueryCandidate("ai", QueryResultKind.AskAi, _text["ai.row.setup"]), _text["ai.row.setupDetail"], AskAiGlyph,
+                () => _ = _commands.TryRunAsync(SettingsCommandId, Composition.SettingsSections.Behavior), false);
+            return;
+        }
+        add(new QueryCandidate("ai", QueryResultKind.AskAi, _text.Format("ai.row", ("query", query))), _text["ai.row.enter"], AskAiGlyph,
+            () => AskAi(query), true);
     }
 }

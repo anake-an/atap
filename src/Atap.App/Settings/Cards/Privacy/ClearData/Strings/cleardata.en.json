@@ -7,6 +7,8 @@
   "cleardata.freed": "Done. {size} freed.",
   "cleardata.nothing": "There was nothing to clear.",
   "cleardata.someLeft": "{size} freed. A few files are in use, so they were left. Try again later.",
+  "cleardata.keys": "It also removes your Ask AI keys from this PC.",
+  "cleardata.keysRemoved": "Your Ask AI keys were removed.",
   "cleardata.kb": "{value} KB",
   "cleardata.mb": "{value} MB"
 }

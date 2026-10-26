@@ -9,6 +9,9 @@
   "networkuse.hostsAndUserUrls": "Menggunakan internet: {hosts} dan alamat yang anda taip",
   "networkuse.some": "Menggunakan internet",
   "networkuse.turnOn": "Hidupkan di halaman Apa yang dipaparkan",
+  "networkuse.askAi": "Tanya AI",
+  "networkuse.askAiDetail": "Menghantar apa yang anda taip, dan teks yang disalin jika anda memilihnya, kepada perkhidmatan yang anda pilih, hanya apabila anda menekan Enter. Kunci anda kekal di PC ini.",
+  "networkuse.askAiTurnOn": "Hidupkan di halaman Utama, di bawah Tanya AI",
   "networkuse.updates": "Semakan kemas kini",
   "networkuse.updatesDetail": "Menggunakan internet: GitHub, untuk menyemak sama ada Atap versi baharu sudah keluar"
 }

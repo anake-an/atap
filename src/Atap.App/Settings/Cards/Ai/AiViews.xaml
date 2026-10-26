@@ -1,0 +1,145 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:ai="clr-namespace:Atap.Settings.Cards.Ai"
+                    xmlns:loc="clr-namespace:Atap.Ui.Localization">
+
+  <!-- Merged into the settings window only while it is open. Loaded on its own, so the settings styles
+       are DynamicResource: they come from the window. -->
+  <BooleanToVisibilityConverter x:Key="Card.BoolToVisibility" />
+
+  <DataTemplate DataType="{x:Type ai:AiCardViewModel}">
+    <StackPanel AutomationProperties.Name="{loc:T ai.title}">
+      <!-- On or off -->
+      <Border Style="{DynamicResource Settings.Card}">
+        <Grid>
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+            <TextBlock Text="{loc:T ai.toggle}" Style="{DynamicResource Settings.Label}" />
+            <TextBlock Text="{loc:T ai.toggleHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" />
+          </StackPanel>
+          <CheckBox Grid.Column="1" Style="{DynamicResource Settings.Toggle}" IsChecked="{Binding IsOn}" VerticalAlignment="Center"
+                    AutomationProperties.Name="{loc:T ai.toggle}" />
+        </Grid>
+      </Border>
+
+      <!-- 1. The service, and where to get a key -->
+      <Border Style="{DynamicResource Settings.Card}">
+        <StackPanel>
+          <TextBlock Text="{loc:T ai.service}" Style="{DynamicResource Settings.Label}" FontWeight="SemiBold" />
+          <TextBlock Text="{loc:T ai.serviceHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" Margin="0,2,0,10" />
+          <WrapPanel>
+            <ComboBox Style="{DynamicResource Settings.ComboBox}" MinWidth="200" Margin="0,0,8,6"
+                      ItemsSource="{Binding Services}" SelectedItem="{Binding SelectedService}" IsEnabled="{Binding CanPickService}"
+                      AutomationProperties.Name="{loc:T ai.provider}" />
+            <Button Style="{DynamicResource Settings.Button}" Content="{loc:T ai.getKey}" Command="{Binding GetKeyCommand}" Margin="0,0,0,6"
+                    AutomationProperties.HelpText="{Binding BillingText}"
+                    Visibility="{Binding HasKeyPage, Converter={StaticResource Card.BoolToVisibility}}" />
+          </WrapPanel>
+          <TextBlock Text="{Binding BillingText}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap"
+                     Visibility="{Binding HasKeyPage, Converter={StaticResource Card.BoolToVisibility}}" />
+        </StackPanel>
+      </Border>
+
+      <!-- 2. The key -->
+      <Border Style="{DynamicResource Settings.Card}">
+        <StackPanel>
+          <TextBlock Text="{loc:T ai.key}" Style="{DynamicResource Settings.Label}" FontWeight="SemiBold" />
+          <TextBlock Text="{Binding KeyHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" Margin="0,2,0,10" />
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <PasswordBox x:Name="KeyBox" Style="{DynamicResource Settings.PasswordBox}" MaxLength="512"
+                         AutomationProperties.Name="{loc:T ai.keyBox}" AutomationProperties.HelpText="{Binding KeyHint}">
+              <PasswordBox.InputBindings>
+                <KeyBinding Key="Enter" Command="{Binding SaveKeyCommand}" CommandParameter="{Binding ElementName=KeyBox}" />
+              </PasswordBox.InputBindings>
+            </PasswordBox>
+            <Button Grid.Column="1" Style="{DynamicResource Settings.AccentButton}" Margin="8,0,0,0" Content="{loc:T ai.save}"
+                    Command="{Binding SaveKeyCommand}" CommandParameter="{Binding ElementName=KeyBox}"
+                    AutomationProperties.HelpText="{loc:T ai.keyBox}" />
+            <Button Grid.Column="2" Style="{DynamicResource Settings.Button}" Margin="8,0,0,0" Content="{loc:T ai.removeKey}"
+                    Command="{Binding RemoveKeyCommand}" />
+          </Grid>
+          <TextBlock Text="{Binding KeyState}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" Margin="0,6,0,0" />
+          <TextBlock Text="{Binding Warning}" Style="{DynamicResource Settings.Error}" TextWrapping="Wrap"
+                     AutomationProperties.LiveSetting="Assertive"
+                     Visibility="{Binding HasWarning, Converter={StaticResource Card.BoolToVisibility}}" />
+          <TextBlock Text="{Binding Message}" Style="{DynamicResource Settings.Label}" TextWrapping="Wrap" Margin="0,6,0,0"
+                     AutomationProperties.LiveSetting="Polite"
+                     Visibility="{Binding HasMessage, Converter={StaticResource Card.BoolToVisibility}}" />
+          <TextBlock Text="{Binding CheckFreeText}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" Margin="0,6,0,0" />
+        </StackPanel>
+      </Border>
+
+      <!-- 3. Fast or Smarter -->
+      <Border Style="{DynamicResource Settings.Card}">
+        <StackPanel>
+          <TextBlock Text="{loc:T ai.speed}" Style="{DynamicResource Settings.Label}" FontWeight="SemiBold" />
+          <TextBlock Text="{loc:T ai.speedHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" Margin="0,2,0,10" />
+          <ListBox Style="{DynamicResource Settings.Segmented}" ItemsSource="{Binding Speeds}" SelectedItem="{Binding SelectedSpeed}"
+                   AutomationProperties.Name="{loc:T ai.speed}" />
+        </StackPanel>
+      </Border>
+
+      <!-- Advanced: your own server and other model names -->
+      <Border Style="{DynamicResource Settings.Card}">
+        <Expander Style="{DynamicResource Settings.Expander}" Header="{loc:T ai.advanced}" Margin="0"
+                  AutomationProperties.Name="{loc:T ai.advanced}">
+          <StackPanel Margin="0,10,0,0">
+            <Grid>
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+              </Grid.ColumnDefinitions>
+              <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock Text="{loc:T ai.ownServer}" Style="{DynamicResource Settings.Label}" />
+                <TextBlock Text="{loc:T ai.ownServerHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" />
+              </StackPanel>
+              <CheckBox Grid.Column="1" Style="{DynamicResource Settings.Toggle}" IsChecked="{Binding UsesOwnServer}" VerticalAlignment="Center"
+                        AutomationProperties.Name="{loc:T ai.ownServer}" />
+            </Grid>
+
+            <StackPanel Margin="0,12,0,0" Visibility="{Binding UsesOwnServer, Converter={StaticResource Card.BoolToVisibility}}">
+              <TextBlock Text="{loc:T ai.server}" Style="{DynamicResource Settings.Label}" />
+              <Grid Margin="0,6,0,0">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="*" />
+                  <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Style="{DynamicResource Settings.TextBox}" Text="{Binding Server, UpdateSourceTrigger=PropertyChanged}" MaxLength="512"
+                         AutomationProperties.Name="{loc:T ai.server}" AutomationProperties.HelpText="{loc:T ai.serverHint}">
+                  <TextBox.InputBindings>
+                    <KeyBinding Key="Enter" Command="{Binding SaveServerCommand}" />
+                  </TextBox.InputBindings>
+                </TextBox>
+                <Button Grid.Column="1" Style="{DynamicResource Settings.Button}" Margin="8,0,0,0" Content="{loc:T ai.save}"
+                        Command="{Binding SaveServerCommand}" AutomationProperties.HelpText="{loc:T ai.server}" />
+              </Grid>
+              <TextBlock Text="{loc:T ai.serverHint}" Style="{DynamicResource Settings.Hint}" />
+              <TextBlock Text="{Binding ServerError}" Style="{DynamicResource Settings.Error}" TextWrapping="Wrap"
+                         Visibility="{Binding HasServerError, Converter={StaticResource Card.BoolToVisibility}}" />
+              <TextBlock Text="{Binding ServerWarning}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" Margin="0,6,0,0"
+                         Visibility="{Binding HasServerWarning, Converter={StaticResource Card.BoolToVisibility}}" />
+            </StackPanel>
+
+            <TextBlock Text="{loc:T ai.model}" Style="{DynamicResource Settings.Label}" Margin="0,16,0,0" />
+            <TextBox Style="{DynamicResource Settings.TextBox}" Text="{Binding Model, UpdateSourceTrigger=LostFocus}" Margin="0,6,0,0"
+                     MaxLength="128" AutomationProperties.Name="{loc:T ai.model}" AutomationProperties.HelpText="{Binding ModelHint}" />
+            <TextBlock Text="{Binding ModelHint}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding ModelError}" Style="{DynamicResource Settings.Error}" TextWrapping="Wrap"
+                       Visibility="{Binding HasModelError, Converter={StaticResource Card.BoolToVisibility}}" />
+          </StackPanel>
+        </Expander>
+      </Border>
+
+      <TextBlock Text="{Binding PrivacyText}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap" Margin="0,4,0,0" />
+    </StackPanel>
+  </DataTemplate>
+
+</ResourceDictionary>

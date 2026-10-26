@@ -7,6 +7,8 @@
   "cleardata.freed": "Siap. {size} telah dikosongkan.",
   "cleardata.nothing": "Tiada apa-apa untuk dikosongkan.",
   "cleardata.someLeft": "{size} telah dikosongkan. Beberapa fail sedang digunakan, jadi fail itu dibiarkan. Cuba lagi nanti.",
+  "cleardata.keys": "Ia juga membuang kunci Tanya AI anda daripada PC ini.",
+  "cleardata.keysRemoved": "Kunci Tanya AI anda telah dibuang.",
   "cleardata.kb": "{value} KB",
   "cleardata.mb": "{value} MB"
 }

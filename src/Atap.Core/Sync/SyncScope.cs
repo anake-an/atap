@@ -27,7 +27,7 @@ public enum SyncUnitKind
 /// </summary>
 public sealed class SyncScope
 {
-    private static readonly string[] MachineFeaturePrefixes = ["startup.", "localApi.", "sync.", "onboarding.", "updates."];
+    private static readonly string[] MachineFeaturePrefixes = ["startup.", "localApi.", "sync.", "onboarding.", "updates.", "ai."];
 
     private readonly HashSet<string> _syncedKeys;
     private readonly HashSet<string> _machineKeys;
@@ -77,7 +77,7 @@ public sealed class SyncScope
 
     /// <summary>
     /// Settings keys that never sync, whatever their definition says. Every key of the startup,
-    /// local API, sync, onboarding and updates features is also covered. A bundle can never turn
+    /// local API, sync, onboarding, updates and Ask AI features is also covered. A bundle can never turn
     /// on the local API, PATH or startup.
     /// </summary>
     public static IReadOnlyList<string> AlwaysMachineKeys { get; } =

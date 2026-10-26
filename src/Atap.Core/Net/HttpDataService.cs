@@ -25,7 +25,7 @@ namespace Atap.Core.Net;
 /// </remarks>
 public sealed class HttpDataService : IDisposable
 {
-    private const string UserAgentComment = "(+https://github.com/anake-an/atap)";
+    internal const string UserAgentComment = "(+https://github.com/anake-an/atap)";
     private const int MaxRedirects = 3;
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(15);
 
@@ -405,7 +405,7 @@ public sealed class HttpDataService : IDisposable
         && string.Equals(a.IdnHost, b.IdnHost, StringComparison.OrdinalIgnoreCase)
         && a.Port == b.Port;
 
-    private static bool IsPlainHttpRefused(Exception ex)
+    internal static bool IsPlainHttpRefused(Exception ex)
     {
         for (var inner = ex.InnerException; inner is not null; inner = inner.InnerException)
         {

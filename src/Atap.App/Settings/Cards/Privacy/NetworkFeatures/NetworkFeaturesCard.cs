@@ -2,7 +2,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Atap.Composition;
 using Atap.Core.Layout;
 using Atap.Core.Localization;
+using Atap.Core.Settings;
 using Atap.Core.Widgets;
+using Atap.Features.Ai;
 using Atap.Settings.Cards.Privacy.NetworkFeatures;
 
 [assembly: AtapSettingsCard(typeof(NetworkFeaturesCard))]
@@ -25,7 +27,7 @@ internal sealed class NetworkFeaturesCard : ISettingsCard
     public object CreateViewModel(SettingsCardContext context)
     {
         var services = context.Services;
-        return new NetworkFeaturesViewModel(services.Catalog, services.Layout, services.Updates?.IsSupported, services.Text);
+        return new NetworkFeaturesViewModel(services.Catalog, services.Layout, services.Updates?.IsSupported, services.Text, services.Settings);
     }
 }
 
@@ -53,21 +55,26 @@ internal sealed class NetworkFeaturesViewModel : ObservableObject, IDisposable
     private readonly ILayoutService _layout;
     private readonly bool? _updateChecks;
     private readonly ILocalizer _text;
+    private readonly IAppSettingsView? _settings;
     private IReadOnlyList<NetworkUse> _items = [];
 
     /// <param name="catalog">Every widget type, enabled or not.</param>
     /// <param name="layout">Which instances the active profile has on.</param>
     /// <param name="updateChecks">Whether Atap checks for updates itself. Null in Store builds, where the Store updates Atap.</param>
     /// <param name="text">UI text.</param>
-    public NetworkFeaturesViewModel(WidgetCatalog catalog, ILayoutService layout, bool? updateChecks, ILocalizer text)
+    /// <param name="settings">Whether Ask AI is on. Ask AI is left out of the list when null.</param>
+    public NetworkFeaturesViewModel(WidgetCatalog catalog, ILayoutService layout, bool? updateChecks, ILocalizer text, IAppSettingsView? settings = null)
     {
         _catalog = catalog;
         _layout = layout;
         _updateChecks = updateChecks;
         _text = text;
+        _settings = settings;
         Rebuild();
         _layout.Changed += OnChanged;
         _text.LanguageChanged += OnChanged;
+        if (_settings is not null)
+            _settings.Changed += OnSettingsChanged;
     }
 
     public IReadOnlyList<NetworkUse> Items
@@ -90,6 +97,8 @@ internal sealed class NetworkFeaturesViewModel : ObservableObject, IDisposable
     {
         _layout.Changed -= OnChanged;
         _text.LanguageChanged -= OnChanged;
+        if (_settings is not null)
+            _settings.Changed -= OnSettingsChanged;
     }
 
     /// <summary>A widget type is listed when its capabilities allow the network or name a host.</summary>
@@ -117,6 +126,13 @@ internal sealed class NetworkFeaturesViewModel : ObservableObject, IDisposable
                 // Widgets are turned on from the What it shows page.
                 isOn ? null : _text["networkuse.turnOn"]));
         }
+        if (_settings is not null)
+        {
+            // Ask AI is turned on from its card on the Home page.
+            var askAi = _settings.Values.GetBool(AiDescriptor.EnabledKey);
+            items.Add(new NetworkUse(_text["networkuse.askAi"], _text["networkuse.askAiDetail"], null, askAi,
+                _text[askAi ? "networkuse.on" : "networkuse.off"], askAi ? null : _text["networkuse.askAiTurnOn"]));
+        }
         if (_updateChecks is { } checks)
             items.Add(new NetworkUse(_text["networkuse.updates"], _text["networkuse.updatesDetail"], null, checks, _text[checks ? "networkuse.on" : "networkuse.off"]));
         Items = items;
@@ -135,4 +151,10 @@ internal sealed class NetworkFeaturesViewModel : ObservableObject, IDisposable
     }
 
     private void OnChanged(object? sender, EventArgs e) => Rebuild();
+
+    private void OnSettingsChanged(object? sender, SettingsChangedEventArgs e)
+    {
+        if (e.Keys.Contains(AiDescriptor.EnabledKey))
+            Rebuild();
+    }
 }

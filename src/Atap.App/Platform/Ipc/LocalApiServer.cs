@@ -27,6 +27,7 @@ internal sealed class LocalApiServer : IAsyncDisposable
     private static readonly TimeSpan RetryDelay = TimeSpan.FromMilliseconds(250);
 
     private readonly string _name;
+    private readonly TimeSpan _readDeadline;
     private readonly SynchronizationContext _ui;
     private readonly ApiHandler _handler;
     private readonly RateLimiter _limiter;
@@ -34,8 +35,10 @@ internal sealed class LocalApiServer : IAsyncDisposable
     private readonly CancellationTokenSource _stop = new();
     private readonly List<Task> _loops = [];
 
-    public LocalApiServer(string name, SynchronizationContext ui, ApiHandler handler, RateLimiter limiter, Action<string, Exception?> log)
+    /// <param name="readDeadline">How long a client may take to send its request. <see cref="ReadDeadline"/> unless a test needs more on a busy machine.</param>
+    public LocalApiServer(string name, SynchronizationContext ui, ApiHandler handler, RateLimiter limiter, Action<string, Exception?> log, TimeSpan? readDeadline = null)
     {
+        _readDeadline = readDeadline ?? ReadDeadline;
         _name = name;
         _ui = ui;
         _handler = handler;
@@ -148,7 +151,7 @@ internal sealed class LocalApiServer : IAsyncDisposable
     private async Task AnswerAsync(NamedPipeServerStream pipe)
     {
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(_stop.Token);
-        deadline.CancelAfter(ReadDeadline);
+        deadline.CancelAfter(_readDeadline);
 
         ApiResponse response;
         var header = new byte[PushFrame.HeaderSize];

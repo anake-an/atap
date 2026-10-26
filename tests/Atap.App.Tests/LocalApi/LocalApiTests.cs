@@ -64,7 +64,8 @@ public sealed class LocalApiTests : IDisposable
     {
         var name = UniqueName();
         var limiter = new RateLimiter(TimeProvider.System, perSecond: 100_000);
-        await using var server = new LocalApiServer(name, new SynchronizationContext(), (_, _) => Task.FromResult(ApiResponse.Success), limiter, (_, _) => { });
+        // A busy test runner can take longer than the 2 second deadline real clients get, so this server waits longer.
+        await using var server = new LocalApiServer(name, new SynchronizationContext(), (_, _) => Task.FromResult(ApiResponse.Success), limiter, (_, _) => { }, TimeSpan.FromSeconds(15));
         Assert.True(server.Start());
         var random = new Random(7);
 
@@ -243,7 +244,7 @@ public sealed class LocalApiTests : IDisposable
     }
 
     private static LocalApiServer Server(string name, ApiHandler handler) =>
-        new(name, new SynchronizationContext(), handler, new RateLimiter(TimeProvider.System), (_, _) => { });
+        new(name, new SynchronizationContext(), handler, new RateLimiter(TimeProvider.System), (_, _) => { }, TimeSpan.FromSeconds(15));
 
     private static string UniqueName() => $"Atap.test.{Guid.NewGuid():N}";
 

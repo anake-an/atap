@@ -20,6 +20,10 @@ internal static class ShellOpen
     public static bool Folder(string path) =>
         Directory.Exists(path) && Start(new ProcessStartInfo("explorer.exe") { ArgumentList = { path }, UseShellExecute = false });
 
+    /// <summary>Opens an https page in the default browser. False for anything else, or when nothing opened.</summary>
+    public static bool Web(Uri url) =>
+        url is { IsAbsoluteUri: true } && url.Scheme == Uri.UriSchemeHttps && Start(new ProcessStartInfo(url.AbsoluteUri) { UseShellExecute = true });
+
     private static bool Start(ProcessStartInfo info)
     {
         try

@@ -17,7 +17,7 @@ Anything that can be tested without a window lives in Core. Core, App and the CL
 ```
 src/Atap.Core/   Widgets/ Layout/ Placement/ Settings/ Storage/ Localization/ Scheduling/
                  Net/ Alerts/ Notch/ Shared/ Power/ Commands/ Input/ Rules/ Updates/
-                 Malaysia/ Media/ Productivity/ Lyrics/ Custom/ Sync/ LocalApi/ Diagnostics/
+                 Malaysia/ Media/ Productivity/ Lyrics/ Custom/ Sync/ LocalApi/ Diagnostics/ Ai/
                  CompactArbiter.cs NotchState.cs
 src/Atap.App/    Program.cs App.xaml(.cs) AppInfo.cs
                  Composition/  startup, hosts, discovery, lifetimes, safe mode
@@ -330,3 +330,15 @@ The Store build (`-p:AtapChannel=Store`) defines `STORE`, which removes Velopack
 `LocalApiServer` listens on the named pipe `Atap.v1.<user SID>`. Its ACL lets only the current user in and denies network logons, so nothing off the PC can reach it. A request may be 8 KB and must finish in 2 seconds, and a client may send 20 a second. The server runs only while "Let programs on this PC show progress" is on. That is a Machine setting and is off by default.
 
 The `atap` CLI has `ping`, `push`, `end`, `alert` and `--version`. Pushed items reach the notch through `PushHub` and the Push widget. Pushed alerts go through the alert rate limit.
+
+## Ask AI
+
+Ask AI (`Features/Ai`, `Settings/Cards/Ai` and `Core/Ai`) is off by default and off in safe mode. The user brings their own key for Claude, ChatGPT, Gemini or OpenRouter, or points it at their own server, such as Ollama.
+
+- **Asking.** While it is on, typing in the command bar adds an Ask AI row right above web search. Only Enter or a click on it sends. The answer streams into a read-only pane in the bar with Stop, Copy and Ask again. The optional shortcut `hotkeys.ai.ask`, unset by default, opens the bar ready to ask. Without a key the row opens Settings instead.
+- **Conversation.** Earlier turns are kept in memory while the bar stays open, at most 20, and go when it closes.
+- **Dialects.** `IAiDialect` builds the request and turns the server-sent events into Delta, Done or Failed. Claude uses `POST /v1/messages` with `x-api-key` and `anthropic-version: 2023-06-01`. ChatGPT, OpenRouter and your own server use the OpenAI chat format, `POST {base}/chat/completions` with a Bearer key, until `[DONE]`. Gemini uses `streamGenerateContent?alt=sse` with the key in `x-goog-api-key`, never in the address. The model ids for Fast and Smarter live in `AiModels.cs`. The model gets no tools.
+- **Transport.** `AiTransport` has its own client, made on the first request, with the same address check, User-Agent and offline switch as `HttpDataService`. Plain http reaches only this PC or a private address, checked after DNS, so it works only for your own server. No cache, no cookies and no redirects, and each service has one fixed host. It allows 10 seconds to connect, 30 seconds to the first piece of the answer (90 for your own server), 30 seconds of silence, 3 minutes in all and 64 KB of answer. Esc, closing the bar, a new question, going offline or changing the key stops it. It never tries again by itself.
+- **Keys.** Each key is a Secret setting `ai.key.<provider>`, locked with Windows data protection in `secrets.json`. The card trims a pasted key, warns when it looks like another service's, and checks it with a request that costs nothing, such as listing models. Every `ai.*` setting is Machine scope, and sync skips the whole `ai.` prefix. Clear saved data removes the keys, and so does Delete all my Atap data.
+- **Privacy.** Only the question, and earlier turns while the bar is open, leave the PC. Copied text goes only while "Include what I copied" is ticked. It shows as a preview first, is cut to 8,000 characters and is wrapped as quoted data. Logs hold the provider, the HTTP status and the kind of error only, never questions, answers or keys. Keys never reach the logs, the local API, sync or an address.
+- **Display.** The answer is plain text in a read-only TextBox, cleaned line by line with `TextSanitizer`. A guard test fails if the command bar gains a Hyperlink, rich text, a web view, an image or XAML parsing.
