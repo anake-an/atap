@@ -6,6 +6,17 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-10-26
+
+The small notch shows what is playing, in the colour of the album art.
+
+### Changed
+
+- While music plays, the small notch shows the song title and artist between the album art and the playing bars. A long title scrolls slowly, and stands still with Less motion on.
+- The playing bars take the main colour of the album art.
+- A thin line along the bottom of the small notch shows how far the song is.
+- New Now playing setting, "In the small notch, show": choose the song title or the lyric line playing now. The lyric line needs the Lyrics widget.
+
 ## [1.2.0] - 2026-10-26
 
 Ask AI arrives: ask a question from the command bar with your own key for Claude, ChatGPT, Gemini, OpenRouter or your own server. It is off until you turn it on.
@@ -293,7 +304,8 @@ First public release of Atap, a free notch for Windows. It is open source under 
 - A sync file cannot turn on the local API, PATH or start with Windows. Secret values never leave the PC, and a synced widget asks for its keys again if another PC changes where it connects.
 - Text in pushes and alerts is cleaned before it is shown, and the `atap` tool prints only short, plain error codes.
 
-[Unreleased]: https://github.com/anake-an/atap/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/anake-an/atap/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/anake-an/atap/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/anake-an/atap/compare/v1.1.2...v1.2.0
 [1.1.2]: https://github.com/anake-an/atap/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/anake-an/atap/compare/v1.1.0...v1.1.1
