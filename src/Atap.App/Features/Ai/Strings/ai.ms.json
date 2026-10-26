@@ -12,7 +12,7 @@
   "ai.provider.openrouter": "OpenRouter",
   "ai.provider.custom": "Pelayan anda sendiri",
   "ai.getKey": "Dapatkan kunci",
-  "ai.billing": "{service} mengenakan bayaran kepada anda untuk setiap soalan, bukan Atap. Semak harganya dahulu.",
+  "ai.billing": "Syarikat di sebalik {service} mengenakan bayaran kepada anda untuk setiap soalan, bukan Atap. Semak harganya dahulu.",
   "ai.key": "2. Tambah kunci anda",
   "ai.keyHint": "Tampal kunci daripada {service} dan tekan Simpan. Kunci itu kekal di PC ini, dikunci pada akaun Windows anda.",
   "ai.keyOptional": "Pelayan anda sendiri mungkin boleh berfungsi tanpa kunci. Biarkan kosong jika ia tidak memintanya.",

@@ -12,7 +12,7 @@
   "ai.provider.openrouter": "OpenRouter",
   "ai.provider.custom": "Your own server",
   "ai.getKey": "Get a key",
-  "ai.billing": "{service} bills you for what you ask, not Atap. Check their prices first.",
+  "ai.billing": "The company behind {service} bills you for what you ask, not Atap. Check their prices first.",
   "ai.key": "2. Add your key",
   "ai.keyHint": "Paste the key from {service} and press Save. It stays on this PC, locked to your Windows account.",
   "ai.keyOptional": "Your own server may work without a key. Leave this empty if it does not ask for one.",
