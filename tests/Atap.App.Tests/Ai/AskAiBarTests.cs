@@ -2,25 +2,36 @@ using System.Xml.Linq;
 using Atap.Core.Ai;
 using Atap.Core.Commands;
 using Atap.Core.Commands.Query;
-using Atap.Core.Widgets;
+using Atap.Core.Notch;
 using Atap.Features.Ai;
 using Atap.Features.CommandBar;
 using Atap.Features.Hotkeys;
-using Atap.Platform.Apps;
+using Atap.Notch;
 using Atap.Tests.Infrastructure;
 
 namespace Atap.Tests.Ai;
 
-/// <summary>The Ask AI row and answer pane in the command bar: what sends, what stops it, and what the pane may hold.</summary>
+/// <summary>The Ask AI row in the command bar: what sends, what goes with it, and what the bar may hold.</summary>
 public sealed class AskAiBarTests : IDisposable
 {
     private readonly TestServices _services = new();
-    private readonly FakeAskAi _ai = new();
-    private readonly List<string> _copied = [];
+    private readonly FakeAiService _ai = new();
+    private readonly NotchControl _notch = new();
+    private readonly FakeChatShell _shell = new();
+    private readonly AiAnswers _answers;
     private string? _clipboard;
     private int _clipboardReads;
 
-    public void Dispose() => _services.Dispose();
+    public AskAiBarTests()
+    {
+        _answers = new AiAnswers(_ai, _services.Text, _notch, _shell, ui: null, _ => true, _services.Time);
+    }
+
+    public void Dispose()
+    {
+        _answers.Dispose();
+        _services.Dispose();
+    }
 
     [Fact]
     public void Typing_SendsNothing_AndOffersAskAiAboveWebSearch()
@@ -36,14 +47,17 @@ public sealed class AskAiBarTests : IDisposable
         Assert.Equal(QueryResultKind.AskAi, row.Kind);
         Assert.Equal("Ask AI: \"what is the time in Tokyo\"", row.Title);
         Assert.Equal(0, _clipboardReads);
+        Assert.Null(_notch.GetSurfaceContent(NotchSurface.Answer));
     }
 
     [Fact]
-    public void Enter_OnTheRow_Sends_AndKeepsTheBarOpen()
+    public void Enter_OnTheRow_Sends_ClosesTheBar_AndPutsTheAnswerInTheNotch()
     {
         using var bar = Bar();
         var closed = 0;
+        var asked = 0;
         bar.Done += (_, _) => closed++;
+        bar.Asked += (_, _) => asked++;
         bar.Query = "what is the capital of Malaysia";
         bar.SelectedIndex = bar.Rows.Count - 2;
 
@@ -52,91 +66,23 @@ public sealed class AskAiBarTests : IDisposable
         var turns = Assert.Single(_ai.Asked).Turns;
         Assert.Equal([new AiTurn(AiRole.User, "what is the capital of Malaysia")], turns);
         Assert.Equal(0, closed);
-        Assert.Equal(string.Empty, bar.Query);
-        Assert.True(bar.Ai!.HasConversation);
-        Assert.True(bar.Ai.IsAsking);
-        Assert.Equal("Asking Claude", bar.Ai.StatusText);
-        Assert.Equal("Ask anything, then press Enter", bar.Placeholder);
+        Assert.Equal(1, asked);
+        var shown = Assert.IsType<AiNotchAnswer>(_notch.GetSurfaceContent(NotchSurface.Answer));
+        Assert.Equal("what is the capital of Malaysia", shown.Last!.QuestionLine);
+        Assert.True(shown.Last.IsAsking);
+        Assert.Equal("Asking Claude", shown.Last.StatusText);
     }
 
     [Fact]
-    public void TheAnswer_Streams_AndAFollowUpCarriesTheEarlierTurns()
-    {
-        using var bar = Bar();
-        Ask(bar, "capital of Malaysia?");
-
-        _ai.Last.Delta("Kuala ");
-        _ai.Last.Delta("Lumpur");
-        Assert.Equal(string.Empty, bar.Ai!.AnswerText);
-        _services.Time.Advance(AskAiViewModel.RefreshEvery);
-        Assert.Equal("Kuala Lumpur", bar.Ai!.AnswerText);
-        _ai.Last.Finish(AiEvent.Done);
-
-        Assert.False(bar.Ai.IsAsking);
-        Assert.Equal("Answer from Claude. Type a follow-up and press Enter.", bar.Ai.StatusText);
-        Ask(bar, "and of Japan?");
-        Assert.Equal(
-            [new AiTurn(AiRole.User, "capital of Malaysia?"), new AiTurn(AiRole.Assistant, "Kuala Lumpur"), new AiTurn(AiRole.User, "and of Japan?")],
-            _ai.Last.Turns);
-    }
-
-    [Fact]
-    public void ClosingTheBar_StopsTheAnswer_AndForgetsTheConversation()
+    public void ClosingTheBar_LeavesTheAnswerInTheNotch()
     {
         var bar = Bar();
         Ask(bar, "a long question");
 
         bar.Dispose();
 
-        Assert.True(_ai.Last.Token.IsCancellationRequested);
-        Assert.Equal(0, _ai.Subscribers);
-    }
-
-    [Fact]
-    public void ANewQuestion_StopsTheLastOne_WhichIsNotKept()
-    {
-        using var bar = Bar();
-        Ask(bar, "first");
-        var first = _ai.Last;
-
-        Ask(bar, "second");
-
-        Assert.True(first.Token.IsCancellationRequested);
-        first.Finish(AiEvent.Failed(AiError.Stopped));
-        Assert.True(bar.Ai!.IsAsking);
-        Assert.Equal([new AiTurn(AiRole.User, "second")], _ai.Last.Turns);
-    }
-
-    [Fact]
-    public void Stop_AndChangingTheKey_StopTheAnswer()
-    {
-        using var bar = Bar();
-        Ask(bar, "first");
-        bar.Ai!.StopCommand.Execute(null);
-        Assert.True(_ai.Last.Token.IsCancellationRequested);
-        _ai.Last.Finish(AiEvent.Failed(AiError.Stopped));
-        Assert.Equal("Stopped.", bar.Ai.StatusText);
-        Assert.False(bar.Ai.HasFailed);
-
-        Ask(bar, "second");
-        _ai.RaiseSetupChanged();
-        Assert.True(_ai.Last.Token.IsCancellationRequested);
-    }
-
-    [Fact]
-    public void AnError_ShowsPlainWords_AndAskAgainSendsTheSameQuestion()
-    {
-        using var bar = Bar();
-        Ask(bar, "hello");
-
-        _ai.Last.Finish(AiEvent.Failed(AiError.OutOfCredit));
-
-        Assert.True(bar.Ai!.HasFailed);
-        Assert.Equal("Your Claude account is out of credit. Top it up on their site.", bar.Ai.StatusText);
-        Assert.True(bar.Ai.AgainCommand.CanExecute(null));
-        bar.Ai.AgainCommand.Execute(null);
-        Assert.Equal(2, _ai.Asked.Count);
-        Assert.Equal([new AiTurn(AiRole.User, "hello")], _ai.Last.Turns);
+        Assert.False(_ai.Last.Token.IsCancellationRequested);
+        Assert.NotNull(_notch.GetSurfaceContent(NotchSurface.Answer));
     }
 
     [Fact]
@@ -157,7 +103,7 @@ public sealed class AskAiBarTests : IDisposable
         Assert.Equal(AiPrompt.Build("summarise this", _clipboard), Assert.Single(_ai.Last.Turns).Text);
         Assert.Contains("<copied>", _ai.Last.Turns[0].Text);
         Assert.False(bar.Ai.IncludeCopied);
-        Assert.Equal("summarise this", bar.Ai.QuestionText.Replace("You asked: ", string.Empty));
+        Assert.Equal("summarise this", _answers.Shown!.Last!.QuestionText);
     }
 
     [Fact]
@@ -198,6 +144,7 @@ public sealed class AskAiBarTests : IDisposable
         Assert.Equal(1, closed);
         Assert.Empty(_ai.Asked);
         Assert.False(bar.ShowCopiedOption);
+        Assert.Null(_notch.GetSurfaceContent(NotchSurface.Answer));
     }
 
     [Fact]
@@ -213,91 +160,17 @@ public sealed class AskAiBarTests : IDisposable
     }
 
     [Fact]
-    public void TheAnswer_IsPlainText_WithLineBreaksKept_AndControlsTakenOut()
-    {
-        using var bar = Bar();
-        Ask(bar, "q");
-
-        _ai.Last.Delta("First line‮ reversed\u0007\r\n\r\n\r\n\r\nSecond   line\n");
-        _services.Time.Advance(AskAiViewModel.RefreshEvery);
-
-        Assert.Equal("First line reversed\n\nSecond line", bar.Ai!.AnswerText);
-    }
-
-    [Fact]
-    public void ManyTinyPieces_AreGathered_AndShownFast()
-    {
-        using var bar = Bar();
-        var shown = 0;
-        Ask(bar, "q");
-        bar.Ai!.PropertyChanged += (_, e) => shown += e.PropertyName == nameof(AskAiViewModel.AnswerText) ? 1 : 0;
-        var clock = System.Diagnostics.Stopwatch.StartNew();
-
-        for (var i = 0; i < 65_000; i++)
-        {
-            _ai.Last.Delta(i % 100 == 99 ? "\n" : "a");
-            // A refresh every 1,000 pieces, as a fast stream past the 75 ms timer would get.
-            if (i % 1_000 == 999)
-                _services.Time.Advance(AskAiViewModel.RefreshEvery);
-        }
-        _ai.Last.Finish(AiEvent.Done);
-
-        clock.Stop();
-        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(2), $"Took {clock.Elapsed}.");
-        Assert.True(shown < 100, $"Shown {shown} times.");
-        Assert.Equal(650, bar.Ai.AnswerText.Split('\n').Length);
-        Assert.Equal(64_350, bar.Ai.AnswerText.Count(c => c == 'a'));
-    }
-
-    [Fact]
-    public void AskAgain_LeavesCopiedTextOut_UnlessTickedAgain()
-    {
-        _clipboard = "private notes";
-        using var bar = Bar();
-        bar.Ai!.IncludeCopied = true;
-        Ask(bar, "summarise");
-        Assert.Contains("private notes", _ai.Last.Turns[^1].Text);
-        _ai.Last.Finish(AiEvent.Failed(AiError.ServiceBusy));
-
-        bar.Ai.AgainCommand.Execute(null);
-        Assert.Equal("summarise", _ai.Last.Turns[^1].Text);
-        _ai.Last.Finish(AiEvent.Failed(AiError.ServiceBusy));
-
-        bar.Ai.IncludeCopied = true;
-        bar.Ai.AgainCommand.Execute(null);
-        Assert.Contains("private notes", _ai.Last.Turns[^1].Text);
-        Assert.False(bar.Ai.IncludeCopied);
-    }
-
-    [Fact]
     public void ChangingTheService_UnticksCopiedText()
     {
         _clipboard = "private notes";
         using var bar = Bar();
         bar.Ai!.IncludeCopied = true;
-        Ask(bar, "first");
-        _ai.Last.Finish(AiEvent.Done);
-        bar.Ai.IncludeCopied = true;
 
         _ai.RaiseSetupChanged();
 
         Assert.False(bar.Ai.IncludeCopied);
-        bar.Ai.AgainCommand.Execute(null);
+        Ask(bar, "first");
         Assert.DoesNotContain("private notes", _ai.Last.Turns[^1].Text);
-    }
-
-    [Fact]
-    public void Copy_PutsTheAnswerOnTheClipboard()
-    {
-        using var bar = Bar();
-        Ask(bar, "q");
-        _ai.Last.Delta("The answer");
-        _services.Time.Advance(AskAiViewModel.RefreshEvery);
-
-        bar.Ai!.CopyCommand.Execute(null);
-
-        Assert.Equal(["The answer"], _copied);
-        Assert.Equal("Copied", bar.Ai.CopyText);
     }
 
     [Fact]
@@ -312,7 +185,7 @@ public sealed class AskAiBarTests : IDisposable
     }
 
     [Fact]
-    public async Task TheShortcut_OpensTheBarReadyToAsk()
+    public async Task TheShortcut_OpensTheBarReadyToAsk_AndTheChatRowOpensTheChat()
     {
         var setting = new HotkeysDescriptor().Settings.Single(s => s.Key == HotkeysDescriptor.AskAiKey);
         Assert.Equal("hotkeys.ai.ask", setting.Key);
@@ -323,62 +196,85 @@ public sealed class AskAiBarTests : IDisposable
         _services.Settings.Register(new CommandBarDescriptor().Settings);
         _services.Settings.Register(new AiDescriptor().Settings);
         _services.Settings.Register(new Atap.Features.NetworkPrivacy.NetworkPrivacyDescriptor().Settings);
-        var shell = new FakeShell();
-        await using var bar = new CommandBarFeature(_services.Commands, _services.Text, _services.Settings, new NoApps(), shell, () => _ai, () => _clipboard);
+        var barShell = new FakeBarShell();
+        await using var bar = new CommandBarFeature(_services.Commands, _services.Text, _services.Settings, new NoApps(), barShell, () => AskAi.Current, () => _clipboard);
         using var transport = new AiTransport("test", _services.Network);
         var secrets = new Atap.Platform.Secrets.DpapiSecretStore(_services.Paths.SecretsFile);
-        await using var feature = new AiFeature(_services.Commands, _services.Settings, secrets, _services.Text, transport, (_, _) => { });
+        var chatShell = new FakeChatShell();
+        await using var feature = new AiFeature(_services.Commands, _services.Settings, secrets, _services.Text, transport, (_, _) => { }, _notch, chatShell, null, _ => true);
         await bar.StartAsync();
         await feature.StartAsync();
 
-        Assert.Same(feature, AskAi.Current);
+        Assert.Same(feature.Answers, AskAi.Current);
+        Assert.Equal(1, _notch.InputHandlerCount);
         Assert.True(await _services.Commands.TryRunAsync(AiDescriptor.AskCommand));
+        Assert.True(barShell.Shown!.IsAskMode);
+        Assert.NotNull(barShell.Shown.Ai);
+        barShell.Close();
 
-        Assert.True(shell.Shown!.IsAskMode);
-        Assert.NotNull(shell.Shown.Ai);
+        // "Open Ask AI chat" is a row in the bar while Ask AI is on.
+        Assert.True(_services.Commands.All.Single(c => c.Id == AiDescriptor.ChatCommand).ShowInCommandBar);
+        Assert.True(await _services.Commands.TryRunAsync(AiDescriptor.ChatCommand));
+        Assert.True(chatShell.IsOpen);
+
         await feature.DisposeAsync();
         Assert.Null(AskAi.Current);
+        Assert.False(chatShell.IsOpen);
+        Assert.Equal(0, _notch.InputHandlerCount);
         Assert.False(_services.Commands.Contains(AiDescriptor.AskCommand));
+        Assert.False(_services.Commands.Contains(AiDescriptor.ChatCommand));
     }
 
     /// <summary>
-    /// The answer is shown only as plain text. This fails if the command bar gains anything that can parse,
-    /// link or load what a service sends: links, rich text, web views, frames, images or XAML parsing.
+    /// Answers are shown only as plain text. This fails if the command bar, the answer in the notch or the chat
+    /// window gains anything that can parse, link or load what a service sends: links, rich text, web views,
+    /// frames, images or XAML parsing.
     /// </summary>
     [Fact]
-    public void ThePane_HoldsNoLinksRichTextOrWebViews()
+    public void TheViews_HoldNoLinksRichTextOrWebViews()
     {
-        var file = Path.Combine(RepoPaths.App, "Features", "CommandBar", "CommandBarWindow.xaml");
-        var document = XDocument.Load(file);
+        string[] views =
+        [
+            Path.Combine(RepoPaths.App, "Features", "CommandBar", "CommandBarWindow.xaml"),
+            Path.Combine(RepoPaths.App, "Notch", "Surfaces", "Answer", "AnswerSurface.xaml"),
+            Path.Combine(RepoPaths.App, "Features", "Ai", "AiChatWindow.xaml"),
+        ];
         string[] refused = ["Hyperlink", "RichTextBox", "WebBrowser", "WebView2", "Frame", "FlowDocument", "FlowDocumentScrollViewer", "DocumentViewer", "Image", "MediaElement"];
-        var names = document.Descendants().Select(e => e.Name.LocalName).ToHashSet(StringComparer.Ordinal);
-        foreach (var name in refused)
-            Assert.DoesNotContain(name, names);
-
-        var answer = document.Descendants().Single(e => e.Name.LocalName == "TextBox" && (string?)e.Attribute(XName.Get("Name", "http://schemas.microsoft.com/winfx/2006/xaml")) == "Answer");
-        Assert.Equal("True", (string?)answer.Attribute("IsReadOnly"));
-        Assert.Contains("Mode=OneWay", (string?)answer.Attribute("Text"));
-
-        foreach (var code in new[] { "CommandBarWindow.xaml.cs", "CommandBarViewModel.cs" }.Select(f => Path.Combine(RepoPaths.App, "Features", "CommandBar", f))
-            .Append(Path.Combine(RepoPaths.App, "Features", "Ai", "AskAiViewModel.cs")))
+        foreach (var file in views)
         {
-            var text = File.ReadAllText(code);
+            var names = XDocument.Load(file).Descendants().Select(e => e.Name.LocalName).ToHashSet(StringComparer.Ordinal);
+            foreach (var name in refused)
+                Assert.False(names.Contains(name), $"{RepoPaths.Relative(file)} holds a {name}.");
+        }
+
+        // The answers are plain text: a TextBlock in the notch, a read-only TextBox in the chat.
+        var notchAnswer = Named(views[1], "TextBlock", "Answer");
+        Assert.Contains("Last.AnswerText", (string?)notchAnswer.Attribute("Text"));
+        var chatAnswer = Named(views[2], "TextBox", "Answer");
+        Assert.Equal("True", (string?)chatAnswer.Attribute("IsReadOnly"));
+        Assert.Contains("Mode=OneWay", (string?)chatAnswer.Attribute("Text"));
+
+        var code = new[] { "CommandBarWindow.xaml.cs", "CommandBarViewModel.cs" }.Select(f => Path.Combine(RepoPaths.App, "Features", "CommandBar", f))
+            .Concat(new[] { "AskAiViewModel.cs", "AiChat.cs", "AiAnswers.cs", "AiChatViewModel.cs", "AiChatWindow.xaml.cs" }.Select(f => Path.Combine(RepoPaths.App, "Features", "Ai", f)));
+        foreach (var file in code)
+        {
+            var text = File.ReadAllText(file);
             foreach (var parser in new[] { "XamlReader", "Hyperlink", "RichTextBox", "WebBrowser", "FlowDocument", "BitmapImage" })
-                Assert.DoesNotContain(parser, text, StringComparison.Ordinal);
+                Assert.False(text.Contains(parser, StringComparison.Ordinal), $"{RepoPaths.Relative(file)} uses {parser}.");
         }
     }
 
+    private static XElement Named(string file, string type, string name) =>
+        XDocument.Load(file).Descendants().Single(e => e.Name.LocalName == type
+            && (string?)e.Attribute(XName.Get("Name", "http://schemas.microsoft.com/winfx/2006/xaml")) == name);
+
     private CommandBarViewModel Bar(bool askMode = false)
     {
-        var pane = new AskAiViewModel(_ai, _services.Text, ui: null, () =>
+        var pane = new AskAiViewModel(_answers, _services.Text, () =>
         {
             _clipboardReads++;
             return _clipboard;
-        }, v =>
-        {
-            _copied.Add(v);
-            return true;
-        }, _services.Time);
+        });
         return new CommandBarViewModel(_services.Commands, _services.Text, new NoApps(), _ => { }, _ => true, CommandBarDescriptor.SearchPages["google"], pane, askMode);
     }
 
@@ -390,71 +286,7 @@ public sealed class AskAiBarTests : IDisposable
         Assert.True(bar.RunSelected());
     }
 
-    private sealed class FakeAskAi : IAskAi
-    {
-        private EventHandler? _setupChanged;
-
-        public AiSetupProblem Problem { get; set; } = AiSetupProblem.None;
-
-        public AiProvider Provider => AiProvider.Anthropic;
-
-        public string ServiceName => "Claude";
-
-        public List<Question> Asked { get; } = [];
-
-        public Question Last => Asked[^1];
-
-        public int Subscribers { get; private set; }
-
-        public event EventHandler? SetupChanged
-        {
-            add
-            {
-                _setupChanged += value;
-                Subscribers++;
-            }
-            remove
-            {
-                _setupChanged -= value;
-                Subscribers--;
-            }
-        }
-
-        public void RaiseSetupChanged() => _setupChanged?.Invoke(this, EventArgs.Empty);
-
-        public Task<AiEvent> AskAsync(IReadOnlyList<AiTurn> turns, Action<AiEvent> onDelta, CancellationToken cancellationToken)
-        {
-            var question = new Question(turns.ToList(), onDelta, cancellationToken);
-            Asked.Add(question);
-            return question.Result.Task;
-        }
-    }
-
-    private sealed record Question(IReadOnlyList<AiTurn> Turns, Action<AiEvent> OnDelta, CancellationToken Token)
-    {
-        public TaskCompletionSource<AiEvent> Result { get; } = new();
-
-        public void Delta(string text) => OnDelta(AiEvent.Delta(text));
-
-        /// <summary>From a thread with no UI, as the transport does, so the pane finishes before this returns.</summary>
-        public void Finish(AiEvent result)
-        {
-            var thread = new Thread(() => Result.SetResult(result));
-            thread.Start();
-            thread.Join();
-        }
-    }
-
-    private sealed class NoApps : IAppCatalog
-    {
-        public Task<IReadOnlyList<InstalledApp>> LoadAsync() => Task.FromResult<IReadOnlyList<InstalledApp>>([]);
-
-        public void Launch(InstalledApp app)
-        {
-        }
-    }
-
-    private sealed class FakeShell : ICommandBarShell
+    private sealed class FakeBarShell : ICommandBarShell
     {
         public CommandBarViewModel? Shown { get; private set; }
 

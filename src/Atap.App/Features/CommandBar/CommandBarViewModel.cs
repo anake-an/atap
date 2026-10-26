@@ -9,15 +9,17 @@ using Atap.Platform.Apps;
 namespace Atap.Features.CommandBar;
 
 /// <summary>One row of results: what it is, a word on what Enter does, and the action.</summary>
-/// <param name="KeepsOpen">The bar stays open after the row runs, as Ask AI does to show its answer.</param>
+/// <param name="KeepsOpen">
+/// The bar stays open while the row runs. Ask AI uses it to read the copied text first, then closes the bar itself.
+/// </param>
 internal sealed record CommandBarRow(QueryResultKind Kind, string Title, string Detail, string Glyph, Action Run, bool KeepsOpen = false);
 
 /// <summary>
 /// What the command bar shows for the text typed: a sum, a unit conversion, Atap commands, apps from Start and,
 /// always last, a web search. Rows are ranked by Core's <see cref="QueryRanker"/>. Nothing runs until Enter or a
 /// click, so typing never opens a browser. Made fresh on every open, and the app list goes with it.
-/// While Ask AI is on, an Ask AI row sits above web search. Only Enter on it sends, and the answer shows in the
-/// bar. The conversation goes when the bar closes.
+/// While Ask AI is on, an Ask AI row sits above web search. Only Enter on it sends. The bar then closes and the
+/// answer shows in the notch.
 /// </summary>
 internal sealed class CommandBarViewModel : ObservableObject, IDisposable
 {
@@ -39,7 +41,7 @@ internal sealed class CommandBarViewModel : ObservableObject, IDisposable
     private int _selectedIndex = -1;
 
     /// <param name="searchUrl">The search page, with <c>{q}</c> where the query goes.</param>
-    /// <param name="ai">The answer pane while Ask AI is on, else null.</param>
+    /// <param name="ai">The Ask AI part while Ask AI is on, else null.</param>
     /// <param name="askMode">Opened by the Ask AI shortcut: only the Ask AI row shows.</param>
     public CommandBarViewModel(
         ICommandRegistry commands, ILocalizer text, IAppCatalog catalog, Action<string> openUrl, Func<string, bool> copy, string searchUrl,
@@ -55,7 +57,7 @@ internal sealed class CommandBarViewModel : ObservableObject, IDisposable
         IsAskMode = askMode && ai is not null;
     }
 
-    /// <summary>The Ask AI pane, or null while Ask AI is off.</summary>
+    /// <summary>The Ask AI part, or null while Ask AI is off.</summary>
     public AskAiViewModel? Ai { get; }
 
     public bool HasAi => Ai is not null;
@@ -63,13 +65,16 @@ internal sealed class CommandBarViewModel : ObservableObject, IDisposable
     /// <summary>Opened ready to ask: only the Ask AI row shows.</summary>
     public bool IsAskMode { get; }
 
-    /// <summary>The tick box for copied text shows while the Ask AI row is chosen, or once a conversation started.</summary>
+    /// <summary>The tick box for copied text shows while the Ask AI row is chosen.</summary>
     public bool ShowCopiedOption =>
-        Ai is { Problem: AiSetupProblem.None } ai
-        && (IsAskMode || ai.HasConversation || (_selectedIndex >= 0 && _selectedIndex < Rows.Count && Rows[_selectedIndex].Kind == QueryResultKind.AskAi));
+        Ai is { Problem: AiSetupProblem.None }
+        && (IsAskMode || (_selectedIndex >= 0 && _selectedIndex < Rows.Count && Rows[_selectedIndex].Kind == QueryResultKind.AskAi));
 
     /// <summary>Raised after a row ran, so the window closes.</summary>
     public event EventHandler? Done;
+
+    /// <summary>Raised after a question went to Ask AI, so the window closes and the app before it gets the keyboard back.</summary>
+    public event EventHandler? Asked;
 
     public string Query
     {
@@ -95,9 +100,9 @@ internal sealed class CommandBarViewModel : ObservableObject, IDisposable
         }
     }
 
-    public string Placeholder => _text[IsAskMode || Ai is { HasConversation: true } ? "ai.placeholder" : "commandbar.placeholder"];
+    public string Placeholder => _text[IsAskMode ? "ai.placeholder" : "commandbar.placeholder"];
 
-    /// <summary>Stops an answer and forgets the conversation. The window calls it when it closes.</summary>
+    /// <summary>Forgets the copied text. The window calls it when it closes. An answer in the notch carries on.</summary>
     public void Dispose() => Ai?.Dispose();
 
     /// <summary>Reads the apps from Start once for this open. Typed text before they arrive is ranked again after.</summary>
@@ -132,14 +137,12 @@ internal sealed class CommandBarViewModel : ObservableObject, IDisposable
         row.Run();
     }
 
-    /// <summary>Enter on the Ask AI row: sends the question and clears the box for a follow-up.</summary>
+    /// <summary>Enter on the Ask AI row: sends the question, with the copied text if ticked, then closes the bar.</summary>
     private void AskAi(string question)
     {
         if (Ai is null || !Ai.Ask(question))
             return;
-        Query = string.Empty;
-        OnPropertyChanged(nameof(Placeholder));
-        OnPropertyChanged(nameof(ShowCopiedOption));
+        Asked?.Invoke(this, EventArgs.Empty);
     }
 
     private void Refresh()
@@ -208,7 +211,7 @@ internal sealed class CommandBarViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// The Ask AI row. It asks only on Enter or a click, and keeps the bar open for the answer. While a key is
+    /// The Ask AI row. It asks only on Enter or a click, and the answer shows in the notch. While a key is
     /// missing it opens Settings at the Ask AI card instead.
     /// </summary>
     private void AddAskAi(Action<QueryCandidate, string, string, Action, bool> add, string query)

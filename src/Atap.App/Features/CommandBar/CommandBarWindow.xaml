@@ -2,7 +2,6 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="clr-namespace:Atap.Ui.Localization"
-        xmlns:ai="clr-namespace:Atap.Features.Ai"
         Title="{loc:T commandbar.open}"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -95,41 +94,6 @@
           </Setter.Value>
         </Setter>
       </Style>
-
-      <!-- The answer pane: the question, the answer as plain text, what is happening, and Stop, Copy and Ask again. -->
-      <DataTemplate x:Key="CommandBar.Answer" DataType="{x:Type ai:AskAiViewModel}">
-        <Border Margin="0,8,0,0" Padding="14,12" CornerRadius="6" BorderThickness="1"
-                Background="{DynamicResource WindowBrush}" BorderBrush="{DynamicResource SettingsCardBorderBrush}"
-                AutomationProperties.Name="{loc:T ai.answer}"
-                Visibility="{Binding HasConversation, Converter={StaticResource Settings.BoolToVisibility}}">
-          <StackPanel>
-            <TextBlock Text="{Binding QuestionText}" FontSize="12" Foreground="{DynamicResource InkSecondaryBrush}" TextTrimming="CharacterEllipsis" />
-            <TextBox x:Name="Answer" Text="{Binding AnswerText, Mode=OneWay}" IsReadOnly="True" IsReadOnlyCaretVisible="False"
-                     TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                     MaxHeight="320" Margin="-3,8,-3,0" Padding="0" BorderThickness="0" Background="Transparent"
-                     Foreground="{DynamicResource InkBrush}" FontSize="14" FocusVisualStyle="{x:Null}"
-                     AutomationProperties.Name="{loc:T ai.answer}" />
-            <DockPanel Margin="0,12,0,0">
-              <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Style="{StaticResource Settings.Button}" Content="{loc:T ai.stop}" Command="{Binding StopCommand}" Margin="8,0,0,0"
-                        Visibility="{Binding IsAsking, Converter={StaticResource Settings.BoolToVisibility}}" />
-                <Button Style="{StaticResource Settings.Button}" Content="{Binding CopyText}" Command="{Binding CopyCommand}" Margin="8,0,0,0"
-                        AutomationProperties.Name="{loc:T ai.copy}" />
-                <Button Style="{StaticResource Settings.Button}" Content="{loc:T ai.again}" Command="{Binding AgainCommand}" Margin="8,0,0,0" />
-                <Button Style="{StaticResource Settings.Button}" Content="{loc:T ai.close}" Click="OnCloseAnswer" Margin="8,0,0,0" />
-              </StackPanel>
-              <TextBlock x:Name="Status" Text="{Binding StatusText}" Style="{StaticResource Settings.Hint}" VerticalAlignment="Center"
-                         AutomationProperties.LiveSetting="Polite" />
-            </DockPanel>
-          </StackPanel>
-        </Border>
-        <DataTemplate.Triggers>
-          <DataTrigger Binding="{Binding HasFailed}" Value="True">
-            <Setter TargetName="Status" Property="Foreground" Value="{DynamicResource InkBrush}" />
-            <Setter TargetName="Status" Property="FontWeight" Value="SemiBold" />
-          </DataTrigger>
-        </DataTemplate.Triggers>
-      </DataTemplate>
     </ResourceDictionary>
   </Window.Resources>
 
@@ -196,10 +160,6 @@
                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                AutomationProperties.Name="{loc:T commandbar.results}"
                Visibility="{Binding HasRows, Converter={StaticResource Settings.BoolToVisibility}}" />
-
-      <!-- The answer, as plain text in a read-only box. Nothing in it is parsed, linked or loaded. -->
-      <ContentControl x:Name="AnswerPane" Content="{Binding Ai}" ContentTemplate="{StaticResource CommandBar.Answer}"
-                      Focusable="False" IsTabStop="False" />
     </StackPanel>
   </Border>
 </Window>
