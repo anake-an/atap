@@ -131,8 +131,13 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
     /// <summary>What a feature gave the shown surface, if anything (the alert, the editor).</summary>
     public object? SurfaceContent => _control.GetSurfaceContent(_shownSurface);
 
-    /// <summary>An alert that came while the notch is open, shown as a banner above the widgets. The open notch would hide it otherwise.</summary>
-    public object? Banner => _shownSurface is NotchSurface.Expanded or NotchSurface.Panel ? _control.GetSurfaceContent(NotchSurface.Alert) : null;
+    /// <summary>
+    /// An alert that came while the notch is open or shows an answer, as a banner above the rest. The notch
+    /// would hide it otherwise.
+    /// </summary>
+    public object? Banner => _shownSurface is NotchSurface.Expanded or NotchSurface.Panel or NotchSurface.Answer
+        ? _control.GetSurfaceContent(NotchSurface.Alert)
+        : null;
 
     /// <summary>Set by the view from the anchor: horizontal on the top edge, vertical on a side edge.</summary>
     public NotchOrientation Orientation
@@ -343,7 +348,8 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
             HasAlert: _control.GetSurfaceContent(NotchSurface.Alert) is not null,
             Slim: _control.IsSet(NotchFlag.Slim) || IsScreenCovered,
             HasCompactOwner: owner is not null,
-            HasCompactContent: owner is not null && VisiblePlacements(NotchState.Compact, owner).Any()));
+            HasCompactContent: owner is not null && VisiblePlacements(NotchState.Compact, owner).Any(),
+            HasAnswer: _control.GetSurfaceContent(NotchSurface.Answer) is not null));
 
         var wasHidden = IsHidden;
         _isOpenForFiles = next == NotchSurface.Panel && drag == NotchDragTarget.Panel && !panelOpen;
@@ -428,6 +434,7 @@ public sealed class NotchViewModel : ObservableObject, IDisposable
         NotchSurfaceResolver.StateOf(surface) ?? surface switch
         {
             NotchSurface.Edit => NotchState.Panel,
+            NotchSurface.Answer => NotchState.Expanded,
             NotchSurface.Alert => NotchState.Compact,
             _ => NotchState.Idle,
         };

@@ -241,6 +241,32 @@ public sealed class PanelTests : IAsyncLifetime
     }
 
     [Fact]
+    public void AnAnswer_StaysWhileHovered_ShowsAlertsAsABanner_AndGivesWayToThePanel()
+    {
+        using var model = Model();
+        _notch.SetSurfaceContent(NotchSurface.Answer, "answer", "ai");
+
+        Assert.Equal(NotchSurface.Answer, model.Surface);
+        Assert.Equal(NotchState.Expanded, model.State);
+        Assert.Same("answer", model.SurfaceContent);
+
+        model.IsHovered = true;
+        _notch.SetSurfaceContent(NotchSurface.Alert, "alert", "alerts");
+        Assert.Equal(NotchSurface.Answer, model.Surface);
+        Assert.Equal("alert", model.Banner);
+        // A click on the answer is not a click on the notch, so the panel stays shut.
+        Assert.False(_notch.Offer(new NotchInput(NotchInputKind.Click, NotchSurface.Answer)));
+
+        _feature.Toggle();
+        Assert.Equal(NotchSurface.Panel, model.Surface);
+        _feature.Close();
+        Assert.Equal(NotchSurface.Answer, model.Surface);
+
+        _notch.SetSurfaceContent(NotchSurface.Answer, null, "ai");
+        Assert.Equal(NotchSurface.Expanded, model.Surface);
+    }
+
+    [Fact]
     public void SafeMode_HasNoPanel()
     {
         var descriptor = new PanelDescriptor();

@@ -14,6 +14,7 @@
     <ResourceDictionary Source="Panel/PanelSurface.xaml" />
     <ResourceDictionary Source="Slim/SlimSurface.xaml" />
     <ResourceDictionary Source="Alert/AlertSurface.xaml" />
+    <ResourceDictionary Source="Answer/AnswerSurface.xaml" />
     <ResourceDictionary Source="Edit/EditSurface.xaml" />
   </ResourceDictionary.MergedDictionaries>
 
