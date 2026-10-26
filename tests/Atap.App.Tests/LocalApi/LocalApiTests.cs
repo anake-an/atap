@@ -252,7 +252,8 @@ public sealed class LocalApiTests : IDisposable
     private static async Task<string> SendRawAsync(string name, byte[] body)
     {
         await using var pipe = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly);
-        await pipe.ConnectAsync(2000);
+        // Generous, so a busy test machine does not fail it. The server answers in milliseconds when idle.
+        await pipe.ConnectAsync(10_000);
         var frame = new byte[4 + body.Length];
         BinaryPrimitives.WriteInt32LittleEndian(frame, body.Length);
         body.CopyTo(frame, 4);

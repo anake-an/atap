@@ -134,6 +134,7 @@ public sealed class SyncFeatureTests : IDisposable
 
         var copy = Path.Combine(Folder, "atap-sync-DESKTOP-B.json");
         WriteBundle(copy, a.Services.Time.GetUtcNow().AddMinutes(1), ("settings:malaysia.state", "\"KDH\""));
+        WaitUntilReadable(copy);
         a.Services.Time.Advance(TimeSpan.FromMinutes(2));
         a.Watch.Fire();
         a.Services.Time.Advance(SyncFeature.SettleDelay);
@@ -142,6 +143,29 @@ public sealed class SyncFeatureTests : IDisposable
         Assert.False(File.Exists(copy));
         Assert.Contains("malaysia.state", File.ReadAllText(BundlePath), StringComparison.Ordinal);
         Assert.Contains("clock.style", File.ReadAllText(BundlePath), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ACopyThatWillNotOpen_IsTriedAgainSoon_WithoutAFolderEvent()
+    {
+        var a = NewPc();
+        await a.Feature.StartAsync();
+        var copy = Path.Combine(Folder, "atap-sync-DESKTOP-B.json");
+        WriteBundle(copy, a.Services.Time.GetUtcNow().AddMinutes(1), ("settings:malaysia.state", "\"JHR\""));
+        WaitUntilReadable(copy);
+        a.Services.Time.Advance(TimeSpan.FromMinutes(2));
+
+        using (new FileStream(copy, FileMode.Open, FileAccess.Read, FileShare.None))
+        {
+            a.Watch.Fire();
+            a.Services.Time.Advance(SyncFeature.SettleDelay);
+            Assert.Null(a.Get("malaysia.state"));
+        }
+
+        a.Services.Time.Advance(SyncFeature.CopyRetryDelay);
+
+        Assert.Equal("JHR", a.Get("malaysia.state"));
+        Assert.False(File.Exists(copy));
     }
 
     [Fact]
@@ -257,6 +281,27 @@ public sealed class SyncFeatureTests : IDisposable
         var pc = new Pc(Folder);
         _pcs.Add(pc);
         return pc;
+    }
+
+    /// <summary>
+    /// Waits until nothing else holds <paramref name="path"/>. On CI a virus scan can read a new file for a
+    /// moment, which made a test that expects the file to open at once fail now and then.
+    /// </summary>
+    private static void WaitUntilReadable(string path)
+    {
+        var until = DateTime.UtcNow.AddSeconds(10);
+        while (true)
+        {
+            try
+            {
+                using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.None);
+                return;
+            }
+            catch (IOException) when (DateTime.UtcNow < until)
+            {
+                Thread.Sleep(50);
+            }
+        }
     }
 
     /// <summary>A bundle from another PC, every unit stamped <paramref name="stamp"/>.</summary>

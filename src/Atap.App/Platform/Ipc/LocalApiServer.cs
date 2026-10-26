@@ -23,6 +23,9 @@ internal sealed class LocalApiServer : IAsyncDisposable
     public const int MaxInstances = 4;
     public static readonly TimeSpan ReadDeadline = TimeSpan.FromSeconds(2);
 
+    // How long a listener waits before it tries again to open a pipe instance.
+    private static readonly TimeSpan RetryDelay = TimeSpan.FromMilliseconds(250);
+
     private readonly string _name;
     private readonly SynchronizationContext _ui;
     private readonly ApiHandler _handler;
@@ -94,9 +97,10 @@ internal sealed class LocalApiServer : IAsyncDisposable
     {
         while (!_stop.IsCancellationRequested)
         {
+            if (pipe is null && !await TryCreateAsync())
+                continue;
             try
             {
-                pipe ??= Create(firstInstance: false);
                 await pipe.WaitForConnectionAsync(_stop.Token);
                 await AnswerAsync(pipe);
             }
@@ -108,8 +112,6 @@ internal sealed class LocalApiServer : IAsyncDisposable
             {
                 // One bad connection never stops the API. The next one gets a fresh instance.
                 _log("Local API request failed.", ex);
-                if (pipe is null)
-                    return;
             }
             finally
             {
@@ -118,6 +120,29 @@ internal sealed class LocalApiServer : IAsyncDisposable
             }
         }
         pipe?.Dispose();
+
+        // A new instance can fail for a moment, such as while Windows still frees the last one. Before, that
+        // stopped this listener for good, so the API answered more slowly until Atap restarted.
+        async Task<bool> TryCreateAsync()
+        {
+            try
+            {
+                pipe = Create(firstInstance: false);
+                return true;
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            {
+                _log("Local API could not open a pipe instance. Trying again.", ex);
+                try
+                {
+                    await Task.Delay(RetryDelay, _stop.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                }
+                return false;
+            }
+        }
     }
 
     private async Task AnswerAsync(NamedPipeServerStream pipe)

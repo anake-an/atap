@@ -129,6 +129,9 @@ internal sealed class SyncFeature : IAppFeature
     public static readonly TimeSpan ExportDelay = TimeSpan.FromSeconds(5);
     public static readonly TimeSpan SettleDelay = TimeSpan.FromMilliseconds(300);
 
+    /// <summary>A conflict copy that would not open, such as while a virus scan reads it, is tried again after this.</summary>
+    public static readonly TimeSpan CopyRetryDelay = TimeSpan.FromSeconds(5);
+
     private readonly SyncStores _stores;
     private readonly SyncScope _scope;
     private readonly SyncLocalFiles _local;
@@ -238,7 +241,7 @@ internal sealed class SyncFeature : IAppFeature
         if (main.Outcome is { } outcome and not SyncBundleReadOutcome.Loaded)
             LogOnce("main:" + outcome, $"Sync ignored atap-sync.json: {outcome}.");
 
-        var copies = folder.ReadCopies(out _);
+        var copies = folder.ReadCopies(out var copyWaiting);
         var result = SyncMerger.Merge(new SyncMergeRequest
         {
             State = _state,
@@ -287,6 +290,10 @@ internal sealed class SyncFeature : IAppFeature
             SyncBundleOutcome.TooLarge => SyncHealth.CannotWrite,
             _ => settled ? SyncHealth.Working : SyncHealth.CannotWrite,
         });
+
+        // Before, a copy that would not open waited for the next folder event, which may never come.
+        if (copyWaiting)
+            _import = _scheduler.At(_time.GetUtcNow() + CopyRetryDelay, RunPass);
     }
 
     private bool TryWrite(SyncFolderFiles folder, string json)
