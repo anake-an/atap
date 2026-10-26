@@ -97,7 +97,8 @@ internal sealed class LocalApiServer : IAsyncDisposable
     {
         while (!_stop.IsCancellationRequested)
         {
-            if (pipe is null && !await TryCreateAsync())
+            pipe ??= await TryCreateAsync();
+            if (pipe is null)
                 continue;
             try
             {
@@ -123,12 +124,11 @@ internal sealed class LocalApiServer : IAsyncDisposable
 
         // A new instance can fail for a moment, such as while Windows still frees the last one. Before, that
         // stopped this listener for good, so the API answered more slowly until Atap restarted.
-        async Task<bool> TryCreateAsync()
+        async Task<NamedPipeServerStream?> TryCreateAsync()
         {
             try
             {
-                pipe = Create(firstInstance: false);
-                return true;
+                return Create(firstInstance: false);
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
@@ -140,7 +140,7 @@ internal sealed class LocalApiServer : IAsyncDisposable
                 catch (OperationCanceledException)
                 {
                 }
-                return false;
+                return null;
             }
         }
     }
