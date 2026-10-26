@@ -17,8 +17,12 @@
         <StackPanel VerticalAlignment="Center" Margin="0,0,16,0">
           <TextBlock Text="{loc:T cleardata.hint}" Style="{DynamicResource Settings.Label}" />
           <TextBlock Text="{Binding SizeText}" Style="{DynamicResource Settings.Hint}" />
+          <TextBlock Text="{Binding KeysText}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap"
+                     Visibility="{Binding HasKeys, Converter={StaticResource Card.BoolToVisibility}}" />
           <TextBlock Text="{Binding ResultText}" Style="{DynamicResource Settings.Hint}"
                      Visibility="{Binding HasResult, Converter={StaticResource Card.BoolToVisibility}}" />
+          <TextBlock Text="{Binding KeysRemovedText}" Style="{DynamicResource Settings.Hint}" TextWrapping="Wrap"
+                     Visibility="{Binding HasKeysRemoved, Converter={StaticResource Card.BoolToVisibility}}" />
         </StackPanel>
         <Button Grid.Column="1" Style="{DynamicResource Settings.Button}" Content="{loc:T cleardata.clear}"
                 Command="{Binding ClearCommand}" VerticalAlignment="Center" />
