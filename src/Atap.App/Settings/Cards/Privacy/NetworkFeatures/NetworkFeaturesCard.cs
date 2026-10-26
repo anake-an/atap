@@ -31,16 +31,19 @@ internal sealed class NetworkFeaturesCard : ISettingsCard
 
 /// <summary>One thing that goes online.</summary>
 /// <param name="Name">What the user calls it.</param>
-/// <param name="Detail">Where it connects, in plain words.</param>
+/// <param name="Detail">Where it goes online, in plain words.</param>
 /// <param name="Note">The privacy note its owner gave, if any.</param>
 /// <param name="IsOn">True while it is on the notch (or, for update checks, while they run).</param>
 /// <param name="StateText">"On" or "Off".</param>
-internal sealed record NetworkUse(string Name, string Detail, string? Note, bool IsOn, string StateText)
+/// <param name="TurnOnHint">Where to turn it on, while it is off and there is a place for that. Null otherwise.</param>
+internal sealed record NetworkUse(string Name, string Detail, string? Note, bool IsOn, string StateText, string? TurnOnHint = null)
 {
     public bool HasNote => Note is not null;
 
+    public bool HasTurnOnHint => TurnOnHint is not null;
+
     /// <summary>What a screen reader says for the row.</summary>
-    public override string ToString() => $"{Name}, {StateText}. {Detail}";
+    public override string ToString() => TurnOnHint is null ? $"{Name}, {StateText}. {Detail}." : $"{Name}, {StateText}. {Detail}. {TurnOnHint}.";
 }
 
 /// <summary>Rebuilt when the layout changes, so the on and off states follow the notch.</summary>
@@ -104,24 +107,31 @@ internal sealed class NetworkFeaturesViewModel : ObservableObject, IDisposable
         foreach (var descriptor in _catalog.Descriptors.Where(d => UsesNetwork(d.Capabilities)))
         {
             var capabilities = descriptor.Capabilities;
-            var parts = new List<string>();
-            if (capabilities.NetworkHosts.Count > 0)
-                parts.Add(_text.Format("networkuse.hosts", ("hosts", string.Join(", ", capabilities.NetworkHosts))));
-            if ((capabilities.Permissions & WidgetPermissions.UserUrls) != 0)
-                parts.Add(_text["networkuse.userUrls"]);
             var isOn = enabledTypes.Contains(descriptor.TypeId);
             items.Add(new NetworkUse(
                 _text[descriptor.NameKey],
-                string.Join(" ", parts),
+                Where(capabilities),
                 capabilities.PrivacyNoteKey is { } note ? _text[note] : null,
                 isOn,
-                _text[isOn ? "networkuse.on" : "networkuse.off"]));
+                _text[isOn ? "networkuse.on" : "networkuse.off"],
+                // Widgets are turned on from the What it shows page.
+                isOn ? null : _text["networkuse.turnOn"]));
         }
         if (_updateChecks is { } checks)
             items.Add(new NetworkUse(_text["networkuse.updates"], _text["networkuse.updatesDetail"], null, checks, _text[checks ? "networkuse.on" : "networkuse.off"]));
         Items = items;
         OnPropertyChanged(nameof(Hint));
         OnPropertyChanged(nameof(EmptyText));
+    }
+
+    /// <summary>"Uses the internet: " and the named sites, addresses the user types in, or both.</summary>
+    private string Where(WidgetCapabilities capabilities)
+    {
+        var hosts = string.Join(", ", capabilities.NetworkHosts);
+        var typed = (capabilities.Permissions & WidgetPermissions.UserUrls) != 0;
+        if (hosts.Length == 0)
+            return _text[typed ? "networkuse.userUrls" : "networkuse.some"];
+        return _text.Format(typed ? "networkuse.hostsAndUserUrls" : "networkuse.hosts", ("hosts", hosts));
     }
 
     private void OnChanged(object? sender, EventArgs e) => Rebuild();

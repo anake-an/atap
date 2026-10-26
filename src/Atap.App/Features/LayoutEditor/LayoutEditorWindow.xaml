@@ -3,6 +3,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:loc="clr-namespace:Atap.Ui.Localization"
+        xmlns:controls="clr-namespace:Atap.Ui.Controls"
         Title="{loc:T layouteditor.title}"
         Icon="/Atap;component/Assets/atap.ico"
         Width="1120" Height="760" MinWidth="760" MinHeight="520"
@@ -302,7 +303,7 @@
                            Visibility="{Binding HasNoSearch, Converter={StaticResource Settings.BoolToVisibility}}" />
               </Grid>
             </StackPanel>
-            <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False" controls:SmoothWheelScroll.IsEnabled="True">
               <ItemsControl ItemsSource="{Binding Gallery}" Focusable="False">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate>

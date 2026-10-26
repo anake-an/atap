@@ -1,7 +1,7 @@
 {
   "weather.name": "Weather",
   "weather.description": "MET Malaysia's forecast for your state, today and the next three days.",
-  "weather.privacy": "Fetches your state's forecast from api.data.gov.my every 3 hours. Only the state's forecast id is sent.",
+  "weather.privacy": "Gets your state's forecast from api.data.gov.my every 3 hours. Only the code for your state's forecast is sent.",
   "weather.needsArea": "Pick your area on the Prayer times page in Settings.",
   "weather.loading": "Getting the forecast…",
   "weather.failed": "Could not get the forecast. Atap will try again later.",

@@ -64,9 +64,11 @@ internal partial class LayoutEditorWindow : Window, ILayoutEditorWindow
     }
 
     /// <summary>Creates the window and shows it on <paramref name="screen"/>. It closes on Done or Cancel.</summary>
-    public static ILayoutEditorWindow Open(LayoutEditorViewModel viewModel, EditorScreen? screen)
+    /// <param name="lessMotion">The widget list jumps on the wheel instead of gliding.</param>
+    public static ILayoutEditorWindow Open(LayoutEditorViewModel viewModel, EditorScreen? screen, bool lessMotion = false)
     {
         var window = new LayoutEditorWindow(viewModel, screen ?? EditorScreen.ForPointer());
+        Atap.Ui.Controls.SmoothWheelScroll.SetLessMotion(window, lessMotion);
         window.Show();
         window.Activate();
         return window;

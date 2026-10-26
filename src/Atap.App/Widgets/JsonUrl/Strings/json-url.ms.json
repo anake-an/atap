@@ -1,7 +1,7 @@
 {
   "json-url.name": "Nilai daripada pautan",
   "json-url.description": "Satu nilai daripada mana-mana pautan web yang memberi JSON, seperti NAS, penghala atau rumah pintar anda. Ia menyala pada notch apabila nilai itu perlu diberi perhatian. Anda boleh tambah lebih daripada satu.",
-  "json-url.privacy": "Atap memuat turun pautan yang anda berikan, sekerap yang anda pilih dan tidak lebih daripada sekali seminit. Pengepala log masuk disimpan dengan selamat pada PC ini, dan balasan yang diambil dengannya disimpan dalam memori sahaja.",
+  "json-url.privacy": "Atap memuat turun pautan yang anda berikan, sekerap yang anda pilih tetapi tidak lebih daripada sekali seminit. Butiran log masuk disimpan dengan selamat pada PC ini, dan balasan yang diambil menggunakannya disimpan dalam memori sahaja.",
   "json-url.url": "Pautan",
   "json-url.urlHint": "Alamat web yang memberi data, seperti http://192.168.1.10/api/status. http biasa hanya berfungsi untuk alamat dalam rangkaian rumah anda.",
   "json-url.title": "Nama pada notch",

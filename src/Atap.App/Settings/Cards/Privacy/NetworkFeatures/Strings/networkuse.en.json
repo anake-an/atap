@@ -4,8 +4,11 @@
   "networkuse.none": "Nothing in Atap uses the internet right now.",
   "networkuse.on": "On",
   "networkuse.off": "Off",
-  "networkuse.hosts": "Connects to {hosts}.",
-  "networkuse.userUrls": "Connects to addresses you type in.",
+  "networkuse.hosts": "Uses the internet: {hosts}",
+  "networkuse.userUrls": "Uses the internet: addresses you type in",
+  "networkuse.hostsAndUserUrls": "Uses the internet: {hosts} and addresses you type in",
+  "networkuse.some": "Uses the internet",
+  "networkuse.turnOn": "Turn on in What it shows",
   "networkuse.updates": "Update checks",
-  "networkuse.updatesDetail": "Asks GitHub whether a newer Atap is out."
+  "networkuse.updatesDetail": "Uses the internet: GitHub, to see if a newer Atap is out"
 }

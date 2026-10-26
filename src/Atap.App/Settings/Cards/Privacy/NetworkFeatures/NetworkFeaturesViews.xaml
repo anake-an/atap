@@ -16,12 +16,27 @@
         <StackPanel Margin="0,0,16,0">
           <TextBlock Text="{Binding Name}" Style="{DynamicResource Settings.Label}" />
           <TextBlock Text="{Binding Detail}" Style="{DynamicResource Settings.Hint}" />
-          <TextBlock Text="{Binding Note}" Style="{DynamicResource Settings.Hint}"
+          <TextBlock Text="{Binding Note}" Style="{DynamicResource Settings.Hint}" Margin="0,6,0,0"
                      Visibility="{Binding HasNote, Converter={StaticResource Card.BoolToVisibility}}" />
+          <TextBlock Text="{Binding TurnOnHint}" Style="{DynamicResource Settings.Hint}" Margin="0,6,0,0"
+                     Visibility="{Binding HasTurnOnHint, Converter={StaticResource Card.BoolToVisibility}}" />
         </StackPanel>
-        <TextBlock Grid.Column="1" Text="{Binding StateText}" Style="{DynamicResource Settings.Label}" VerticalAlignment="Center" />
+        <!-- On or Off as a small chip: filled with the accent while on, outlined while off. -->
+        <Border x:Name="Chip" Grid.Column="1" VerticalAlignment="Top" Margin="0,1,0,0" MinWidth="48" Padding="10,3"
+                CornerRadius="6" BorderThickness="1"
+                Background="{DynamicResource WindowBrush}" BorderBrush="{DynamicResource SettingsCardBorderBrush}">
+          <TextBlock x:Name="ChipText" Text="{Binding StateText}" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Center"
+                     Foreground="{DynamicResource InkSecondaryBrush}" />
+        </Border>
       </Grid>
     </Border>
+    <DataTemplate.Triggers>
+      <DataTrigger Binding="{Binding IsOn}" Value="True">
+        <Setter TargetName="Chip" Property="Background" Value="{DynamicResource ToggleOnBrush}" />
+        <Setter TargetName="Chip" Property="BorderBrush" Value="{DynamicResource ToggleOnBrush}" />
+        <Setter TargetName="ChipText" Property="Foreground" Value="{DynamicResource SettingsCardBrush}" />
+      </DataTrigger>
+    </DataTemplate.Triggers>
   </DataTemplate>
 
   <DataTemplate DataType="{x:Type network:NetworkFeaturesViewModel}">

@@ -1,7 +1,7 @@
 {
   "solat.name": "Waktu solat",
   "solat.description": "Prayer times for your area, with a countdown to the next one.",
-  "solat.privacy": "Sends your JAKIM zone code to e-Solat (www.e-solat.gov.my), or to api.waktusolat.app when e-Solat is down. About once a month.",
+  "solat.privacy": "Sends your prayer time area to e-Solat (www.e-solat.gov.my), or to api.waktusolat.app if e-Solat is down. About once a month.",
   "solat.liveBefore": "Show on the notch before each prayer",
   "solat.liveBeforeHint": "The notch shows the countdown this many minutes before. At 0 it shows only when the time comes.",
   "solat.minutes": "min",
