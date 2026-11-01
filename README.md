@@ -1,3 +1,5 @@
+> **Atap is discontinued.** As of November 2026 it is no longer maintained, and it has been removed from the Microsoft Store. The code and releases stay here for reference. No updates or fixes will be made.
+
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/brand/atap-mark-on-dark.svg">
